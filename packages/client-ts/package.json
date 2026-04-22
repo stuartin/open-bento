@@ -1,0 +1,19 @@
+{
+    "name": "@open-bento/client-ts",
+    "type": "module",
+    "exports": {
+        "./client": "./generated/client",
+        "./tsconfig": "./tsconfig.json"
+    },
+    "scripts": {
+        "dev": "openapi-ts",
+        "lint": "biome lint .",
+        "format": "biome lint --write ."
+    },
+    "devDependencies": {
+        "@biomejs/biome": "catalog:",
+        "@hey-api/openapi-ts": "0.96.1",
+        "@open-bento/config": "workspace:*",
+        "zod": "catalog:"
+    }
+}
