@@ -1,5 +1,11 @@
 {
     "extends": [
         "@open-bento/config/biome"
-    ]
+    ],
+    "files": {
+        "includes": [
+            "**",
+            "!generated/**/*"
+        ]
+    }
 }
