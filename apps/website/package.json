@@ -15,6 +15,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "catalog:",
+		"@open-bento/types": "workspace:",
 		"@open-bento/config": "workspace:",
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/kit": "^2.57.0",

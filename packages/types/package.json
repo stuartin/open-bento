@@ -1,0 +1,21 @@
+{
+    "name": "@open-bento/types",
+    "type": "module",
+    "exports": {
+        ".": "./index.ts"
+    },
+    "scripts": {
+        "lint": "biome lint .",
+        "format": "biome lint --write ."
+    },
+    "dependencies": {
+        "@orpc/contract": "^1.13.14",
+        "@orpc/zod": "^1.13.14",
+        "@orpc/openapi": "^1.13.14",
+        "zod": "catalog:"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "catalog:",
+        "@open-bento/config": "workspace:*"
+    }
+}
