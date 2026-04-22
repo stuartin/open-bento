@@ -14,6 +14,7 @@
         "@biomejs/biome": "catalog:",
         "@hey-api/openapi-ts": "0.96.1",
         "@open-bento/config": "workspace:*",
+        "@tanstack/svelte-query": "catalog:",
         "zod": "catalog:"
     }
 }

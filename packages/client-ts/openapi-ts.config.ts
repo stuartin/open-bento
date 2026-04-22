@@ -8,6 +8,7 @@ export default defineConfig({
     output: 'generated/client',
     plugins: [
         'zod',
+        '@tanstack/svelte-query',
         {
             name: "@hey-api/sdk",
             validator: true
