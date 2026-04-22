@@ -1,6 +1,6 @@
 packages:
-  - "apps/*"
-  - "packages/*"
+  - apps/*
+  - packages/*
 
 catalog:
-  "@biomejs/biome": "^2.4.12"
+  '@biomejs/biome': ^2.4.12

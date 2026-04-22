@@ -2,11 +2,24 @@
     "name": "@open-bento/schema",
     "type": "module",
     "scripts": {
+        "build": "tsp compile .",
+        "dev": "pnpm run /^dev:/",
+        "dev:tsp": "tsp compile . --watch",
+        "dev:serve": "serve generated --single -p 4000",
         "lint": "biome lint .",
         "format": "biome lint --write ."
     },
+    "dependencies": {
+        "@typespec/compiler": "latest",
+        "@typespec/http": "latest",
+        "@typespec/rest": "latest",
+        "@typespec/openapi": "latest",
+        "@typespec/openapi3": "latest",
+        "@typespec/http-client-js": "latest"
+    },
     "devDependencies": {
+        "@biomejs/biome": "catalog:",
         "@open-bento/config": "workspace:*",
-        "@biomejs/biome": "catalog:"
+        "serve": "^14.2.6"
     }
 }
