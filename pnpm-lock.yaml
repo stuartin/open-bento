@@ -4,13 +4,16 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@biomejs/biome':
+      specifier: ^2.4.12
+      version: 2.4.12
+
 importers:
 
   .:
     devDependencies:
-      '@biomejs/biome':
-        specifier: ^2.4.12
-        version: 2.4.12
       turbo:
         specifier: ^2.5.0
         version: 2.9.6
@@ -18,7 +21,16 @@ importers:
         specifier: 5.7.3
         version: 5.7.3
 
-  packages/config-typescript: {}
+  packages/config: {}
+
+  packages/schema:
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 2.4.12
+      '@open-bento/config':
+        specifier: workspace:*
+        version: link:../config
 
 packages:
 

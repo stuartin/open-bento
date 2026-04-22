@@ -2,13 +2,11 @@
   "name": "open-bento",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
-    "test": "turbo run test",
     "dev": "turbo run dev",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "format": "turbo run format"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.12",
     "turbo": "^2.5.0",
     "typescript": "5.7.3"
   },

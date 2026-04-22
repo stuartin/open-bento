@@ -1,0 +1,12 @@
+{
+    "name": "@open-bento/schema",
+    "type": "module",
+    "scripts": {
+        "lint": "biome lint .",
+        "format": "biome lint --write ."
+    },
+    "devDependencies": {
+        "@open-bento/config": "workspace:*",
+        "@biomejs/biome": "catalog:"
+    }
+}
