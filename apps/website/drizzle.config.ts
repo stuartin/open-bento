@@ -6,6 +6,7 @@ export default defineConfig({
 	schema: './src/lib/server/db/schema/index.ts',
 	dialect: 'sqlite',
 	dbCredentials: { url: process.env.DATABASE_URL },
+	casing: "snake_case",
 	verbose: true,
 	strict: true
 });

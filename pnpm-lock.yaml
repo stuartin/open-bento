@@ -9,6 +9,18 @@ catalogs:
     '@biomejs/biome':
       specifier: ^2.4.12
       version: 2.4.12
+    '@orpc/contract':
+      specifier: ^1.13.14
+      version: 1.13.14
+    '@orpc/openapi':
+      specifier: ^1.13.14
+      version: 1.13.14
+    '@orpc/server':
+      specifier: ^1.13.14
+      version: 1.13.14
+    '@orpc/zod':
+      specifier: ^1.13.14
+      version: 1.13.14
     '@tanstack/svelte-query':
       specifier: ^6.1.18
       version: 6.1.18
@@ -47,6 +59,12 @@ importers:
       '@open-bento/types':
         specifier: 'workspace:'
         version: link:../../packages/types
+      '@orpc/openapi':
+        specifier: 'catalog:'
+        version: 1.13.14(ws@8.20.0)
+      '@orpc/server':
+        specifier: 'catalog:'
+        version: 1.13.14(ws@8.20.0)
       '@paralleldrive/cuid2':
         specifier: ^3.3.0
         version: 3.3.0
@@ -138,13 +156,13 @@ importers:
   packages/types:
     dependencies:
       '@orpc/contract':
-        specifier: ^1.13.14
+        specifier: 'catalog:'
         version: 1.13.14
       '@orpc/openapi':
-        specifier: ^1.13.14
+        specifier: 'catalog:'
         version: 1.13.14(ws@8.20.0)
       '@orpc/zod':
-        specifier: ^1.13.14
+        specifier: 'catalog:'
         version: 1.13.14(@orpc/contract@1.13.14)(@orpc/server@1.13.14(ws@8.20.0))(ws@8.20.0)(zod@4.3.6)
       zod:
         specifier: 'catalog:'

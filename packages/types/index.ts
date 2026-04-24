@@ -1,10 +1,12 @@
-import { ProjectSchema, projectsContract } from "./contracts/projects";
+import { ProjectSchema, projectsContract } from "./contracts/projects.contract";
 import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4'
 import { OpenAPIGenerator } from '@orpc/openapi'
 import type { InferContractRouterInputs, InferContractRouterOutputs } from '@orpc/contract'
 
 export const contract = {
-    projects: projectsContract
+    organizations: {
+        projects: projectsContract
+    }
 }
 
 const openAPIGenerator = new OpenAPIGenerator({
@@ -35,3 +37,4 @@ export const zSchema = {
 
 export type ContractInputs = InferContractRouterInputs<typeof contract>
 export type ContractOutputs = InferContractRouterOutputs<typeof contract>
+export type { AnyContractRouter } from "@orpc/contract"

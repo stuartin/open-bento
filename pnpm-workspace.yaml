@@ -4,8 +4,12 @@ packages:
 
 catalog:
   "@biomejs/biome": ^2.4.12
+  "@orpc/contract": ^1.13.14
+  "@orpc/openapi": ^1.13.14
+  "@orpc/server": ^1.13.14
+  "@orpc/zod": ^1.13.14
   "@tanstack/svelte-query": "^6.1.18"
   zod: ^4.3.6
 onlyBuiltDependencies:
-  - '@tailwindcss/oxide'
+  - "@tailwindcss/oxide"
   - esbuild

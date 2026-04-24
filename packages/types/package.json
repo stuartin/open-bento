@@ -9,9 +9,9 @@
         "format": "biome lint --write ."
     },
     "dependencies": {
-        "@orpc/contract": "^1.13.14",
-        "@orpc/zod": "^1.13.14",
-        "@orpc/openapi": "^1.13.14",
+        "@orpc/contract": "catalog:",
+        "@orpc/zod": "catalog:",
+        "@orpc/openapi": "catalog:",
         "zod": "catalog:"
     },
     "devDependencies": {
