@@ -8,7 +8,7 @@ export const contract = {
 
 const openAPIGenerator = new OpenAPIGenerator({
     schemaConverters: [
-        new ZodToJsonSchemaConverter(), // <-- if you use Zod
+        new ZodToJsonSchemaConverter(),
     ],
 })
 
