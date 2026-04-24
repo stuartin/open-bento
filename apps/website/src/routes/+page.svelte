@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { schema } from "@open-bento/types";
+  import { openAPISchema } from "@open-bento/types";
 </script>
 
 <h1>Welcome to SvelteKit</h1>
@@ -9,5 +9,5 @@
 </p>
 
 <pre>
-  {JSON.stringify(schema, null, 2)}
+  {JSON.stringify(openAPISchema, null, 2)}
 </pre>

@@ -1,6 +1,7 @@
 import { ProjectSchema, projectsContract } from "./contracts/projects";
 import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4'
 import { OpenAPIGenerator } from '@orpc/openapi'
+import type { InferContractRouterInputs, InferContractRouterOutputs } from '@orpc/contract'
 
 export const contract = {
     projects: projectsContract
@@ -12,7 +13,7 @@ const openAPIGenerator = new OpenAPIGenerator({
     ],
 })
 
-export const schema = await openAPIGenerator.generate(contract, {
+export const openAPISchema = await openAPIGenerator.generate(contract, {
     info: {
         title: 'Open Bento',
         version: '0.0.1',
@@ -27,3 +28,10 @@ export const schema = await openAPIGenerator.generate(contract, {
         },
     }
 })
+
+export const zSchema = {
+    Project: ProjectSchema
+}
+
+export type ContractInputs = InferContractRouterInputs<typeof contract>
+export type ContractOutputs = InferContractRouterOutputs<typeof contract>

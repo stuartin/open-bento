@@ -108,7 +108,7 @@ export const projectsContract = {
             })
         )
         .output(
-            ProjectSchema
+            z.undefined()
         )
         .errors({
             NOT_FOUND,

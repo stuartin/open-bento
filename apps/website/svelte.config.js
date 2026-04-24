@@ -19,6 +19,11 @@ const config = {
 				include: [...config.include, '../drizzle.config.ts']
 			})
 		}
+	},
+	compilerOptions: {
+		experimental: {
+			async: true
+		}
 	}
 };
 
