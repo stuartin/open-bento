@@ -11,6 +11,7 @@ export const projectsRouter = os.router({
     ),
     list: os.list.handler(
         ({ input }) => {
+            console.log('projects.list')
             return {
                 results: [{
                     id: "123",
