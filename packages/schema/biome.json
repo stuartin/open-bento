@@ -1,5 +1,0 @@
-{
-    "extends": [
-        "@open-bento/config/biome"
-    ]
-}
