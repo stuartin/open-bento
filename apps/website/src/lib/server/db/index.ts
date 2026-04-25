@@ -1,15 +1,12 @@
-import { drizzle, LibSQLDatabase } from 'drizzle-orm/libsql';
+import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import * as schema from '$lib/server/db/schema';
-import { env } from '$env/dynamic/private';
 import { relations } from '$lib/server/db/schema/relations';
 import { migrate } from 'drizzle-orm/libsql/migrator';
 import { projectsDAO } from '$lib/server/db/dao/projects.dao';
+import { DATABASE_MIGRATIONS_PATH, DATABASE_PATH } from '$lib/constants';
 
-if (!env.DATABASE_URL) throw new Error('DATABASE_URL is not set');
-if (!env.MIGRATIONS_PATH) throw new Error('MIGRATIONS_PATH is not set');
-
-const client = createClient({ url: env.DATABASE_URL });
+const client = createClient({ url: DATABASE_PATH });
 export const db = drizzle({ client, schema, relations, casing: "snake_case" });
 
 export class DB {
@@ -26,11 +23,11 @@ export class DB {
 
     private async migrate() {
         console.log('DB: Start migrations');
-        console.log('DB: Path: ', env.MIGRATIONS_PATH)
-        console.log('DB: DB: ', env.DATABASE_URL)
+        console.log('DB: Path: ', DATABASE_MIGRATIONS_PATH)
+        console.log('DB: DB: ', DATABASE_PATH)
 
         await migrate(db, {
-            migrationsFolder: env.MIGRATIONS_PATH
+            migrationsFolder: DATABASE_MIGRATIONS_PATH
         });
         console.log('DB: End migrations');
     }

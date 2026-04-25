@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: open-bento
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - /apps/website/.env
+    # environment:
+    #   - PUBLIC_ORIGIN="http://localhost:3000"
+    volumes:
+      - db:/app/db
+
+volumes:
+  db:

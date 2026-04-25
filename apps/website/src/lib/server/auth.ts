@@ -5,11 +5,13 @@ import { env } from '$env/dynamic/private';
 import { getRequestEvent } from '$app/server';
 import { db } from '$lib/server/db';
 import { createId } from "@paralleldrive/cuid2";
+import { building } from '$app/environment';
+import { ORIGIN } from '$lib/constants';
 
 export type AuthAPI = typeof auth['api']
 export const auth = betterAuth({
-	baseURL: env.ORIGIN,
-	secret: env.BETTER_AUTH_SECRET,
+	baseURL: ORIGIN,
+	secret: building ? 'is-dev' : env.BETTER_AUTH_SECRET, // https://github.com/better-auth/better-auth/issues/8125
 	database: drizzleAdapter(db, {
 		provider: 'sqlite',
 		usePlural: true,

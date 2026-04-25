@@ -4,6 +4,7 @@
   "tasks": {
     "lint": {},
     "format": {},
+    "build": {},
     "dev": {
       "cache": false,
       "persistent": true

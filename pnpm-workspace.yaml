@@ -16,3 +16,6 @@ catalog:
 onlyBuiltDependencies:
   - "@tailwindcss/oxide"
   - esbuild
+syncInjectedDepsAfterScripts:
+  - build
+injectWorkspacePackages: true
