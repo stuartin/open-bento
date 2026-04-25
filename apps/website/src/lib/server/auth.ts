@@ -6,6 +6,7 @@ import { getRequestEvent } from '$app/server';
 import { db } from '$lib/server/db';
 import { createId } from "@paralleldrive/cuid2";
 
+export type AuthAPI = typeof auth['api']
 export const auth = betterAuth({
 	baseURL: env.ORIGIN,
 	secret: env.BETTER_AUTH_SECRET,

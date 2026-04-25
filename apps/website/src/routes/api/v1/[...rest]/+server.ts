@@ -3,6 +3,7 @@ import { CORSPlugin } from '@orpc/server/plugins'
 import { onError } from '@orpc/server'
 import { router } from '$lib/server/api'
 import type { RequestHandler } from '@sveltejs/kit'
+import { auth } from '$lib/server/auth'
 
 const handler = new OpenAPIHandler(router, {
     plugins: [new CORSPlugin()],
@@ -17,7 +18,8 @@ const handle: RequestHandler = async ({ request }) => {
     const { response } = await handler.handle(request, {
         prefix: '/api/v1',
         context: {
-            request
+            request,
+            auth: auth.api
         }
     })
 

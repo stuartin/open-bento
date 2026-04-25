@@ -1,5 +1,5 @@
 import { contract } from "@open-bento/types";
-import { createRouter } from "../lib/orpc.router";
+import { createRouter } from "../lib/orpc";
 import { DummyProject } from "$lib/server/db/dao/projects.dao";
 
 const os = createRouter(contract.organizations.projects);

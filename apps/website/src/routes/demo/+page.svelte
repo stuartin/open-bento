@@ -1,7 +1,7 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import { client } from "$lib/api-client";
-  import { createQuery, type QueryOptions } from "@tanstack/svelte-query";
+  import { createQuery } from "@tanstack/svelte-query";
 
   const query = createQuery(() =>
     client.organizations.projects.list.queryOptions({

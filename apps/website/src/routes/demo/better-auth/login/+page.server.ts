@@ -16,6 +16,7 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		const email = formData.get('email')?.toString() ?? '';
 		const password = formData.get('password')?.toString() ?? '';
+		const redirectTo = event.url.searchParams.get('redirectTo') ?? '/'
 
 		try {
 			await auth.api.signInEmail({
@@ -32,13 +33,14 @@ export const actions: Actions = {
 			return fail(500, { message: 'Unexpected error' });
 		}
 
-		return redirect(302, '/demo/better-auth');
+		return redirect(302, redirectTo);
 	},
 	signUpEmail: async (event) => {
 		const formData = await event.request.formData();
 		const email = formData.get('email')?.toString() ?? '';
 		const password = formData.get('password')?.toString() ?? '';
 		const name = formData.get('name')?.toString() ?? '';
+		const redirectTo = event.url.searchParams.get('redirectTo') ?? '/'
 
 		try {
 			await auth.api.signUpEmail({
@@ -56,6 +58,6 @@ export const actions: Actions = {
 			return fail(500, { message: 'Unexpected error' });
 		}
 
-		return redirect(302, '/demo/better-auth');
+		return redirect(302, redirectTo);
 	},
 };
