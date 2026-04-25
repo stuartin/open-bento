@@ -83,6 +83,9 @@ importers:
       '@orpc/tanstack-query':
         specifier: 'catalog:'
         version: 1.14.0(@orpc/client@1.13.14)(@tanstack/query-core@5.99.2)
+      '@orpc/zod':
+        specifier: 'catalog:'
+        version: 1.13.14(@orpc/contract@1.13.14)(@orpc/server@1.13.14(ws@8.20.0))(ws@8.20.0)(zod@4.3.6)
       '@paralleldrive/cuid2':
         specifier: ^3.3.0
         version: 3.3.0
