@@ -1,6 +1,7 @@
 import { contract } from "@open-bento/types";
 import { createRouter } from "../lib/orpc";
 import { DummyProject } from "$lib/server/db/dao/projects.dao";
+import { foldersRouter } from "./folders.router";
 
 const os = createRouter(contract.organizations.projects);
 export const projectsRouter = os.router({
@@ -17,6 +18,7 @@ export const projectsRouter = os.router({
                     id: "123",
                     organizationId: input.organizationId,
                     name: "123",
+                    folders: []
                 }]
             }
         }
@@ -36,4 +38,5 @@ export const projectsRouter = os.router({
             return undefined
         }
     ),
+    folders: foldersRouter
 })

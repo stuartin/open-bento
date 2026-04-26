@@ -5,6 +5,7 @@
     "lint": {},
     "format": {},
     "build": {},
+    "check": {},
     "dev": {
       "cache": false,
       "persistent": true

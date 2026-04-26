@@ -5,11 +5,12 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
-    "format": "turbo run format"
+    "format": "turbo run format",
+    "check": "turbo run check"
   },
   "devDependencies": {
-    "@types/node": "^24",
-    "turbo": "^2.5.0",
+    "@types/node": "^24.12.2",
+    "turbo": "^2.9.6",
     "typescript": "5.7.3"
   },
   "packageManager": "pnpm@10.14.0",

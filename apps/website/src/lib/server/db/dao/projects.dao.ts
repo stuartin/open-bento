@@ -4,7 +4,8 @@ import { z } from "zod"
 export const DummyProject: z.infer<typeof zSchema.Project> = {
     id: "123456",
     organizationId: "123456",
-    name: "my-project"
+    name: "my-project",
+    folders: []
 }
 
 export const projectsDAO = {

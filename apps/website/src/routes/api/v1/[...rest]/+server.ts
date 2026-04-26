@@ -7,6 +7,7 @@ import { auth } from '$lib/server/auth'
 import { OpenAPIReferencePlugin } from '@orpc/openapi/plugins'
 import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4'
 import { openAPISchemaGeneratorOptions } from '@open-bento/types'
+import { Spawner } from '@open-bento/spawner-v3'
 
 const handler = new OpenAPIHandler(router, {
     plugins: [
@@ -30,7 +31,8 @@ const handle: RequestHandler = async ({ request }) => {
         prefix: '/api/v1',
         context: {
             request,
-            auth: auth.api
+            auth: auth.api,
+            spawner: await Spawner.get()
         }
     })
 

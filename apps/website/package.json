@@ -27,6 +27,7 @@
 		"@biomejs/biome": "catalog:",
 		"@open-bento/config": "workspace:",
 		"@open-bento/types": "workspace:",
+		"@open-bento/spawner-v3": "workspace:",
 		"@orpc/client": "catalog:",
 		"@orpc/openapi": "catalog:",
 		"@orpc/openapi-client": "catalog:",

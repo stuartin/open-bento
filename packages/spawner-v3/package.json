@@ -1,0 +1,25 @@
+{
+  "name": "@open-bento/spawner-v3",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tofu": "./tofu.Dockerfile"
+  },
+  "scripts": {
+    "lint": "biome lint .",
+    "format": "biome lint --write .",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "effect": "^3.21.2",
+    "@effect/platform": "^0.96.1",
+    "@effect/platform-node": "^0.106.0",
+    "@open-bento/types": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@open-bento/config": "workspace:*",
+    "typescript": "^5.8.3"
+  }
+}
