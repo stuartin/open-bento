@@ -32,6 +32,8 @@ const handle: RequestHandler = async ({ request }) => {
     // better-auth
     if (request.url.startsWith(`${API_PREFIX}/auth`)) auth.handler(request);
 
+    console.log({ url: request.url })
+
     // oRPC
     const { response } = await handler.handle(request, {
         prefix: API_PREFIX,

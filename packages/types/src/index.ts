@@ -2,11 +2,13 @@ import { ProjectSchema, projectsContract } from "./contracts/projects.contract";
 import { JobSchema, jobsContract } from "./contracts/jobs.contract";
 import { OrganizationSchema, organizationsContract } from "./contracts/organizations.contract";
 import { FolderSchema, foldersContract } from "./contracts/folders.contract";
+import { cloudsPingContract } from "./contracts/clouds/clouds.ping.contract";
 import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4'
 import { OpenAPIGenerator, type OpenAPIGeneratorGenerateOptions } from '@orpc/openapi'
 import type { InferContractRouterInputs, InferContractRouterOutputs } from '@orpc/contract'
 import { IdSchema } from "./lib/shared";
 import type z from "zod";
+import { cloudsOrganizationsContract } from "./contracts/clouds/clouds.organizations.contract";
 
 export const contract = {
     organizations: {
@@ -18,6 +20,10 @@ export const contract = {
                 jobs: jobsContract
             }
         },
+    },
+    clouds: {
+        ping: cloudsPingContract,
+        organizations: cloudsOrganizationsContract
     }
 }
 
@@ -68,4 +74,4 @@ export type JobStatus = z.infer<typeof zSchema.Job.shape.status>;
 
 export type ContractInputs = InferContractRouterInputs<typeof contract>
 export type ContractOutputs = InferContractRouterOutputs<typeof contract>
-export type { AnyContractRouter, ContractRouterClient } from "@orpc/contract"
+export type { AnyContractRouter, ContractRouterClient } from "@orpc/contra

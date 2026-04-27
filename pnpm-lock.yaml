@@ -176,6 +176,15 @@ importers:
         specifier: ^5.8.3
         version: 5.9.3
 
+  packages/terraform:
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 'catalog:'
+        version: 2.4.12
+      '@open-bento/config':
+        specifier: workspace:*
+        version: link:../config
+
   packages/types:
     dependencies:
       '@orpc/contract':
