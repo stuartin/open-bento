@@ -8,12 +8,13 @@ import type { AuthAPI } from "../auth";
 import type { Spawner } from "@open-bento/spawner-v3";
 import { cloudsPingRouter } from "./routers/clouds/clouds.ping.router";
 import { cloudsOrganizationsRouter } from "./routers/clouds/clouds.organizations.router";
+import type { ResponseHeadersPluginContext } from "@orpc/server/plugins";
 
-export interface APIContext {
+export type APIContext = {
     request: Request;
     auth: AuthAPI
     spawner: Spawner
-}
+} & Required<ResponseHeadersPluginContext>
 
 const os = createRouter(contract);
 export const router = os

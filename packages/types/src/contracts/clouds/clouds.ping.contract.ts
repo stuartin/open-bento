@@ -12,10 +12,7 @@ export const cloudsPingContract = oc.pub
                 path: "/ping",
                 description: 'Get a folder in a project',
                 successDescription: 'The requested folder',
+                successStatus: 204,
                 tags: Tags,
             })
-            // .input(z.undefined())
-            .output(
-                z.object({ ok: z.boolean() })
-            )
-    })
+    })  

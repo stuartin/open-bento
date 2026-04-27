@@ -9,9 +9,11 @@ import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4'
 import { openAPISchemaGeneratorOptions } from '@open-bento/types'
 import { Spawner } from '@open-bento/spawner-v3'
 import { API_PREFIX } from '$lib/constants'
+import { ResponseHeadersPlugin } from '@orpc/server/plugins'
 
 const handler = new OpenAPIHandler(router, {
     plugins: [
+        new ResponseHeadersPlugin(),
         new CORSPlugin(),
         new OpenAPIReferencePlugin({
             schemaConverters: [

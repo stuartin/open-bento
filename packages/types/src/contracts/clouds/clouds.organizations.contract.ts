@@ -1,10 +1,11 @@
 import z from 'zod';
 import { NOT_FOUND, FORBIDDEN, CONFLICT } from '../../lib/errors'
 import { createContract } from '../../lib/orpc.contract'
+import { IdSchema } from '../../lib/shared';
 
 export const EntitlementSetSchema = z.object({
     data: z.object({
-        id: z.string(),
+        id: IdSchema,
         type: z.literal("entitlement-sets"),
         attributes: z.object({
             agents: z.boolean(),
@@ -54,6 +55,9 @@ export const cloudsOrganizationsContract = oc.auth
                 z.object({
                     organization: z.string(),
                 })
+            )
+            .output(
+                EntitlementSetSchema
             )
             .errors({
                 NOT_FOUND
