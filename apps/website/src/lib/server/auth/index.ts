@@ -11,6 +11,7 @@ import { oauthProvider } from "@better-auth/oauth-provider";
 import { jwt, organization } from "better-auth/plugins"
 import { sessions } from '../db/schema';
 import { eq } from 'drizzle-orm';
+import { bearer } from "better-auth/plugins";
 
 export type AuthAPI = typeof auth['api']
 export const auth = betterAuth({
@@ -20,6 +21,9 @@ export const auth = betterAuth({
 	experimental: {
 		joins: true
 	},
+	disabledPaths: [
+		"/token",
+	],
 	database: drizzleAdapter(db, {
 		provider: 'sqlite',
 		usePlural: true,
@@ -53,6 +57,7 @@ export const auth = betterAuth({
 		enabled: true
 	},
 	plugins: [
+		bearer(),
 		organization({
 			organizationHooks: {
 				afterDeleteOrganization: async ({ organization }) => {
@@ -79,7 +84,9 @@ export const auth = betterAuth({
 				},
 			}
 		}),
-		jwt(),
+		jwt({
+			// disableSettingJwtHeader: true,
+		}),
 		oauthProvider({
 			consentPage: "/auth/consent",
 			loginPage: "/auth/login",

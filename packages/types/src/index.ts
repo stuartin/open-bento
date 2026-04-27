@@ -74,4 +74,4 @@ export type JobStatus = z.infer<typeof zSchema.Job.shape.status>;
 
 export type ContractInputs = InferContractRouterInputs<typeof contract>
 export type ContractOutputs = InferContractRouterOutputs<typeof contract>
-export type { AnyContractRouter, ContractRouterClient } from "@orpc/contra
+export type { AnyContractRouter, ContractRouterClient } from "@orpc/contract"
