@@ -7,11 +7,10 @@
   let { form }: { form: ActionData } = $props();
 
   const params = new SvelteURLSearchParams(page.url.searchParams.toString());
-  const redirectTo = $derived(params.get("redirectTo"));
 </script>
 
 <h1>Login</h1>
-<form method="post" action="?/signInEmail&redirectTo={redirectTo}" use:enhance>
+<form method="post" action="?/signInEmail&{params.toString()}" use:enhance>
   <label>
     Email
     <input
@@ -40,7 +39,7 @@
     >Login</button
   >
   <button
-    formaction="?/signUpEmail&redirectTo={redirectTo}"
+    formaction="?/signUpEmail&{params.toString()}"
     class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-white transition"
     >Register</button
   >

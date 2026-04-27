@@ -4,7 +4,7 @@ import { organizationsRouter } from "./routers/organizations.router";
 import { projectsRouter } from "./routers/projects.router";
 import { foldersRouter } from "./routers/folders.router";
 import { jobsRouter } from "./routers/jobs.router";
-import type { AuthAPI } from "../auth";
+import type { AuthAPI } from "../auth/auth";
 import { useAuth } from "./middleware/use-auth";
 import type { Spawner } from "@open-bento/spawner";
 

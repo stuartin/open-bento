@@ -8,6 +8,7 @@ import { OpenAPIReferencePlugin } from '@orpc/openapi/plugins'
 import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4'
 import { openAPISchemaGeneratorOptions } from '@open-bento/types'
 import { Spawner } from '@open-bento/spawner-v3'
+import { API_PREFIX } from '$lib/constants'
 
 const handler = new OpenAPIHandler(router, {
     plugins: [
@@ -27,8 +28,13 @@ const handler = new OpenAPIHandler(router, {
 })
 
 const handle: RequestHandler = async ({ request }) => {
+
+    // better-auth
+    if (request.url.startsWith(`${API_PREFIX}/auth`)) auth.handler(request);
+
+    // oRPC
     const { response } = await handler.handle(request, {
-        prefix: '/api/v1',
+        prefix: API_PREFIX,
         context: {
             request,
             auth: auth.api,

@@ -6,7 +6,7 @@ import { APIError } from 'better-auth/api';
 
 export const load: PageServerLoad = (event) => {
 	if (event.locals.user) {
-		return redirect(302, '/demo/better-auth');
+		return redirect(302, '/auth');
 	}
 	return {};
 };
@@ -17,6 +17,7 @@ export const actions: Actions = {
 		const email = formData.get('email')?.toString() ?? '';
 		const password = formData.get('password')?.toString() ?? '';
 		const redirectTo = event.url.searchParams.get('redirectTo') ?? '/'
+		const clientId = event.url.searchParams.get('client_id')
 
 		try {
 			await auth.api.signInEmail({
@@ -33,7 +34,7 @@ export const actions: Actions = {
 			return fail(500, { message: 'Unexpected error' });
 		}
 
-		return redirect(302, redirectTo);
+		return clientId ? redirect(302, `/api/v1/auth/oauth2/authorize?${event.url.searchParams.toString()}`) : redirect(302, redirectTo);
 	},
 	signUpEmail: async (event) => {
 		const formData = await event.request.formData();
@@ -41,6 +42,7 @@ export const actions: Actions = {
 		const password = formData.get('password')?.toString() ?? '';
 		const name = formData.get('name')?.toString() ?? '';
 		const redirectTo = event.url.searchParams.get('redirectTo') ?? '/'
+		const clientId = event.url.searchParams.get('client_id')
 
 		try {
 			await auth.api.signUpEmail({
@@ -58,6 +60,7 @@ export const actions: Actions = {
 			return fail(500, { message: 'Unexpected error' });
 		}
 
-		return redirect(302, redirectTo);
+		return clientId ? redirect(302, `/api/v1/auth/oauth2/authorize?${event.url.searchParams.toString()}`) : redirect(302, redirectTo);
+
 	},
 };

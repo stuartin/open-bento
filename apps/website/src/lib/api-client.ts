@@ -20,7 +20,7 @@ const link = new OpenAPILink(contract, {
         onError((error, t) => {
             if (error instanceof ORPCError) {
                 if ([401, 403].includes(error.status)) {
-                    goto(`/demo/better-auth/login?redirectTo=${window.location.pathname}`);
+                    goto(`/auth/login?redirectTo=${window.location.pathname}`);
                 }
             }
         }),
