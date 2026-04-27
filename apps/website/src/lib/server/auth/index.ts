@@ -8,7 +8,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { building } from '$app/environment';
 import { API_PREFIX, ORIGIN } from '$lib/constants';
 import { oauthProvider } from "@better-auth/oauth-provider";
-import { jwt } from "better-auth/plugins"
+import { jwt, organization } from "better-auth/plugins"
 
 export type AuthAPI = typeof auth['api']
 export const auth = betterAuth({
@@ -21,6 +21,7 @@ export const auth = betterAuth({
 	}),
 	emailAndPassword: { enabled: true },
 	plugins: [
+		organization(),
 		jwt(),
 		oauthProvider({
 			consentPage: "/auth/consent",
