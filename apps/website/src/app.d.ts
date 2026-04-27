@@ -1,5 +1,5 @@
 import type { APIClient } from '$lib/api-client';
-import type { User, Session } from 'better-auth/minimal';
+import type { Session, User } from 'better-auth'
 
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
@@ -11,7 +11,9 @@ declare global {
 		}
 
 		// interface Error {}
-		// interface PageData {}
+		interface PageData {
+			user?: User;
+		}
 		// interface PageState {}
 		// interface Platform {}
 	}
