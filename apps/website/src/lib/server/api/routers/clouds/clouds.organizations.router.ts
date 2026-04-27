@@ -20,7 +20,7 @@ export const cloudsOrganizationsRouter = os
 
                 if (!organization) throw errors.NOT_FOUND()
 
-                context.resHeaders.set("TFP-API-Version", "2.6")
+                context.resHeaders?.set("TFP-API-Version", "2.6")
                 return {
                     data: {
                         id: organization.id,

@@ -57,3 +57,26 @@
   "signal": { "aborted": false }
 }
 ```
+
+# /api/v1/cloud/v2/organizations/org/workspaces/workspace_test
+
+```json
+method: 'GET',
+url: 'https://localhost:5173/api/v1/cloud/v2/organizations/org/workspaces/workspace_test
+```
+
+# /api/v1/cloud/v2/organizations/org/workspaces
+
+```json
+method: 'POST',
+url: 'https://localhost:5173/api/v1/cloud/v2/organizations/org/workspaces
+
+{\n' +
+  "data": {\n' +
+    "type": "workspaces",\n' +
+    "attributes": {\n' +
+      "name": "workspace_test"\n' +
+    }\n' +
+  }\n' +
+}'
+```

@@ -14,7 +14,7 @@ export type APIContext = {
     request: Request;
     auth: AuthAPI
     spawner: Spawner
-} & Required<ResponseHeadersPluginContext>
+} & ResponseHeadersPluginContext
 
 const os = createRouter(contract);
 export const router = os
