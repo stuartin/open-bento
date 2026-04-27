@@ -9,6 +9,8 @@ import { building } from '$app/environment';
 import { API_PREFIX, ORIGIN } from '$lib/constants';
 import { oauthProvider } from "@better-auth/oauth-provider";
 import { jwt, organization } from "better-auth/plugins"
+import { sessions } from '../db/schema';
+import { eq } from 'drizzle-orm';
 
 export type AuthAPI = typeof auth['api']
 export const auth = betterAuth({
@@ -40,7 +42,7 @@ export const auth = betterAuth({
 					return {
 						data: {
 							...session,
-							activeOrganizationId: organizations[0]?.id,
+							activeOrganizationId: organizations[0]?.organizationId,
 						},
 					};
 				},
@@ -53,6 +55,13 @@ export const auth = betterAuth({
 	plugins: [
 		organization({
 			organizationHooks: {
+				afterDeleteOrganization: async ({ organization }) => {
+					await db.update(sessions)
+						.set({
+							activeOrganizationId: null
+						})
+						.where(eq(sessions.activeOrganizationId, organization.id))
+				},
 				beforeAddMember: async ({ member, user, organization }) => {
 					// Custom validation or modification
 					console.log(`Adding ${user.email} to ${organization.name}`);
