@@ -3,7 +3,7 @@ import { building, dev } from '$app/environment';
 import { auth } from '$lib/server/auth';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { sequence } from '@sveltejs/kit/hooks';
-import { DB } from '$lib/server/db';
+import { dbMigrate } from '$lib/server/db';
 import { Spawner } from '@open-bento/spawner-v3';
 import { jobsDAO } from '$lib/server/db/dao/jobs.dao';
 import { seedTerraformClient } from '$lib/server/auth/seeds/terraform-client.seed';
@@ -23,7 +23,7 @@ const handleBetterAuth: Handle = async ({ event, resolve }) => {
 export const handle: Handle = sequence(handleBetterAuth);
 
 export const init: ServerInit = async () => {
-	await DB.get()
+	await dbMigrate()
 	await seedTerraformClient()
 	await seedOrganizationAdmin()
 

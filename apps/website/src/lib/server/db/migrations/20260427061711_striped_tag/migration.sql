@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `organization_ids` text;

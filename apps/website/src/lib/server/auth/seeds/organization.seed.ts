@@ -5,7 +5,7 @@ import { dev } from "$app/environment"
 
 export const seedOrganizationAdmin = async () => {
     const organization = await seedOrganization()
-    const admin = await seedAdmin()
+    const admin = await seedAdmin([organization.id])
     await seedAdminToOrganization(admin, organization)
 }
 
@@ -33,7 +33,7 @@ const seedOrganization = async () => {
     return organization
 }
 
-const seedAdmin = async () => {
+const seedAdmin = async (organizationIds: string[]) => {
     const context = await auth.$context
     const internalAdapter = context.internalAdapter
     const passwordUtil = context.password
@@ -51,6 +51,7 @@ const seedAdmin = async () => {
         email: ADMIN_EMAIL,
         emailVerified: true,
         name: "admin",
+        organizationIds,
         createdAt: new Date(),
         updatedAt: new Date(),
     })
