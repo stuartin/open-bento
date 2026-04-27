@@ -13,6 +13,7 @@ declare global {
 		// interface Error {}
 		interface PageData {
 			user?: User;
+			session?: Session;
 		}
 		// interface PageState {}
 		// interface Platform {}

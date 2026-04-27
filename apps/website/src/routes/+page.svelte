@@ -3,19 +3,14 @@
   import { page } from "$app/state";
   import { authClient } from "$lib/auth-client";
 
-  import type { LayoutServerData } from "./$types";
-
-  const { data }: { data: LayoutServerData } = $props();
-
-  const user = $derived(data.user);
-
-  const test = $derived(page.data.user);
+  const { user, session } = $derived(page.data);
 </script>
 
 <h1>open-bento</h1>
 <div>
-  {#if test}
-    <pre>{JSON.stringify(test, null, 2)}</pre>
+  {#if user && session}
+    <pre>{JSON.stringify(user, null, 2)}</pre>
+    <pre>{JSON.stringify(session, null, 2)}</pre>
     <br />
     <button
       onclick={async () => {

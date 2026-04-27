@@ -47,16 +47,6 @@ const seedAdmin = async () => {
     const existingAdmin = await internalAdapter.findUserByEmail(ADMIN_EMAIL)
     if (existingAdmin) return existingAdmin.user
 
-    // const admin2 = await auth.api.signUpEmail({
-    //     body: {
-    //         email: "admin@local.com",
-    //         name: "admin",
-    //         password: "Passwor12#"
-    //     }
-    // })
-
-    // console.log({ admin2 })
-
     const admin = await internalAdapter.createUser({
         email: ADMIN_EMAIL,
         emailVerified: true,
