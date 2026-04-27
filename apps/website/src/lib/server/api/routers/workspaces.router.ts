@@ -1,13 +1,13 @@
 import { contract } from "@open-bento/types";
 import { createRouter } from "../lib/orpc";
-import { DummyFolder } from "$lib/server/db/dao/folders.dao";
+import { DummyWorkspace } from "$lib/server/db/dao/workspaces.dao";
 import { jobsRouter } from "./jobs.router";
 
-const os = createRouter(contract.organizations.projects.folders);
-export const foldersRouter = os.router({
+const os = createRouter(contract.organizations.projects.workspaces);
+export const workspacesRouter = os.router({
     get: os.get.handler(
         () => {
-            return DummyFolder
+            return DummyWorkspace
         }
     ),
     list: os.list.handler(
@@ -19,12 +19,12 @@ export const foldersRouter = os.router({
     ),
     create: os.create.handler(
         () => {
-            return DummyFolder
+            return DummyWorkspace
         }
     ),
     update: os.update.handler(
         () => {
-            return DummyFolder
+            return DummyWorkspace
         }
     ),
     delete: os.delete.handler(

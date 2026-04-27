@@ -85,7 +85,7 @@ export const auth = betterAuth({
 			}
 		}),
 		jwt({
-			// disableSettingJwtHeader: true,
+			disableSettingJwtHeader: true,
 		}),
 		oauthProvider({
 			consentPage: "/auth/consent",

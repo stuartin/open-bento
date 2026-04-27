@@ -2,7 +2,7 @@ import { contract } from "@open-bento/types";
 import { createRouter } from "../lib/orpc";
 import { DummyJob, jobsDAO } from "$lib/server/db/dao/jobs.dao";
 
-const os = createRouter(contract.organizations.projects.folders.jobs);
+const os = createRouter(contract.organizations.projects.workspaces.jobs);
 export const jobsRouter = os.router({
     get: os.get.handler(
         () => {

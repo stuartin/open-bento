@@ -5,7 +5,7 @@ export const DummyProject: z.infer<typeof zSchema.Project> = {
     id: "123456",
     organizationId: "123456",
     name: "my-project",
-    folders: []
+    workspaces: []
 }
 
 export const projectsDAO = {

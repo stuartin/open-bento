@@ -1,7 +1,7 @@
 import { ProjectSchema, projectsContract } from "./contracts/projects.contract";
 import { JobSchema, jobsContract } from "./contracts/jobs.contract";
 import { OrganizationSchema, organizationsContract } from "./contracts/organizations.contract";
-import { FolderSchema, foldersContract } from "./contracts/folders.contract";
+import { WorkspaceSchema, workspacesContract } from "./contracts/workspaces.contract";
 import { cloudsPingContract } from "./contracts/clouds/clouds.ping.contract";
 import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4'
 import { OpenAPIGenerator, type OpenAPIGeneratorGenerateOptions } from '@orpc/openapi'
@@ -15,8 +15,8 @@ export const contract = {
         ...organizationsContract,
         projects: {
             ...projectsContract,
-            folders: {
-                ...foldersContract,
+            workspaces: {
+                ...workspacesContract,
                 jobs: jobsContract
             }
         },
@@ -49,8 +49,8 @@ export const openAPISchemaGeneratorOptions: OpenAPIGeneratorGenerateOptions = {
         Job: {
             schema: JobSchema,
         },
-        Folder: {
-            schema: FolderSchema,
+        Workspace: {
+            schema: WorkspaceSchema,
         },
     }
 }
@@ -59,14 +59,14 @@ export const zSchema = {
     Id: IdSchema,
     Organization: OrganizationSchema,
     Project: ProjectSchema,
-    Folder: FolderSchema,
+    Workspace: WorkspaceSchema,
     Job: JobSchema,
 }
 
 export type Id = z.infer<typeof zSchema.Id>;
 export type Organization = z.infer<typeof zSchema.Organization>;
 export type Project = z.infer<typeof zSchema.Project>;
-export type Folder = z.infer<typeof zSchema.Folder>;
+export type Workspace = z.infer<typeof zSchema.Workspace>;
 export type Job = z.infer<typeof zSchema.Job>;
 export type JobType = z.infer<typeof zSchema.Job.shape.type>;
 export type JobStatus = z.infer<typeof zSchema.Job.shape.status>;

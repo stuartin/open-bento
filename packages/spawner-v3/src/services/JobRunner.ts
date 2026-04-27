@@ -54,7 +54,7 @@ export class JobRunner extends Effect.Service<JobRunner>()("JobRunner", {
             ["version", "-json"],
             {
               JOB_ID: job.id,
-              FOLDER_ID: job.folderId,
+              WORKSPACE_ID: job.workspaceId,
             }
           );
 

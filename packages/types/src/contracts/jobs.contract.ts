@@ -11,7 +11,7 @@ export const JobSchema = z.object({
     id: IdSchema.meta({ description: 'The job id' }),
     organizationId: IdSchema.meta({ description: 'The organization id' }),
     projectId: IdSchema.meta({ description: 'The project id' }),
-    folderId: IdSchema.meta({ description: 'The folder id' }),
+    workspaceId: IdSchema.meta({ description: 'The workspace id' }),
     type: JobTypeSchema.meta({ description: 'The job type' }),
     tool: JobToolSchema.default("tofu").meta({ description: 'The IaC tool to use' }),
     toolVersion: z.string().default("1.9.1").meta({ description: 'The tool version' }),
@@ -25,7 +25,7 @@ export const JobSchema = z.object({
         id: 'abc123def',
         organizationId: 'org456xyz',
         projectId: 'proj789abc',
-        folderId: 'folder789',
+        workspaceId: 'workspace789',
         type: 'plan',
         tool: 'tofu',
         toolVersion: '1.9.0',
@@ -39,7 +39,7 @@ export const JobSchema = z.object({
 const Tags = ["jobs"]
 const oc = createContract()
 export const jobsContract = oc.pub
-    .prefix("/organizations/{organizationId}/projects/{projectId}/folders/{folderId}")
+    .prefix("/organizations/{organizationId}/projects/{projectId}/workspaces/{workspaceId}")
     .router({
         get: oc.pub
             .route({
@@ -50,7 +50,7 @@ export const jobsContract = oc.pub
                 tags: Tags,
             })
             .input(
-                JobSchema.pick({ organizationId: true, projectId: true, folderId: true }).extend({
+                JobSchema.pick({ organizationId: true, projectId: true, workspaceId: true }).extend({
                     jobId: JobSchema.shape.id,
                 })
             )
@@ -64,12 +64,12 @@ export const jobsContract = oc.pub
             .route({
                 method: "GET",
                 path: "/jobs",
-                description: 'Get a list of jobs in a folder',
+                description: 'Get a list of jobs in a workspace',
                 successDescription: 'A list of jobs',
                 tags: Tags,
             })
             .input(
-                JobSchema.pick({ organizationId: true, projectId: true, folderId: true })
+                JobSchema.pick({ organizationId: true, projectId: true, workspaceId: true })
             )
             .output(
                 ListSchema(JobSchema)
@@ -78,12 +78,12 @@ export const jobsContract = oc.pub
             .route({
                 method: "POST",
                 path: "/jobs",
-                description: 'Create a job in a folder',
+                description: 'Create a job in a workspace',
                 successDescription: 'The new job',
                 tags: Tags,
             })
             .input(
-                JobSchema.pick({ organizationId: true, projectId: true, folderId: true, type: true })
+                JobSchema.pick({ organizationId: true, projectId: true, workspaceId: true, type: true })
             )
             .output(
                 JobSchema
@@ -103,7 +103,7 @@ export const jobsContract = oc.pub
                 JobSchema.pick({ status: true, logs: true }).partial().extend({
                     organizationId: JobSchema.shape.organizationId,
                     projectId: JobSchema.shape.projectId,
-                    folderId: JobSchema.shape.folderId,
+                    workspaceId: JobSchema.shape.workspaceId,
                     jobId: JobSchema.shape.id,
                 })
             )
@@ -127,7 +127,7 @@ export const jobsContract = oc.pub
                 z.object({
                     organizationId: JobSchema.shape.organizationId,
                     projectId: JobSchema.shape.projectId,
-                    folderId: JobSchema.shape.folderId,
+                    workspaceId: JobSchema.shape.workspaceId,
                     jobId: JobSchema.shape.id,
                     force: z.boolean().optional()
                 })

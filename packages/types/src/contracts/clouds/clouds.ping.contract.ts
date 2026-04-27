@@ -10,8 +10,8 @@ export const cloudsPingContract = oc.pub
             .route({
                 method: "GET",
                 path: "/ping",
-                description: 'Get a folder in a project',
-                successDescription: 'The requested folder',
+                description: 'Ping the cloud API',
+                successDescription: 'Ping successful',
                 successStatus: 204,
                 tags: Tags,
             })
