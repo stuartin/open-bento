@@ -6,7 +6,7 @@ export const DummyWorkspace: z.infer<typeof zSchema.Workspace> = {
     organizationId: "org123456",
     projectId: "proj123456",
     name: "my-workspace",
-    jobs: [],
+    runs: [],
     createdAt: new Date(),
     updatedAt: new Date()
 }

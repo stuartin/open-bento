@@ -1,7 +1,7 @@
 import { contract } from "@open-bento/types";
 import { createRouter } from "../lib/orpc";
 import { DummyWorkspace } from "$lib/server/db/dao/workspaces.dao";
-import { jobsRouter } from "./jobs.router";
+import { runsRouter } from "./runs.router";
 
 const os = createRouter(contract.organizations.projects.workspaces);
 export const workspacesRouter = os.router({
@@ -32,5 +32,5 @@ export const workspacesRouter = os.router({
             return undefined
         }
     ),
-    jobs: jobsRouter
+    runs: runsRouter
 })

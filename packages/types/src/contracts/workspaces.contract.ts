@@ -2,14 +2,14 @@ import z from 'zod'
 import { IdSchema, ListSchema } from '../lib/shared'
 import { NOT_FOUND, FORBIDDEN, CONFLICT } from '../lib/errors'
 import { createContract } from '../lib/orpc.contract'
-import { JobSchema } from './jobs.contract'
+import { RunSchema } from './runs.contract'
 
 export const WorkspaceSchema = z.object({
     id: IdSchema.meta({ description: 'The workspace id' }),
     organizationId: IdSchema.meta({ description: 'The organization id' }),
     projectId: IdSchema.meta({ description: 'The project id' }),
     name: z.string().meta({ description: 'The workspace name' }),
-    jobs: JobSchema.array().meta({ description: 'A list of jobs ran in the workspace' }),
+    runs: RunSchema.array().meta({ description: 'A list of runs in the workspace' }),
     createdAt: z.date().meta({ description: 'The workspace creation date' }),
     updatedAt: z.date().meta({ description: 'The workspace last update date' }),
 }).meta({
@@ -19,7 +19,7 @@ export const WorkspaceSchema = z.object({
         organizationId: 'org456xyz',
         projectId: 'proj789abc',
         name: 'my-workspace',
-        jobs: [],
+        runs: [],
         createdAt: new Date('2024-01-01T00:00:00Z'),
         updatedAt: new Date('2024-01-01T00:00:00Z'),
     }]

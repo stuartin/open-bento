@@ -1,5 +1,5 @@
 import { ProjectSchema, projectsContract } from "./contracts/projects.contract";
-import { JobSchema, jobsContract } from "./contracts/jobs.contract";
+import { RunSchema, runsContract } from "./contracts/runs.contract";
 import { OrganizationSchema, organizationsContract } from "./contracts/organizations.contract";
 import { WorkspaceSchema, workspacesContract } from "./contracts/workspaces.contract";
 import { cloudsPingContract } from "./contracts/clouds/clouds.ping.contract";
@@ -17,7 +17,7 @@ export const contract = {
             ...projectsContract,
             workspaces: {
                 ...workspacesContract,
-                jobs: jobsContract
+                runs: runsContract
             }
         },
     },
@@ -46,8 +46,8 @@ export const openAPISchemaGeneratorOptions: OpenAPIGeneratorGenerateOptions = {
         Project: {
             schema: ProjectSchema,
         },
-        Job: {
-            schema: JobSchema,
+        Run: {
+            schema: RunSchema,
         },
         Workspace: {
             schema: WorkspaceSchema,
@@ -60,16 +60,16 @@ export const zSchema = {
     Organization: OrganizationSchema,
     Project: ProjectSchema,
     Workspace: WorkspaceSchema,
-    Job: JobSchema,
+    Run: RunSchema,
 }
 
 export type Id = z.infer<typeof zSchema.Id>;
 export type Organization = z.infer<typeof zSchema.Organization>;
 export type Project = z.infer<typeof zSchema.Project>;
 export type Workspace = z.infer<typeof zSchema.Workspace>;
-export type Job = z.infer<typeof zSchema.Job>;
-export type JobType = z.infer<typeof zSchema.Job.shape.type>;
-export type JobStatus = z.infer<typeof zSchema.Job.shape.status>;
+export type Run = z.infer<typeof zSchema.Run>;
+export type RunType = z.infer<typeof zSchema.Run.shape.type>;
+export type RunStatus = z.infer<typeof zSchema.Run.shape.status>;
 
 
 export type ContractInputs = InferContractRouterInputs<typeof contract>

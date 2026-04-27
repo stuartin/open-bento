@@ -1,12 +1,12 @@
 import { contract } from "@open-bento/types";
 import { createRouter } from "../lib/orpc";
-import { DummyJob, jobsDAO } from "$lib/server/db/dao/jobs.dao";
+import { DummyRun, runsDAO } from "$lib/server/db/dao/runs.dao";
 
-const os = createRouter(contract.organizations.projects.workspaces.jobs);
-export const jobsRouter = os.router({
+const os = createRouter(contract.organizations.projects.workspaces.runs);
+export const runsRouter = os.router({
     get: os.get.handler(
         () => {
-            return DummyJob
+            return DummyRun
         }
     ),
     list: os.list.handler(
@@ -18,14 +18,14 @@ export const jobsRouter = os.router({
     ),
     create: os.create.handler(
         async ({ input, context }) => {
-            const job = await jobsDAO.create(input)
-            await context.spawner.queueJob(job)
-            return job
+            const run = await runsDAO.create(input)
+            await context.spawner.queueRun(run)
+            return run
         }
     ),
     update: os.update.handler(
         () => {
-            return DummyJob
+            return DummyRun
         }
     ),
     delete: os.delete.handler(

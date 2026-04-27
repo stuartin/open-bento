@@ -3,7 +3,7 @@ import { createRouter } from "./lib/orpc";
 import { organizationsRouter } from "./routers/organizations.router";
 import { projectsRouter } from "./routers/projects.router";
 import { workspacesRouter } from "./routers/workspaces.router";
-import { jobsRouter } from "./routers/jobs.router";
+import { runsRouter } from "./routers/runs.router";
 import type { AuthAPI } from "../auth";
 import type { Spawner } from "@open-bento/spawner-v3";
 import { cloudsPingRouter } from "./routers/clouds/clouds.ping.router";
@@ -25,7 +25,7 @@ export const router = os
                 ...projectsRouter,
                 workspaces: {
                     ...workspacesRouter,
-                    jobs: jobsRouter
+                    runs: runsRouter
                 }
             }
         },

@@ -5,7 +5,7 @@ import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { dbMigrate } from '$lib/server/db';
 import { Spawner } from '@open-bento/spawner-v3';
-import { jobsDAO } from '$lib/server/db/dao/jobs.dao';
+import { runsDAO } from '$lib/server/db/dao/runs.dao';
 import { seedTerraformClient } from '$lib/server/auth/seeds/terraform-client.seed';
 import { seedOrganizationAdmin } from '$lib/server/auth/seeds/organization.seed';
 
@@ -29,8 +29,8 @@ export const init: ServerInit = async () => {
 
 	const spawner = await Spawner.get()
 	spawner.config = {
-		onLogs: jobsDAO.onLogs,
-		onStatusUpdate: jobsDAO.onStatusUpdate
+		onLogs: runsDAO.onLogs,
+		onStatusUpdate: runsDAO.onStatusUpdate
 	}
 	spawner.start()
 
