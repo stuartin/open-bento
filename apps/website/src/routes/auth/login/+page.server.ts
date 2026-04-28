@@ -3,6 +3,7 @@ import type { Actions } from './$types';
 import type { PageServerLoad } from './$types';
 import { auth } from '$lib/server/auth';
 import { APIError } from 'better-auth/api';
+import { TERRAFORM_CLI_CLIENT_ID } from '$lib/constants';
 
 export const load: PageServerLoad = (event) => {
 	if (event.locals.user) {
@@ -24,7 +25,6 @@ export const actions: Actions = {
 				body: {
 					email,
 					password,
-					callbackURL: '/auth/verification-success'
 				}
 			});
 		} catch (error) {
@@ -50,6 +50,7 @@ export const actions: Actions = {
 					email,
 					password,
 					name,
+					organizationIds: [],
 					callbackURL: '/auth/verification-success'
 				}
 			});

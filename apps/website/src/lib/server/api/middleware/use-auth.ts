@@ -3,7 +3,7 @@ import { createMiddleware } from "../lib/orpc";
 import { authClient } from "$lib/auth-client";
 import { dev } from "$app/environment";
 import { db } from "$lib/server/db";
-import type { User } from "$lib/server/auth/types";
+import type { Session, User } from "$lib/server/auth/types";
 
 const os = createMiddleware();
 export const useAuth = os
@@ -13,7 +13,8 @@ export const useAuth = os
     .middleware(async ({ context, next, errors }) => {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = dev ? '0' : '1';
 
-        if (context.request.headers.get("Authorization")) {
+        const authorizationHeader = context.request.headers.get("Authorization")
+        if (authorizationHeader) {
             const { data } = await authClient.oauth2.userinfo({
                 fetchOptions: {
                     headers: context.request.headers
@@ -26,11 +27,18 @@ export const useAuth = os
                 }
             }) as User | undefined
 
+            const session = await db.query.sessions.findFirst({
+                where: {
+                    userId: user?.id
+                }
+            }) as Session | undefined
+
             if (!user) throw errors.UNAUTHORIZED();
 
             return next({
                 context: {
                     user,
+                    session
                 },
             });
         }

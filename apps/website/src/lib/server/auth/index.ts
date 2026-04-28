@@ -6,7 +6,7 @@ import { getRequestEvent } from '$app/server';
 import { db } from '$lib/server/db';
 import { createId } from "@paralleldrive/cuid2";
 import { building } from '$app/environment';
-import { API_PREFIX, ORIGIN } from '$lib/constants';
+import { API_PREFIX, ORIGIN, TERRAFORM_CLI_CLIENT_ID } from '$lib/constants';
 import { oauthProvider } from "@better-auth/oauth-provider";
 import { jwt, organization } from "better-auth/plugins"
 import { sessions } from '../db/schema';
@@ -94,7 +94,7 @@ export const auth = betterAuth({
 				oauthAuthServerConfig: true
 			},
 			cachedTrustedClients: new Set([
-				"terraform-cli"
+				TERRAFORM_CLI_CLIENT_ID
 			])
 		}),
 		sveltekitCookies(getRequestEvent) // make sure this is the last plugin in the array
