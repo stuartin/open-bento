@@ -12,7 +12,7 @@ export const tfeWorkspacesRouter = os.router({
 
         context.resHeaders?.set("TFP-API-Version", "2.6")
 
-        throw errors.NOT_FOUND()
+        // throw errors.NOT_FOUND()
 
         const res = {
             data: {
@@ -36,25 +36,35 @@ export const tfeWorkspacesRouter = os.router({
         return res
     }),
     create: os.create.handler(async ({ input, context, errors }) => {
-        const json = await input.body.text()
-        const parsed = JSON.parse(json)
-        const { success, data, error } = z.object({
-            data: z.object({
-                type: z.literal("workspaces"),
-                attributes: z.object({
-                    name: z.string()
-                })
-            })
-        }).safeParse(parsed)
-
-        if (!success) throw errors.BAD_REQUEST(error)
-
         const res = {
             data: {
                 id: "workspace",
                 type: "workspaces",
                 attributes: {
-                    name: data.data.attributes.name,
+                    name: input.data.attributes.name,
+                    description: "",
+                    "terraform-version": "",
+                    "working-directory": "",
+                    locked: false,
+                    "locked-reason": "",
+                    // permissions: {},
+                    "execution-mode": "remote" as const,
+                    "created-at": new Date().toISOString(),
+                    "updated-at": new Date().toISOString(),
+                }
+            }
+        }
+
+        context.resHeaders?.set("TFP-API-Version", "2.6")
+        return res
+    }),
+    update: os.create.handler(async ({ input, context, errors }) => {
+        const res = {
+            data: {
+                id: "workspace",
+                type: "workspaces",
+                attributes: {
+                    name: "test",
                     description: "",
                     "terraform-version": "",
                     "working-directory": "",

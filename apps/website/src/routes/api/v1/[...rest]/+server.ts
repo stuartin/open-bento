@@ -10,11 +10,14 @@ import { openAPISchemaGeneratorOptions } from '@open-bento/types'
 import { Spawner } from '@open-bento/spawner-v3'
 import { API_PREFIX } from '$lib/constants'
 import { ResponseHeadersPlugin } from '@orpc/server/plugins'
+import { TFE_ROOT_INTERCEPTOR_CONTEXT_KEY, tfeRootInterceptor } from '$lib/tfe'
 
 const handler = new OpenAPIHandler(router, {
     plugins: [
         new ResponseHeadersPlugin(),
-        new CORSPlugin(),
+        new CORSPlugin({
+            exposeHeaders: ['Content-Disposition']
+        }),
         new OpenAPIReferencePlugin({
             schemaConverters: [
                 new ZodToJsonSchemaConverter()
@@ -22,9 +25,25 @@ const handler = new OpenAPIHandler(router, {
             specGenerateOptions: openAPISchemaGeneratorOptions
         })
     ],
+    adapterInterceptors: [
+        (options) => {
+            return options.next({
+                ...options,
+                context: {
+                    ...options.context,
+                    [TFE_ROOT_INTERCEPTOR_CONTEXT_KEY as any]: {
+                        fetchRequest: options.request,
+                    },
+                },
+            })
+        },
+    ],
+    rootInterceptors: [
+        // https://orpc.dev/docs/advanced/extend-body-parser
+        (options) => tfeRootInterceptor(options as any)
+    ],
     interceptors: [
         onError((error) => {
-
             if (error instanceof ORPCError) {
                 console.error(error.message)
                 if (error.cause instanceof ValidationError) {
@@ -43,7 +62,7 @@ const handle: RequestHandler = async ({ request }) => {
 
 
     // debug
-    if (request.method === "POST") {
+    if (request.method === "POST" || request.method === "PATCH") {
         const body = await request.clone().json()
         console.log({ ...body })
     }

@@ -18,3 +18,18 @@
         }
       }
       ```
+
+    - **PATCH** `/api/v1/tfe/v2/organizations/org/workspaces` > **200**
+
+      ```
+      {
+        data: {
+          type: "workspaces",
+          attributes: {
+            "terraform-version": "x.x.x" (client version)
+          }
+        }
+      }
+      ```
+
+    - **GET** `/api/v1/tfe/v2/workspaces/workspace/current-state-version` > **200**

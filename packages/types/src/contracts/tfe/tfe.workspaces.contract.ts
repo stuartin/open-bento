@@ -139,22 +139,39 @@ export const tfeWorkspacesContract = oc.auth
                 method: "POST",
                 path: "/workspaces",
                 tags: Tags,
-                inputStructure: "detailed"
             })
             .input(
                 z.object({
-                    params: z.object({ organization: z.string() }),
-                    // query: z.object({ search: z.string() }),
-                    body: z.file(),
-                    // body: z.object({
-                    //     data: z.object({
-                    //         type: z.literal("workspaces"),
-                    //         attributes: z.object({
-                    //             name: z.string()
-                    //         })
-                    //     })
-                    // }),
-                    // headers: z.object({ 'x-custom-header': z.string() }),
+                    organization: z.string(),
+                    data: z.object({
+                        type: z.literal("workspaces"),
+                        attributes: z.object({
+                            name: z.string()
+                        })
+                    }),
+                })
+            )
+            .output(
+                toEntityResponseSchema("workspaces", WorkspaceSchema)
+            )
+            .errors({
+                FORBIDDEN,
+            }),
+        update: oc.auth
+            .route({
+                method: "PATCH",
+                path: "/workspaces",
+                tags: Tags,
+            })
+            .input(
+                z.object({
+                    organization: z.string(),
+                    data: z.object({
+                        type: z.literal("workspaces"),
+                        attributes: z.object({
+                            name: z.string(),
+                        })
+                    }),
                 })
             )
             .output(

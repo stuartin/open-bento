@@ -1,5 +1,4 @@
 import z, { ZodAny, ZodObject } from "zod";
-import type { Id } from "..";
 import { IdSchema } from "./shared";
 
 export const toEntityResponseSchema = <T extends ZodObject>(type: string, entitySchema: T) => {
