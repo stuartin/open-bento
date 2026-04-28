@@ -1,19 +1,12 @@
 import { contract } from "@open-bento/types";
 import { createRouter } from "../../lib/orpc";
-import { db } from "$lib/server/db";
 import { useAuth } from "../../middleware/use-auth";
-import { readFile } from "fs/promises";
-import z from "zod";
-import { ORPCError } from "@orpc/client";
 
 const os = createRouter(contract.tfe.organizations.workspaces).use(useAuth);
 export const tfeWorkspacesRouter = os.router({
     get: os.get.handler(async ({ input, context, errors }) => {
-
-        context.resHeaders?.set("TFP-API-Version", "2.6")
-
         // throw errors.NOT_FOUND()
-
+        context.resHeaders?.set("TFP-API-Version", "2.6")
         const res = {
             data: {
                 id: "workspace",

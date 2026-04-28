@@ -1,21 +1,21 @@
 import { dev } from "$app/environment"
+import { TERRAFORM_CLI_CLIENT_ID } from "$lib/constants"
 import { auth } from ".."
 
 export const seedTerraformClient = async () => {
     const context = await auth.$context
     const adapter = context.adapter
-    const CLIENT_ID = "terraform-cli"
 
     if (dev) {
         await adapter.delete({
             model: "oauthClient",
-            where: [{ field: "clientId", value: CLIENT_ID }]
+            where: [{ field: "clientId", value: TERRAFORM_CLI_CLIENT_ID }]
         })
     }
 
     const existing = await adapter.findOne<{ id: string }>({
         model: "oauthClient",
-        where: [{ field: "clientId", value: CLIENT_ID }],
+        where: [{ field: "clientId", value: TERRAFORM_CLI_CLIENT_ID }],
     })
 
     if (existing) return existing
@@ -23,8 +23,8 @@ export const seedTerraformClient = async () => {
     const client = await adapter.create({
         model: "oauthClient",
         data: {
-            clientId: CLIENT_ID,
-            name: CLIENT_ID,
+            clientId: TERRAFORM_CLI_CLIENT_ID,
+            name: TERRAFORM_CLI_CLIENT_ID,
             redirectUris: [
                 "http://localhost:10000/login",
                 "http://localhost:10001/login",
