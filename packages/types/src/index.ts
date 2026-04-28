@@ -2,13 +2,13 @@ import { ProjectSchema, projectsContract } from "./contracts/projects.contract";
 import { RunSchema, runsContract } from "./contracts/runs.contract";
 import { OrganizationSchema, organizationsContract } from "./contracts/organizations.contract";
 import { WorkspaceSchema, workspacesContract } from "./contracts/workspaces.contract";
-import { cloudsPingContract } from "./contracts/clouds/clouds.ping.contract";
+import { tfePingContract } from "./contracts/tfe/tfe.ping.contract";
 import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4'
 import { OpenAPIGenerator, type OpenAPIGeneratorGenerateOptions } from '@orpc/openapi'
 import type { InferContractRouterInputs, InferContractRouterOutputs } from '@orpc/contract'
 import { IdSchema } from "./lib/shared";
 import type z from "zod";
-import { cloudsOrganizationsContract } from "./contracts/clouds/clouds.organizations.contract";
+import { tfeOrganizationsContract } from "./contracts/tfe/tfe.organizations.contract";
 
 export const contract = {
     organizations: {
@@ -21,9 +21,9 @@ export const contract = {
             }
         },
     },
-    clouds: {
-        ping: cloudsPingContract,
-        organizations: cloudsOrganizationsContract
+    tfe: {
+        ping: tfePingContract,
+        organizations: tfeOrganizationsContract
     }
 }
 

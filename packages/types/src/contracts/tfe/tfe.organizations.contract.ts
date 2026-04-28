@@ -40,10 +40,10 @@ export const EntitlementSetSchema = z.object({
     }),
 });
 
-const Tags = ['Cloud']
+const Tags = ['tfe']
 const oc = createContract()
-export const cloudsOrganizationsContract = oc.auth
-    .prefix("/cloud/v2")
+export const tfeOrganizationsContract = oc.auth
+    .prefix("/tfe/v2")
     .router({
         entitlementSet: oc.auth
             .route({

@@ -1,10 +1,9 @@
-import z from 'zod'
 import { createContract } from '../../lib/orpc.contract'
 
-const Tags = ['Cloud']
+const Tags = ['tfe']
 const oc = createContract()
-export const cloudsPingContract = oc.pub
-    .prefix("/cloud/v2")
+export const tfePingContract = oc.pub
+    .prefix("/tfe/v2")
     .router({
         ping: oc.pub
             .route({

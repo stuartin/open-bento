@@ -11,6 +11,6 @@ export const GET: RequestHandler = async ({ request }) => {
             token: "/api/v1/auth/oauth2/token",
             ports: [10000, 10010],
         },
-        "tfe.v2": "/api/v1/cloud/v2/"
+        "tfe.v2": "/api/v1/tfe/v2/"
     })
 }

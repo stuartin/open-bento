@@ -6,8 +6,8 @@ import { workspacesRouter } from "./routers/workspaces.router";
 import { runsRouter } from "./routers/runs.router";
 import type { AuthAPI } from "../auth";
 import type { Spawner } from "@open-bento/spawner-v3";
-import { cloudsPingRouter } from "./routers/clouds/clouds.ping.router";
-import { cloudsOrganizationsRouter } from "./routers/clouds/clouds.organizations.router";
+import { tfePingRouter } from "./routers/tfe/tfe.ping.router";
+import { tfeOrganizationsRouter } from "./routers/tfe/tfe.organizations.router";
 import type { ResponseHeadersPluginContext } from "@orpc/server/plugins";
 
 export type APIContext = {
@@ -29,8 +29,8 @@ export const router = os
                 }
             }
         },
-        clouds: {
-            ping: cloudsPingRouter,
-            organizations: cloudsOrganizationsRouter
+        tfe: {
+            ping: tfePingRouter,
+            organizations: tfeOrganizationsRouter
         }
     });
