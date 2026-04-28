@@ -2,20 +2,20 @@ import z from 'zod'
 import { IdSchema, ListSchema } from '../lib/shared'
 import { NOT_FOUND, FORBIDDEN, CONFLICT } from '../lib/errors'
 import { createContract } from '../lib/orpc.contract'
-import { FolderSchema } from './folders.contract'
+import { WorkspaceSchema } from './workspaces.contract'
 
 export const ProjectSchema = z.object({
     id: IdSchema.meta({ description: 'The project id' }),
     organizationId: IdSchema.meta({ description: 'The organization id' }),
     name: z.string().meta({ description: 'The project name' }),
-    folders: FolderSchema.array().meta({ description: 'A list of folders for the project' })
+    workspaces: WorkspaceSchema.array().meta({ description: 'A list of workspaces for the project' })
 }).meta({
     description: 'A project',
     examples: [{
         id: '1234njsd',
         organizationId: 'as8jmmss',
         name: 'my-project',
-        folders: []
+        workspaces: []
     }]
 })
 

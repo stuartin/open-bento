@@ -8,20 +8,85 @@ import { createId } from "@paralleldrive/cuid2";
 import { building } from '$app/environment';
 import { API_PREFIX, ORIGIN } from '$lib/constants';
 import { oauthProvider } from "@better-auth/oauth-provider";
-import { jwt } from "better-auth/plugins"
+import { jwt, organization } from "better-auth/plugins"
+import { sessions } from '../db/schema';
+import { eq } from 'drizzle-orm';
+import { bearer } from "better-auth/plugins";
 
 export type AuthAPI = typeof auth['api']
 export const auth = betterAuth({
 	baseURL: ORIGIN,
 	basePath: `${API_PREFIX}/auth`,
 	secret: building ? 'is-dev' : env.BETTER_AUTH_SECRET, // https://github.com/better-auth/better-auth/issues/8125
+	experimental: {
+		joins: true
+	},
+	disabledPaths: [
+		"/token",
+	],
 	database: drizzleAdapter(db, {
 		provider: 'sqlite',
 		usePlural: true,
 	}),
-	emailAndPassword: { enabled: true },
+	user: {
+		additionalFields: {
+			organizationIds: { type: "string[]", defaultValue: () => [] }
+		}
+	},
+	databaseHooks: {
+		session: {
+			create: {
+				before: async (session) => {
+					const organizations = await db.query.members.findMany({
+						where: {
+							userId: session.userId
+						}
+					})
+
+					return {
+						data: {
+							...session,
+							activeOrganizationId: organizations[0]?.organizationId,
+						},
+					};
+				},
+			},
+		},
+	},
+	emailAndPassword: {
+		enabled: true
+	},
 	plugins: [
-		jwt(),
+		bearer(),
+		organization({
+			organizationHooks: {
+				afterDeleteOrganization: async ({ organization }) => {
+					await db.update(sessions)
+						.set({
+							activeOrganizationId: null
+						})
+						.where(eq(sessions.activeOrganizationId, organization.id))
+				},
+				beforeAddMember: async ({ member, user, organization }) => {
+					// Custom validation or modification
+					console.log(`Adding ${user.email} to ${organization.name}`);
+					// Optionally modify member data
+					return {
+						data: {
+							member,
+							organization,
+							user: {
+								...user,
+								organizationIds: [...user.organizationIds, organization.id]
+							}
+						},
+					};
+				},
+			}
+		}),
+		jwt({
+			disableSettingJwtHeader: true,
+		}),
 		oauthProvider({
 			consentPage: "/auth/consent",
 			loginPage: "/auth/login",

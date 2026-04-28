@@ -3,7 +3,7 @@ import { Config as EffectConfig, Effect } from "effect";
 export class Config extends Effect.Service<Config>()("Config", {
   effect: Effect.gen(function* () {
     return {
-      maxConcurrentJobs: yield* EffectConfig.number("MAX_CONCURRENT_JOBS").pipe(
+      maxConcurrentRuns: yield* EffectConfig.number("MAX_CONCURRENT_RUNS").pipe(
         EffectConfig.withDefault(5),
       )
     };

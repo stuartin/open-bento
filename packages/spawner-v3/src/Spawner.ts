@@ -1,14 +1,14 @@
 import { ConfigError, Data, Effect, Layer, ManagedRuntime } from "effect";
-import { JobRunner } from "./services/JobRunner";
+import { RunRunner } from "./services/RunRunner";
 import { Config } from "./services/Config";
 import { Docker } from "./services/Docker";
-import type { Job, JobStatus } from "@open-bento/types";
+import type { Run, RunStatus } from "@open-bento/types";
 
 export type OnStatusUpdate = (
-  jobId: string,
-  status: JobStatus,
+  runId: string,
+  status: RunStatus,
 ) => Promise<void>;
-export type OnLogs = (jobId: string, logs: string[]) => Promise<void>;
+export type OnLogs = (runId: string, logs: string[]) => Promise<void>;
 
 export interface SpawnerConfig {
   onStatusUpdate: OnStatusUpdate;
@@ -21,7 +21,7 @@ export class Spawner {
   private constructor() { }
   static #instance: Spawner
 
-  private runtime!: ManagedRuntime.ManagedRuntime<JobRunner | Config | Docker, ConfigError.ConfigError>;
+  private runtime!: ManagedRuntime.ManagedRuntime<RunRunner | Config | Docker, ConfigError.ConfigError>;
   public config: SpawnerConfig | undefined
 
   public static async get(config?: SpawnerConfig) {
@@ -36,7 +36,7 @@ export class Spawner {
   private initRuntime() {
     const RuntimeLayer = Layer.mergeAll(
       Docker.Default,
-      JobRunner.Default,
+      RunRunner.Default,
     ).pipe(
       Layer.provideMerge(Config.Default)
     )
@@ -49,26 +49,26 @@ export class Spawner {
     if (!this.config?.onStatusUpdate) throw new ConfigNotDefinedError({ config: "onStatusUpdate" })
     if (!this.config?.onLogs) throw new ConfigNotDefinedError({ config: "onStatusUpdate" })
 
-    const onStatus = (jobId: string, status: JobStatus) =>
-      Effect.promise(() => this.config!.onStatusUpdate(jobId, status));
+    const onStatus = (runId: string, status: RunStatus) =>
+      Effect.promise(() => this.config!.onStatusUpdate(runId, status));
 
-    const onLogs = (jobId: string, logs: string[]) =>
-      Effect.promise(() => this.config!.onLogs(jobId, logs))
+    const onLogs = (runId: string, logs: string[]) =>
+      Effect.promise(() => this.config!.onLogs(runId, logs))
 
 
     const program = Effect.gen(function* () {
-      const jobRunner = yield* JobRunner;
-      yield* jobRunner.start(onStatus, onLogs);
+      const runRunner = yield* RunRunner;
+      yield* runRunner.start(onStatus, onLogs);
     })
 
     this.runtime.runFork(program);
   }
 
-  async queueJob(job: Job): Promise<boolean> {
+  async queueRun(run: Run): Promise<boolean> {
     return this.runtime.runPromise(
       Effect.gen(function* () {
-        const jobRunner = yield* JobRunner;
-        return yield* jobRunner.enqueue(job);
+        const runRunner = yield* RunRunner;
+        return yield* runRunner.enqueue(run);
       }),
     );
   }

@@ -1,23 +1,33 @@
 import { ProjectSchema, projectsContract } from "./contracts/projects.contract";
-import { JobSchema, jobsContract } from "./contracts/jobs.contract";
+import { RunSchema, runsContract } from "./contracts/runs.contract";
 import { OrganizationSchema, organizationsContract } from "./contracts/organizations.contract";
-import { FolderSchema, foldersContract } from "./contracts/folders.contract";
+import { WorkspaceSchema, workspacesContract } from "./contracts/workspaces.contract";
+import { tfePingContract } from "./contracts/tfe/tfe.ping.contract";
 import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4'
 import { OpenAPIGenerator, type OpenAPIGeneratorGenerateOptions } from '@orpc/openapi'
 import type { InferContractRouterInputs, InferContractRouterOutputs } from '@orpc/contract'
 import { IdSchema } from "./lib/shared";
 import type z from "zod";
+import { tfeOrganizationsContract } from "./contracts/tfe/tfe.organizations.contract";
+import { tfeWorkspacesContract } from "./contracts/tfe/tfe.workspaces.contract";
 
 export const contract = {
     organizations: {
         ...organizationsContract,
         projects: {
             ...projectsContract,
-            folders: {
-                ...foldersContract,
-                jobs: jobsContract
+            workspaces: {
+                ...workspacesContract,
+                runs: runsContract
             }
         },
+    },
+    tfe: {
+        ping: tfePingContract,
+        organizations: {
+            ...tfeOrganizationsContract,
+            workspaces: tfeWorkspacesContract
+        }
     }
 }
 
@@ -40,11 +50,11 @@ export const openAPISchemaGeneratorOptions: OpenAPIGeneratorGenerateOptions = {
         Project: {
             schema: ProjectSchema,
         },
-        Job: {
-            schema: JobSchema,
+        Run: {
+            schema: RunSchema,
         },
-        Folder: {
-            schema: FolderSchema,
+        Workspace: {
+            schema: WorkspaceSchema,
         },
     }
 }
@@ -53,17 +63,17 @@ export const zSchema = {
     Id: IdSchema,
     Organization: OrganizationSchema,
     Project: ProjectSchema,
-    Folder: FolderSchema,
-    Job: JobSchema,
+    Workspace: WorkspaceSchema,
+    Run: RunSchema,
 }
 
 export type Id = z.infer<typeof zSchema.Id>;
 export type Organization = z.infer<typeof zSchema.Organization>;
 export type Project = z.infer<typeof zSchema.Project>;
-export type Folder = z.infer<typeof zSchema.Folder>;
-export type Job = z.infer<typeof zSchema.Job>;
-export type JobType = z.infer<typeof zSchema.Job.shape.type>;
-export type JobStatus = z.infer<typeof zSchema.Job.shape.status>;
+export type Workspace = z.infer<typeof zSchema.Workspace>;
+export type Run = z.infer<typeof zSchema.Run>;
+export type RunType = z.infer<typeof zSchema.Run.shape.type>;
+export type RunStatus = z.infer<typeof zSchema.Run.shape.status>;
 
 
 export type ContractInputs = InferContractRouterInputs<typeof contract>

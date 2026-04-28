@@ -6,7 +6,8 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "format": "turbo run format",
-    "check": "turbo run check"
+    "check": "turbo run check",
+    "test": "turbo run test"
   },
   "devDependencies": {
     "@types/node": "^24.12.2",

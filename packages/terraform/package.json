@@ -1,0 +1,14 @@
+{
+  "name": "@open-bento/terraform",
+  "type": "module",
+  "scripts": {
+    "lint": "biome lint .",
+    "format": "biome lint --write .",
+    "test": "pnpm run /^test:/",
+    "test:cloud-init": "terraform -chdir=src/cloud-init init"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@open-bento/config": "workspace:*"
+  }
+}

@@ -1,5 +1,11 @@
 import { defineRelations, sql } from "drizzle-orm";
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable,
+  text,
+  integer,
+  index,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
@@ -16,6 +22,7 @@ export const users = sqliteTable("users", {
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+  organizationIds: text("organization_ids", { mode: "json" }),
 });
 
 export const sessions = sqliteTable(
@@ -35,6 +42,7 @@ export const sessions = sqliteTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    activeOrganizationId: text("active_organization_id"),
   },
   (table) => [index("sessions_userId_idx").on(table.userId)],
 );
@@ -85,6 +93,62 @@ export const verifications = sqliteTable(
       .notNull(),
   },
   (table) => [index("verifications_identifier_idx").on(table.identifier)],
+);
+
+export const organizations = sqliteTable(
+  "organizations",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    slug: text("slug").notNull().unique(),
+    logo: text("logo"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+    metadata: text("metadata"),
+  },
+  (table) => [uniqueIndex("organizations_slug_uidx").on(table.slug)],
+);
+
+export const members = sqliteTable(
+  "members",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role").default("member").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("members_organizationId_idx").on(table.organizationId),
+    index("members_userId_idx").on(table.userId),
+  ],
+);
+
+export const invitations = sqliteTable(
+  "invitations",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    role: text("role"),
+    status: text("status").default("pending").notNull(),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+    inviterId: text("inviter_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    index("invitations_organizationId_idx").on(table.organizationId),
+    index("invitations_email_idx").on(table.email),
+  ],
 );
 
 export const jwkss = sqliteTable("jwkss", {
@@ -185,6 +249,9 @@ export const relations = defineRelations(
     sessions,
     accounts,
     verifications,
+    organizations,
+    members,
+    invitations,
     jwkss,
     oauthClients,
     oauthRefreshTokens,
@@ -200,6 +267,14 @@ export const relations = defineRelations(
       accounts: r.many.accounts({
         from: r.users.id,
         to: r.accounts.userId,
+      }),
+      members: r.many.members({
+        from: r.users.id,
+        to: r.members.userId,
+      }),
+      invitations: r.many.invitations({
+        from: r.users.id,
+        to: r.invitations.inviterId,
       }),
       oauthClients: r.many.oauthClients({
         from: r.users.id,
@@ -235,6 +310,36 @@ export const relations = defineRelations(
     accounts: {
       users: r.one.users({
         from: r.accounts.userId,
+        to: r.users.id,
+      }),
+    },
+    organizations: {
+      members: r.many.members({
+        from: r.organizations.id,
+        to: r.members.organizationId,
+      }),
+      invitations: r.many.invitations({
+        from: r.organizations.id,
+        to: r.invitations.organizationId,
+      }),
+    },
+    members: {
+      organizations: r.one.organizations({
+        from: r.members.organizationId,
+        to: r.organizations.id,
+      }),
+      users: r.one.users({
+        from: r.members.userId,
+        to: r.users.id,
+      }),
+    },
+    invitations: {
+      organizations: r.one.organizations({
+        from: r.invitations.organizationId,
+        to: r.organizations.id,
+      }),
+      users: r.one.users({
+        from: r.invitations.inviterId,
         to: r.users.id,
       }),
     },
