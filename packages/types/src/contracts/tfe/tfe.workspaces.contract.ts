@@ -59,6 +59,9 @@ const WorkspaceSchema = z.object({
     // "oauth-client-name": z.string().nullable(),
     // "operations": z.boolean(),
     // "permissions": WorkspacePermissionsSchema,
+    "permissions": z.object({
+        "can-queue-run": z.boolean().default(true)
+    }),
     // "apply-duration-average": z.number().nullable(),
     // "plan-duration-average": z.number().nullable(),
     // "policy-check-failures": z.number().nullable(),
@@ -113,7 +116,7 @@ const StateVersionSchema = z.object({
 
 const Tags = ['tfe']
 const oc = createContract()
-export const tfeWorkspacesContract = oc.auth
+export const tfeOrganizationsWorkspacesContract = oc.auth
     .prefix("/tfe/v2/organizations/{organization}")
     .router({
         get: oc.auth
@@ -198,4 +201,50 @@ export const tfeWorkspacesContract = oc.auth
             .errors({
                 NOT_FOUND
             }),
+    })
+
+
+
+
+const ConfigurationVersionSchema = z.object({
+    "auto-queue-runs": z.boolean(),
+    "error": z.string().nullable(),
+    "error-message": z.string().nullable(),
+    "source": z.string(),
+    "speculative": z.boolean(),
+    "status": z.enum(["pending", "fetching", "uploaded", "archiving", "archived", "errored"]),
+    "status-timestamps": z.record(z.string(), z.string()).optional(),
+    "upload-url": z.url(),
+    "provisional": z.boolean(),
+})
+
+export const tfeWorkspacesContract = oc.auth
+    .prefix("/tfe/v2")
+    .router({
+        configurationVersions: oc.auth
+            .route({
+                method: "POST",
+                path: "/workspaces/{workspace}/configuration-versions",
+                tags: Tags,
+            })
+            .input(
+                z.object({
+                    workspace: z.string(),
+                    data: z.object({
+                        type: z.literal('configuration-versions'),
+                        attributes: z.object({
+                            'auto-queue-runs': z.boolean(),
+                            provisional: z.boolean(),
+                            speculative: z.boolean()
+                        })
+                    })
+                })
+            )
+            .output(
+                toEntityResponseSchema("configuration-versions", ConfigurationVersionSchema)
+            )
+            .errors({
+                NOT_FOUND
+            }),
+
     })
