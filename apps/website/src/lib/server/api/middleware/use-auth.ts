@@ -25,10 +25,8 @@ export const useAuth = os
                     id: data?.sub
                 }
             }) as User | undefined
-            console.log(user)
-            if (!user) {
-                throw errors.UNAUTHORIZED();
-            }
+
+            if (!user) throw errors.UNAUTHORIZED();
 
             return next({
                 context: {

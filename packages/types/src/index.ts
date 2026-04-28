@@ -9,6 +9,7 @@ import type { InferContractRouterInputs, InferContractRouterOutputs } from '@orp
 import { IdSchema } from "./lib/shared";
 import type z from "zod";
 import { tfeOrganizationsContract } from "./contracts/tfe/tfe.organizations.contract";
+import { tfeWorkspacesContract } from "./contracts/tfe/tfe.workspaces.contract";
 
 export const contract = {
     organizations: {
@@ -23,7 +24,10 @@ export const contract = {
     },
     tfe: {
         ping: tfePingContract,
-        organizations: tfeOrganizationsContract
+        organizations: {
+            ...tfeOrganizationsContract,
+            workspaces: tfeWorkspacesContract
+        }
     }
 }
 

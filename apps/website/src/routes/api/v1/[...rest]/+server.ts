@@ -1,6 +1,6 @@
 import { OpenAPIHandler } from '@orpc/openapi/fetch'
 import { CORSPlugin } from '@orpc/server/plugins'
-import { onError } from '@orpc/server'
+import { onError, ORPCError, ValidationError } from '@orpc/server'
 import { router } from '$lib/server/api'
 import type { RequestHandler } from '@sveltejs/kit'
 import { auth } from '$lib/server/auth'
@@ -24,21 +24,28 @@ const handler = new OpenAPIHandler(router, {
     ],
     interceptors: [
         onError((error) => {
-            console.error(error)
+
+            if (error instanceof ORPCError) {
+                console.error(error.message)
+                if (error.cause instanceof ValidationError) {
+                    console.log(JSON.stringify(error, null, 2))
+                }
+            }
         }),
     ],
 })
 
 const handle: RequestHandler = async ({ request }) => {
+    console.log({ method: request.method, url: request.url })
 
     // better-auth
     if (request.url.startsWith(`${API_PREFIX}/auth`)) auth.handler(request);
 
-    console.log({ url: request })
 
+    // debug
     if (request.method === "POST") {
-        const body = await request.json()
-        console.log({ body: JSON.stringify(body, null, 2) })
+        const body = await request.clone().json()
+        console.log({ ...body })
     }
 
     // oRPC
