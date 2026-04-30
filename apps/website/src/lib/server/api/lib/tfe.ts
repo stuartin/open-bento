@@ -1,5 +1,5 @@
 import type { StandardOpenAPIHandlerOptions } from "@orpc/openapi/standard";
-import type { APIContext } from "./server/api";
+import type { APIContext } from "..";
 
 type ItemType<T> = T extends Array<infer U> ? U : never;
 type RootInterceptors = StandardOpenAPIHandlerOptions<APIContext & { [TFE_ROOT_INTERCEPTOR_CONTEXT_KEY]: { fetchRequest: Request } }>['rootInterceptors']
