@@ -2,7 +2,7 @@ import { dev } from "$app/environment"
 import { TERRAFORM_CLI_CLIENT_ID } from "$lib/constants"
 import { auth } from ".."
 
-export const seedTerraformClient = async () => {
+export const initTerraformClient = async () => {
     const context = await auth.$context
     const adapter = context.adapter
 

@@ -3,14 +3,14 @@ import { auth } from ".."
 import type { Organization } from "better-auth/plugins"
 import { dev } from "$app/environment"
 
-export const seedOrganizationAdmin = async () => {
-    const organization = await seedOrganization()
-    const admin = await seedAdmin([organization.id])
-    await seedAdminToOrganization(admin, organization)
+export const initOrganizationWithAdmin = async () => {
+    const organization = await initOrganization()
+    const admin = await initAdmin([organization.id])
+    await initAdminToOrganization(admin, organization)
 }
 
 
-const seedOrganization = async () => {
+const initOrganization = async () => {
     const context = await auth.$context
     const adapter = context.adapter
 
@@ -33,7 +33,7 @@ const seedOrganization = async () => {
     return organization
 }
 
-const seedAdmin = async (organizationIds: string[]) => {
+const initAdmin = async (organizationIds: string[]) => {
     const context = await auth.$context
     const internalAdapter = context.internalAdapter
     const passwordUtil = context.password
@@ -67,7 +67,7 @@ const seedAdmin = async (organizationIds: string[]) => {
     return admin
 }
 
-const seedAdminToOrganization = async (admin: User, organization: Organization) => {
+const initAdminToOrganization = async (admin: User, organization: Organization) => {
     const context = await auth.$context
     const adapter = context.adapter
 

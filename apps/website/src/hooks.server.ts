@@ -3,11 +3,11 @@ import { building, dev } from '$app/environment';
 import { auth } from '$lib/server/auth';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { sequence } from '@sveltejs/kit/hooks';
-import { dbMigrate } from '$lib/server/db';
+import { initDB } from '$lib/server/db';
 import { Spawner } from '@open-bento/spawner-v3';
 import { runsDAO } from '$lib/server/db/dao/runs.dao';
-import { seedTerraformClient } from '$lib/server/auth/seeds/terraform-client.seed';
-import { seedOrganizationAdmin } from '$lib/server/auth/seeds/organization.seed';
+import { initTerraformClient } from '$lib/server/auth/init/init-terraform-client';
+import { initOrganizationWithAdmin } from '$lib/server/auth/init/init-organization';
 
 const handleBetterAuth: Handle = async ({ event, resolve }) => {
 	const session = await auth.api.getSession({ headers: event.request.headers });
@@ -23,9 +23,9 @@ const handleBetterAuth: Handle = async ({ event, resolve }) => {
 export const handle: Handle = sequence(handleBetterAuth);
 
 export const init: ServerInit = async () => {
-	await dbMigrate()
-	await seedTerraformClient()
-	await seedOrganizationAdmin()
+	await initDB()
+	await initTerraformClient()
+	await initOrganizationWithAdmin()
 
 	const spawner = await Spawner.get()
 	spawner.config = {

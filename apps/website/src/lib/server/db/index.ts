@@ -9,7 +9,7 @@ import { DATABASE_MIGRATIONS_PATH, DATABASE_PATH } from '$lib/constants';
 const client = createClient({ url: DATABASE_PATH });
 export const db = drizzle({ client, schema, relations, casing: "snake_case" });
 
-export const dbMigrate = async () => {
+export const initDB = async () => {
     console.log('DB: Start migrations');
     console.log('DB: Path: ', DATABASE_MIGRATIONS_PATH)
     console.log('DB: DB: ', DATABASE_PATH)
