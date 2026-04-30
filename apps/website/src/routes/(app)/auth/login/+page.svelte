@@ -1,73 +1,63 @@
 <script lang="ts">
-  import { dev } from "$app/environment";
-  import { enhance } from "$app/forms";
-  import { page } from "$app/state";
-  import type { ActionData } from "./$types";
-  import { SvelteURLSearchParams } from "svelte/reactivity";
+  import { authClient } from "$lib/auth-client";
 
-  let { form }: { form: ActionData } = $props();
+  const getForm = () => {
+    const email = document.getElementById("form-email") as HTMLInputElement;
+    const password = document.getElementById(
+      "form-password",
+    ) as HTMLInputElement;
+    const name = document.getElementById("form-name") as HTMLInputElement;
 
-  const params = new SvelteURLSearchParams(page.url.searchParams.toString());
+    return { email: email.value, password: password.value, name: name.value };
+  };
+
+  const getUser = () => {
+    return {
+      email: "email@domain.com",
+      password: "Password12#",
+      name: "stu",
+    };
+  };
+
+  const login = async () => {
+    const { email, password } = getUser();
+
+    let bearerToken = null;
+
+    const { data, error } = await authClient.signIn.email({
+      email,
+      password,
+      callbackURL: "/",
+    });
+    console.log({ data, error });
+  };
+
+  const register = async () => {
+    const { email, password, name } = getUser();
+
+    const { data, error } = await authClient.signUp.email({
+      email,
+      password,
+      name,
+    });
+    console.log({ data, error });
+  };
 </script>
 
 <h1>Login</h1>
-<form
-  id="form"
-  method="post"
-  action="?/signInEmail&{params.toString()}"
-  use:enhance
->
+<form>
   <label>
     Email
-    <input
-      id="form-email"
-      type="email"
-      name="email"
-      class="bg-white shadow-sm mt-1 px-3 py-2 border border-gray-300 focus:border-blue-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-    />
+    <input id="form-email" type="email" name="email" />
   </label>
   <label>
     Password
-    <input
-      id="form-password"
-      type="password"
-      name="password"
-      class="bg-white shadow-sm mt-1 px-3 py-2 border border-gray-300 focus:border-blue-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-    />
+    <input id="form-password" type="password" name="password" />
   </label>
   <label>
     Name (for registration)
-    <input
-      name="name"
-      class="bg-white shadow-sm mt-1 px-3 py-2 border border-gray-300 focus:border-blue-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-    />
+    <input id="form-name" name="name" />
   </label>
-  {#if dev}
-    <button
-      type="button"
-      class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-white transition"
-      onclick={() => {
-        const form = document.getElementById("form") as HTMLFormElement;
-        const email = document.getElementById("form-email") as HTMLInputElement;
-        const password = document.getElementById(
-          "form-password",
-        ) as HTMLInputElement;
-
-        email.value = "admin@local.com";
-        password.value = "Password12#";
-        form.requestSubmit();
-      }}>Default</button
-    >
-  {:else}
-    <button
-      class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-white transition"
-      >Login</button
-    >
-  {/if}
-  <button
-    formaction="?/signUpEmail&{params.toString()}"
-    class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-white transition"
-    >Register</button
-  >
+  <button onclick={login}>Login</button>
+  <button onclick={register}>Register</button>
 </form>
-<p class="text-red-500">{form?.message ?? ""}</p>
