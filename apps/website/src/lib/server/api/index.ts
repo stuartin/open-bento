@@ -4,7 +4,7 @@ import { organizationsRouter } from "./routers/organizations.router";
 import { projectsRouter } from "./routers/projects.router";
 import { workspacesRouter } from "./routers/workspaces.router";
 import { runsRouter } from "./routers/runs.router";
-import type { AuthAPI } from "../auth";
+import type { Auth } from "../auth";
 import type { Spawner } from "@open-bento/spawner-v3";
 import { tfePingRouter } from "./routers/tfe/tfe.ping.router";
 import { tfeOrganizationsRouter } from "./routers/tfe/tfe.organizations.router";
@@ -12,7 +12,7 @@ import type { ResponseHeadersPluginContext } from "@orpc/server/plugins";
 
 export type APIContext = {
     request: Request;
-    auth: AuthAPI
+    auth: Auth
     spawner: Spawner
 } & ResponseHeadersPluginContext
 

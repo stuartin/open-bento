@@ -1,6 +1,5 @@
 import { UNAUTHORIZED } from "@open-bento/types/errors";
 import { createMiddleware } from "../lib/orpc";
-import { authClient } from "$lib/auth-client";
 import { dev } from "$app/environment";
 import { db } from "$lib/server/db";
 import type { Session, User } from "$lib/server/auth/types";
@@ -15,45 +14,50 @@ export const useAuth = os
 
         const authorizationHeader = context.request.headers.get("Authorization")
         if (authorizationHeader) {
-            const { data } = await authClient.oauth2.userinfo({
-                fetchOptions: {
+            try {
+                const userInfo = await context.auth.api.oauth2UserInfo({
                     headers: context.request.headers
-                }
-            })
+                })
 
-            const user = await db.query.users.findFirst({
-                where: {
-                    id: data?.sub
-                }
-            }) as User | undefined
+                const accessToken = await db.query.oauthAccessTokens.findFirst({
+                    where: {
+                        userId: userInfo.sub,
+                        expiresAt: { gte: new Date() }
+                    },
+                    with: {
+                        users: true,
+                        sessions: true
+                    }
+                })
+                console.log({ userInfo, accessToken })
 
-            const session = await db.query.sessions.findFirst({
-                where: {
-                    userId: user?.id
-                }
-            }) as Session | undefined
+                const user = accessToken?.users as User | undefined
+                const session = accessToken?.sessions as Session | undefined
 
-            if (!user) throw errors.UNAUTHORIZED();
+                if (!user || !session) throw errors.UNAUTHORIZED();
 
-            return next({
-                context: {
-                    user,
-                    session
-                },
-            });
+                return next({
+                    context: {
+                        user,
+                        session
+                    },
+                });
+            } catch (_) {
+                console.log(_)
+                throw errors.UNAUTHORIZED();
+            }
         }
 
-        const authSession = await context.auth.getSession({
+        const session = await context.auth.api.getSession({
             headers: context.request.headers,
         });
-        if (!authSession?.user) {
-            throw errors.UNAUTHORIZED();
-        }
+
+        if (!session?.user || !session?.session) throw errors.UNAUTHORIZED();
 
         return next({
             context: {
-                session: authSession.session,
-                user: authSession.user,
+                user: session.user,
+                session: session.session,
             },
         });
     });
