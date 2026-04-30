@@ -1,6 +1,6 @@
 import type { RequestHandler } from '@sveltejs/kit'
 import { json } from '@sveltejs/kit';
-import { TERRAFORM_CLI_CLIENT_ID } from "../../../lib/constants"
+import { TERRAFORM_CLI_CLIENT_ID } from "../../../../lib/constants"
 
 export const GET: RequestHandler = async ({ request }) => {
     return json({

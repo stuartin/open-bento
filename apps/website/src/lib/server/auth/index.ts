@@ -12,6 +12,7 @@ import { jwt, organization } from "better-auth/plugins"
 import { sessions } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { bearer } from "better-auth/plugins";
+import { oneTimeToken } from "better-auth/plugins/one-time-token";
 
 export type Auth = typeof auth
 export const auth = betterAuth({
@@ -58,6 +59,7 @@ export const auth = betterAuth({
 	},
 	plugins: [
 		bearer(),
+		oneTimeToken(),
 		organization({
 			organizationHooks: {
 				afterDeleteOrganization: async ({ organization }) => {

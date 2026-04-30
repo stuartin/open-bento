@@ -29,8 +29,6 @@ export const useAuth = os
                         sessions: true
                     }
                 })
-                console.log({ userInfo, accessToken })
-
                 const user = accessToken?.users as User | undefined
                 const session = accessToken?.sessions as Session | undefined
 
@@ -42,8 +40,8 @@ export const useAuth = os
                         session
                     },
                 });
-            } catch (_) {
-                console.log(_)
+            } catch (error) {
+                console.error(error)
                 throw errors.UNAUTHORIZED();
             }
         }

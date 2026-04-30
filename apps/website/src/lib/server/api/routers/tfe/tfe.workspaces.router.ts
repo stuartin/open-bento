@@ -29,6 +29,13 @@ export const tfeWorkspacesRouter = os.router({
     get: os.get.handler(async ({ input, context, errors }) => {
         // throw errors.NOT_FOUND()
 
+        console.log(context.request.headers)
+        // const data = await auth.api.generateOneTimeToken({
+        //     // This endpoint requires session cookies.
+        //     headers: context.request.headers,
+        // });
+        // console.log({ data })
+
         context.resHeaders?.set("TFP-API-Version", "2.6")
         return DUMMY_RES
     }),
@@ -40,7 +47,7 @@ export const tfeWorkspacesRouter = os.router({
         context.resHeaders?.set("TFP-API-Version", "2.6")
         return DUMMY_RES
     }),
-    "current-state-version": os["current-state-version"].handler(async ({ input, context }) => {
+    getCurrentStateVersion: os.getCurrentStateVersion.handler(async ({ input, context }) => {
 
         context.resHeaders?.set("TFP-API-Version", "2.6")
 

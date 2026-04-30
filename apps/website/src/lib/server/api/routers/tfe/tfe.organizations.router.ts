@@ -7,7 +7,7 @@ import { tfeWorkspacesRouter } from "./tfe.workspaces.router";
 const os = createRouter(contract.tfe.organizations).use(useAuth);
 export const tfeOrganizationsRouter = os
     .router({
-        entitlementSet: os.entitlementSet.handler(
+        getEntitlementSet: os.getEntitlementSet.handler(
             async ({ input, path, context, errors }) => {
 
                 const organization = await db.query.organizations.findFirst({
