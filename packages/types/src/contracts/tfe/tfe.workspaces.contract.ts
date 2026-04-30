@@ -117,7 +117,7 @@ const StateVersionSchema = z.object({
 const Tags = ['tfe']
 const oc = createContract()
 export const tfeOrganizationsWorkspacesContract = oc.auth
-    .prefix("/tfe/v2/organizations/{organization}")
+    .prefix("/tfe/organizations/{organization}")
     .router({
         get: oc.auth
             .route({
@@ -183,7 +183,7 @@ export const tfeOrganizationsWorkspacesContract = oc.auth
             .errors({
                 FORBIDDEN,
             }),
-        "current-state-version": oc.auth
+        getCurrentStateVersion: oc.auth
             .route({
                 method: "GET",
                 path: "/workspaces/{workspace}/current-state-version",
@@ -219,9 +219,9 @@ const ConfigurationVersionSchema = z.object({
 })
 
 export const tfeWorkspacesContract = oc.auth
-    .prefix("/tfe/v2")
+    .prefix("/tfe")
     .router({
-        configurationVersions: oc.auth
+        createConfigurationVersions: oc.auth
             .route({
                 method: "POST",
                 path: "/workspaces/{workspace}/configuration-versions",

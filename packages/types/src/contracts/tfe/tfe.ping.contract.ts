@@ -3,7 +3,7 @@ import { createContract } from '../../lib/orpc.contract'
 const Tags = ['tfe']
 const oc = createContract()
 export const tfePingContract = oc.pub
-    .prefix("/tfe/v2")
+    .prefix("/tfe")
     .router({
         ping: oc.pub
             .route({

@@ -43,9 +43,9 @@ export const EntitlementSetSchema = z.object({
 const Tags = ['tfe']
 const oc = createContract()
 export const tfeOrganizationsContract = oc.auth
-    .prefix("/tfe/v2")
+    .prefix("/tfe")
     .router({
-        entitlementSet: oc.auth
+        getEntitlementSet: oc.auth
             .route({
                 method: "GET",
                 path: "/organizations/{organization}/entitlement-set",
