@@ -1,6 +1,7 @@
 import { contract, type Workspace } from "@open-bento/types";
 import { createRouter } from "../../lib/orpc";
 import { useAuth } from "../../middleware/use-auth";
+import { generateRandomString } from "better-auth/crypto";
 
 const DUMMY_RES = {
     data: {
@@ -29,12 +30,15 @@ export const tfeWorkspacesRouter = os.router({
     get: os.get.handler(async ({ input, context, errors }) => {
         // throw errors.NOT_FOUND()
 
-        // const data = await auth.api.generateOneTimeToken({
-        //     // This endpoint requires session cookies.
-        //     headers: context.request.headers,
-        // });
-        // console.log({ data })
+        const expiresAt = new Date(Date.now() + 3 * 60 * 1000);
 
+        const t = await context.auth.$context
+        const y = t.internalAdapter.createVerificationValue({
+            value: generateRandomString(10, "a-z", "A-Z", "0-9"),
+            identifier: `pre-signed:${context.session.token}`,
+            expiresAt,
+        })
+        console.log({ y })
         context.resHeaders?.set("TFP-API-Version", "2.6")
         return DUMMY_RES
     }),

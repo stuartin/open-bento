@@ -25,6 +25,7 @@
 	"devDependencies": {
 		"@better-auth/drizzle-adapter": "https://pkg.pr.new/better-auth/better-auth/@better-auth/drizzle-adapter@6913",
 		"@better-auth/oauth-provider": "^1.6.9",
+		"@better-auth/utils": "^0.4.0",
 		"@biomejs/biome": "catalog:",
 		"@open-bento/config": "workspace:",
 		"@open-bento/spawner-v3": "workspace:",

@@ -32,5 +32,5 @@ export const router = os
         tfe: {
             ping: tfePingRouter,
             organizations: tfeOrganizationsRouter
-        }
+        },
     });
