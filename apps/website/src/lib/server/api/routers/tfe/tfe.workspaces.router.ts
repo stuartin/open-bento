@@ -29,7 +29,6 @@ export const tfeWorkspacesRouter = os.router({
     get: os.get.handler(async ({ input, context, errors }) => {
         // throw errors.NOT_FOUND()
 
-        console.log(context.request.headers)
         // const data = await auth.api.generateOneTimeToken({
         //     // This endpoint requires session cookies.
         //     headers: context.request.headers,

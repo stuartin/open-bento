@@ -13,7 +13,7 @@
 
   const getUser = () => {
     return {
-      email: "email@domain.com",
+      email: "admin@local.com",
       password: "Password12#",
       name: "stu",
     };
