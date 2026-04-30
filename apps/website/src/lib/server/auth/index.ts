@@ -13,7 +13,7 @@ import { sessions } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { bearer } from "better-auth/plugins";
 
-export type AuthAPI = typeof auth['api']
+export type Auth = typeof auth
 export const auth = betterAuth({
 	baseURL: ORIGIN,
 	basePath: `${API_PREFIX}/auth`,

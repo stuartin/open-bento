@@ -10,7 +10,7 @@ import { openAPISchemaGeneratorOptions } from '@open-bento/types'
 import { Spawner } from '@open-bento/spawner-v3'
 import { API_PREFIX } from '$lib/constants'
 import { ResponseHeadersPlugin } from '@orpc/server/plugins'
-import { TFE_ROOT_INTERCEPTOR_CONTEXT_KEY, tfeRootInterceptor } from '$lib/tfe'
+import { TFE_ROOT_INTERCEPTOR_CONTEXT_KEY, tfeRootInterceptor } from '$lib/server/api/lib/tfe'
 
 const handler = new OpenAPIHandler(router, {
     plugins: [
@@ -72,7 +72,7 @@ const handle: RequestHandler = async ({ request }) => {
         prefix: API_PREFIX,
         context: {
             request,
-            auth: auth.api,
+            auth,
             spawner: await Spawner.get()
         }
     })
