@@ -1,6 +1,6 @@
 import { APIError, createAuthEndpoint, createAuthMiddleware, getSessionFromCtx } from "better-auth/api";
 import { BetterAuthError, type BetterAuthPlugin, type GenericEndpointContext, type Session, type User } from "better-auth";
-import { type OAuthAccessToken } from "better-auth/plugins";
+import { type Jwk, type OAuthAccessToken } from "better-auth/plugins";
 import { z } from "zod"
 
 const getOauthSessionFromCtx = async (ctx: GenericEndpointContext) => {
@@ -8,6 +8,10 @@ const getOauthSessionFromCtx = async (ctx: GenericEndpointContext) => {
         session: Session
         user: User
     } | null = null
+
+    if (ctx.context.session) {
+        return ctx.context.session;
+    }
 
     try {
         const oauthPlugin = ctx.context?.getPlugin("oauth-provider")
@@ -22,14 +26,13 @@ const getOauthSessionFromCtx = async (ctx: GenericEndpointContext) => {
             model: "oauthAccessToken",
             where: [
                 { field: "userId", value: userInfo?.sub || null },
-                { field: "expiresAt", operator: "gte", value: new Date() }
+                { field: "expiresAt", operator: "gte", value: new Date() },
             ],
             join: {
                 session: true,
                 user: true
             }
         });
-
         if (!oauthToken?.user || !oauthToken?.session) return session
 
         session = { session: oauthToken.session, user: oauthToken.user }
@@ -37,7 +40,6 @@ const getOauthSessionFromCtx = async (ctx: GenericEndpointContext) => {
 
         const cookieConfig = ctx.context.authCookies.sessionToken;
         const cookieName = cookieConfig.name
-
         await ctx.setSignedCookie(
             cookieName,
             oauthToken.session.token,

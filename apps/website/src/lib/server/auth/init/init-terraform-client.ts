@@ -6,12 +6,12 @@ export const initTerraformClient = async () => {
     const context = await auth.$context
     const adapter = context.adapter
 
-    if (dev) {
-        await adapter.delete({
-            model: "oauthClient",
-            where: [{ field: "clientId", value: TERRAFORM_CLI_CLIENT_ID }]
-        })
-    }
+    // if (dev) {
+    //     await adapter.delete({
+    //         model: "oauthClient",
+    //         where: [{ field: "clientId", value: TERRAFORM_CLI_CLIENT_ID }]
+    //     })
+    // }
 
     const existing = await adapter.findOne<{ id: string }>({
         model: "oauthClient",

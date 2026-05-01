@@ -39,10 +39,10 @@ const initAdmin = async (organizationIds: string[]) => {
     const passwordUtil = context.password
     const ADMIN_EMAIL = "admin@local.com"
 
-    if (dev) {
-        const existingAdmin = await internalAdapter.findUserByEmail(ADMIN_EMAIL)
-        if (existingAdmin) await internalAdapter.deleteUser(existingAdmin.user.id)
-    }
+    // if (dev) {
+    //     const existingAdmin = await internalAdapter.findUserByEmail(ADMIN_EMAIL)
+    //     if (existingAdmin) await internalAdapter.deleteUser(existingAdmin.user.id)
+    // }
 
     const existingAdmin = await internalAdapter.findUserByEmail(ADMIN_EMAIL)
     if (existingAdmin) return existingAdmin.user
