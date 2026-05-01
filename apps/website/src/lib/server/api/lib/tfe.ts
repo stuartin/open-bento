@@ -17,6 +17,23 @@ export const tfeRootInterceptor: RootInterceptor = (options) => {
                 const contentDisposition = fetchRequest.headers.get('content-disposition')
                 const contentType = fetchRequest.headers.get('content-type')
 
+                if (!contentDisposition && contentType == "application/octet-stream") {
+                    // how to create a File here?
+                    //
+                    // example incoming request:
+                    // headers: Headers {
+                    // 'user-agent': 'go-tfe',
+                    // 'terraform-version': '1.7.3',
+                    // 'x-terraform-integration': 'cloud',
+                    // accept: 'application/json, */*',
+                    // 'content-type': 'application/octet-stream',
+                    // 'content-length': '3865',
+                    // 'accept-encoding': 'gzip',
+                    // host: 'localhost:5173'
+                    //   }
+
+                }
+
                 if (!contentDisposition && contentType === "application/vnd.api+json") {
                     const json = await fetchRequest.text()
                     const parsed = JSON.parse(json)

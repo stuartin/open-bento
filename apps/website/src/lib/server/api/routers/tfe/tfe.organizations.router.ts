@@ -2,7 +2,7 @@ import { contract } from "@open-bento/types";
 import { createRouter } from "../../lib/orpc";
 import { useAuth } from "../../middleware/use-auth";
 import { db } from "$lib/server/db";
-import { tfeWorkspacesRouter } from "./tfe.workspaces.router";
+import { tfeOrganizationsWorkspacesRouter } from "./tfe.workspaces.router";
 
 const os = createRouter(contract.tfe.organizations).use(useAuth);
 export const tfeOrganizationsRouter = os
@@ -59,5 +59,5 @@ export const tfeOrganizationsRouter = os
                     }
                 }
             }),
-        workspaces: tfeWorkspacesRouter
+        workspaces: tfeOrganizationsWorkspacesRouter
     })

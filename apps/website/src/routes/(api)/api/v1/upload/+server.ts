@@ -1,5 +1,6 @@
 import { auth } from "$lib/server/auth";
 import { error, json, type RequestHandler } from "@sveltejs/kit";
+import { APIError } from "better-auth";
 
 export const GET: RequestHandler = async ({ request, url }) => {
 
@@ -14,7 +15,10 @@ export const GET: RequestHandler = async ({ request, url }) => {
 
         return json(result)
     } catch (err) {
-        error(400, "Invalid token")
+        if (err instanceof APIError) {
+            return error(err.statusCode, err.message)
+        }
     }
 
+    error(500, "Unknown error")
 }

@@ -3,12 +3,11 @@ import { createRouter } from "../../lib/orpc";
 import { useAuth } from "../../middleware/use-auth";
 import { generateRandomString } from "better-auth/crypto";
 
-const DUMMY_RES = {
+const DUMMY_WORKSPACE_RES = {
     data: {
         id: "workspace",
         type: "workspaces",
         attributes: {
-
             name: "test", // required for CREATE
             description: "",
             "terraform-version": "", // Required for UPDATE
@@ -25,32 +24,40 @@ const DUMMY_RES = {
     }
 }
 
-const os = createRouter(contract.tfe.organizations.workspaces).use(useAuth);
-export const tfeWorkspacesRouter = os.router({
-    get: os.get.handler(async ({ input, context, errors }) => {
+export const DUMMY_CONFIGURATION_RES = {
+    data: {
+        id: "configversion",
+        type: "configuration-versions",
+        attributes: {
+            "auto-queue-runs": true,
+            error: null,
+            "error-message": null,
+            source: "tfe-api",
+            speculative: true,
+            status: "pending" as const,
+            "upload-url":
+                "https://localhost:5173/api/v1/tfe/upload",
+            provisional: false
+        }
+    }
+}
+
+const osOrg = createRouter(contract.tfe.organizations.workspaces).use(useAuth);
+export const tfeOrganizationsWorkspacesRouter = osOrg.router({
+    get: osOrg.get.handler(async ({ input, context, errors }) => {
         // throw errors.NOT_FOUND()
-
-        const expiresAt = new Date(Date.now() + 3 * 60 * 1000);
-
-        const t = await context.auth.$context
-        const y = t.internalAdapter.createVerificationValue({
-            value: generateRandomString(10, "a-z", "A-Z", "0-9"),
-            identifier: `pre-signed:${context.session.token}`,
-            expiresAt,
-        })
-        console.log({ y })
         context.resHeaders?.set("TFP-API-Version", "2.6")
-        return DUMMY_RES
+        return DUMMY_WORKSPACE_RES
     }),
-    create: os.create.handler(async ({ input, context, errors }) => {
+    create: osOrg.create.handler(async ({ input, context, errors }) => {
         context.resHeaders?.set("TFP-API-Version", "2.6")
-        return DUMMY_RES
+        return DUMMY_WORKSPACE_RES
     }),
-    update: os.create.handler(async ({ input, context, errors }) => {
+    update: osOrg.create.handler(async ({ input, context, errors }) => {
         context.resHeaders?.set("TFP-API-Version", "2.6")
-        return DUMMY_RES
+        return DUMMY_WORKSPACE_RES
     }),
-    getCurrentStateVersion: os.getCurrentStateVersion.handler(async ({ input, context }) => {
+    getCurrentStateVersion: osOrg.getCurrentStateVersion.handler(async ({ input, context }) => {
 
         context.resHeaders?.set("TFP-API-Version", "2.6")
 
@@ -71,4 +78,12 @@ export const tfeWorkspacesRouter = os.router({
             }
         }
     })
+})
+
+const osWrk = createRouter(contract.tfe.workspaces).use(useAuth);
+export const tfeWorkspacesRouter = osWrk.router({
+    createConfigurationVersions: osWrk.createConfigurationVersions.handler(async ({ input, context, errors }) => {
+        context.resHeaders?.set("TFP-API-Version", "2.6")
+        return DUMMY_CONFIGURATION_RES
+    }),
 })

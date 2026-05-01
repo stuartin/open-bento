@@ -55,7 +55,7 @@ const handler = new OpenAPIHandler(router, {
 })
 
 const handle: RequestHandler = async ({ request }) => {
-    console.log({ method: request.method, url: request.url })
+    console.log({ method: request.method, url: request.url, headers: request.headers })
 
     // better-auth
     if (request.url.startsWith(`${API_PREFIX}/auth`)) auth.handler(request);

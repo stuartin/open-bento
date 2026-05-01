@@ -36,7 +36,7 @@ const WorkspaceSettingOverwritesSchema = z.object({
     "agent-pool": z.boolean().optional(),
 })
 
-const WorkspaceSchema = z.object({
+export const TFEWorkspaceSchema = z.object({
     // "actions": WorkspaceActionsSchema,
     // "allow-destroy-plan": z.boolean(),
     // "assessments-enabled": z.boolean(),
@@ -93,7 +93,7 @@ const StateVersionResourceSchema = z.object({
     "provider": z.string(),
 })
 
-const StateVersionSchema = z.object({
+export const TFEStateVersionSchema = z.object({
     // "billable-rum-count": z.number(),
     "created-at": z.iso.datetime(),
     // "size": z.number(),
@@ -132,7 +132,7 @@ export const tfeOrganizationsWorkspacesContract = oc.auth
                 })
             )
             .output(
-                toEntityResponseSchema("workspaces", WorkspaceSchema)
+                toEntityResponseSchema("workspaces", TFEWorkspaceSchema)
             )
             .errors({
                 NOT_FOUND
@@ -155,7 +155,7 @@ export const tfeOrganizationsWorkspacesContract = oc.auth
                 })
             )
             .output(
-                toEntityResponseSchema("workspaces", WorkspaceSchema)
+                toEntityResponseSchema("workspaces", TFEWorkspaceSchema)
             )
             .errors({
                 FORBIDDEN,
@@ -178,7 +178,7 @@ export const tfeOrganizationsWorkspacesContract = oc.auth
                 })
             )
             .output(
-                toEntityResponseSchema("workspaces", WorkspaceSchema)
+                toEntityResponseSchema("workspaces", TFEWorkspaceSchema)
             )
             .errors({
                 FORBIDDEN,
@@ -196,7 +196,7 @@ export const tfeOrganizationsWorkspacesContract = oc.auth
                 })
             )
             .output(
-                toEntityResponseSchema("state-versions", StateVersionSchema)
+                toEntityResponseSchema("state-versions", TFEStateVersionSchema)
             )
             .errors({
                 NOT_FOUND
@@ -206,7 +206,7 @@ export const tfeOrganizationsWorkspacesContract = oc.auth
 
 
 
-const ConfigurationVersionSchema = z.object({
+export const TFEConfigurationVersionSchema = z.object({
     "auto-queue-runs": z.boolean(),
     "error": z.string().nullable(),
     "error-message": z.string().nullable(),
@@ -241,7 +241,7 @@ export const tfeWorkspacesContract = oc.auth
                 })
             )
             .output(
-                toEntityResponseSchema("configuration-versions", ConfigurationVersionSchema)
+                toEntityResponseSchema("configuration-versions", TFEConfigurationVersionSchema)
             )
             .errors({
                 NOT_FOUND

@@ -9,7 +9,8 @@ import type { InferContractRouterInputs, InferContractRouterOutputs } from '@orp
 import { IdSchema } from "./lib/shared";
 import type z from "zod";
 import { tfeOrganizationsContract } from "./contracts/tfe/tfe.organizations.contract";
-import { tfeOrganizationsWorkspacesContract } from "./contracts/tfe/tfe.workspaces.contract";
+import { TFEConfigurationVersionSchema, tfeOrganizationsWorkspacesContract, tfeWorkspacesContract } from "./contracts/tfe/tfe.workspaces.contract";
+import { toEntityResponseSchema } from "./lib/tfe";
 
 export const contract = {
     organizations: {
@@ -27,7 +28,8 @@ export const contract = {
         organizations: {
             ...tfeOrganizationsContract,
             workspaces: tfeOrganizationsWorkspacesContract
-        }
+        },
+        workspaces: tfeWorkspacesContract
     }
 }
 
@@ -65,6 +67,9 @@ export const zSchema = {
     Project: ProjectSchema,
     Workspace: WorkspaceSchema,
     Run: RunSchema,
+    TFE: {
+        ConfigurationVersion: toEntityResponseSchema("configuration-versions", TFEConfigurationVersionSchema)
+    }
 }
 
 export type Id = z.infer<typeof zSchema.Id>;
