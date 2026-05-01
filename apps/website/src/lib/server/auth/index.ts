@@ -13,6 +13,7 @@ import { sessions } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { bearer } from "better-auth/plugins";
 import { signedUrl } from '$lib/plugins/signed-url';
+import { oauthSession } from '$lib/plugins/oauth-session';
 
 export type Auth = typeof auth
 export const auth = betterAuth({
@@ -59,7 +60,6 @@ export const auth = betterAuth({
 	},
 	plugins: [
 		bearer(),
-		signedUrl({ path: "/api/v1/upload" }),
 		organization({
 			organizationHooks: {
 				afterDeleteOrganization: async ({ organization }) => {
@@ -99,6 +99,8 @@ export const auth = betterAuth({
 				TERRAFORM_CLI_CLIENT_ID
 			])
 		}),
+		oauthSession(),
+		signedUrl({ path: "/api/v1/upload" }),
 		sveltekitCookies(getRequestEvent) // make sure this is the last plugin in the array
 	],
 	advanced: {

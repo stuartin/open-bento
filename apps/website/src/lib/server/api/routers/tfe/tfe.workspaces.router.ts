@@ -1,7 +1,7 @@
-import { contract, type Workspace } from "@open-bento/types";
+import { contract } from "@open-bento/types";
 import { createRouter } from "../../lib/orpc";
 import { useAuth } from "../../middleware/use-auth";
-import { generateRandomString } from "better-auth/crypto";
+import { ORIGIN } from "$lib/constants";
 
 const DUMMY_WORKSPACE_RES = {
     data: {
@@ -84,6 +84,14 @@ const osWrk = createRouter(contract.tfe.workspaces).use(useAuth);
 export const tfeWorkspacesRouter = osWrk.router({
     createConfigurationVersions: osWrk.createConfigurationVersions.handler(async ({ input, context, errors }) => {
         context.resHeaders?.set("TFP-API-Version", "2.6")
-        return DUMMY_CONFIGURATION_RES
+        // const { url } = await context.auth.api.generateSignedUrl({
+        //     headers: context.request.headers
+        // })
+        // console.log(url)
+        const url = "/"
+        return {
+            ...DUMMY_CONFIGURATION_RES,
+            "upload-url": `${ORIGIN}${url}`
+        }
     }),
 })

@@ -1,4 +1,4 @@
-import { createAuthEndpoint, sessionMiddleware } from "better-auth/api";
+import { createAuthEndpoint, createAuthMiddleware, requestOnlySessionMiddleware, sessionMiddleware } from "better-auth/api";
 import { z } from "zod";
 import type { BetterAuthClientPlugin, BetterAuthPlugin } from "better-auth";
 import { generateRandomString } from "better-auth/crypto";
