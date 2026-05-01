@@ -1,8 +1,9 @@
-import { createAuthEndpoint, createAuthMiddleware, requestOnlySessionMiddleware, sessionMiddleware } from "better-auth/api";
+import { createAuthEndpoint, sessionMiddleware } from "better-auth/api";
 import { z } from "zod";
 import type { BetterAuthClientPlugin, BetterAuthPlugin } from "better-auth";
 import { generateRandomString } from "better-auth/crypto";
 import { createHMAC } from "@better-auth/utils/hmac";
+import { oauthSessionMiddleware } from "./oauth-session";
 
 export interface PreSignedUrlOptions {
     path: string; // The path to sign
@@ -20,11 +21,10 @@ export const signedUrl = (options: PreSignedUrlOptions) => {
                 "/signed-url/generate",
                 {
                     method: "GET",
-                    use: [sessionMiddleware],
+                    use: [oauthSessionMiddleware],
                 },
                 async (ctx) => {
                     const session = ctx.context.session;
-                    console.log({ session })
 
                     const expires = Date.now() + expiresIn * 1000;
                     const token = generateRandomString(32);

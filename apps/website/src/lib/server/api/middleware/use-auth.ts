@@ -10,45 +10,45 @@ export const useAuth = os
         UNAUTHORIZED,
     })
     .middleware(async ({ context, next, errors }) => {
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = dev ? '0' : '1';
+        // process.env.NODE_TLS_REJECT_UNAUTHORIZED = dev ? '0' : '1';
 
-        const authorizationHeader = context.request.headers.get("Authorization")
-        if (authorizationHeader) {
-            try {
-                const userInfo = await context.auth.api.oauth2UserInfo({
-                    headers: context.request.headers
-                })
+        // const authorizationHeader = context.request.headers.get("Authorization")
+        // if (authorizationHeader) {
+        //     try {
+        //         const userInfo = await context.auth.api.oauth2UserInfo({
+        //             headers: context.request.headers
+        //         })
 
-                const accessToken = await db.query.oauthAccessTokens.findFirst({
-                    where: {
-                        userId: userInfo.sub,
-                        expiresAt: { gte: new Date() }
-                    },
-                    with: {
-                        users: true,
-                        sessions: true
-                    }
-                })
-                const user = accessToken?.users as User | undefined
-                const session = accessToken?.sessions as Session | undefined
+        //         const accessToken = await db.query.oauthAccessTokens.findFirst({
+        //             where: {
+        //                 userId: userInfo.sub,
+        //                 expiresAt: { gte: new Date() }
+        //             },
+        //             with: {
+        //                 users: true,
+        //                 sessions: true
+        //             }
+        //         })
+        //         const user = accessToken?.users as User | undefined
+        //         const session = accessToken?.sessions as Session | undefined
 
-                if (!user || !session) throw errors.UNAUTHORIZED();
+        //         if (!user || !session) throw errors.UNAUTHORIZED();
 
-                return next({
-                    context: {
-                        user,
-                        session
-                    },
-                });
-            } catch (error) {
-                console.error(error)
-                throw errors.UNAUTHORIZED();
-            }
-        }
+        //         return next({
+        //             context: {
+        //                 user,
+        //                 session
+        //             },
+        //         });
+        //     } catch (error) {
+        //         console.error(error)
+        //         throw errors.UNAUTHORIZED();
+        //     }
+        // }
 
-        const session = await context.auth.api.getSession({
-            headers: context.request.headers,
-        });
+        const session = await context.auth.api.getOAuthSession({
+            headers: context.request.headers
+        })
 
         if (!session?.user || !session?.session) throw errors.UNAUTHORIZED();
 

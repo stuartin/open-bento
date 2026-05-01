@@ -1,8 +1,65 @@
-import { APIError, createAuthMiddleware } from "better-auth/api";
-import { setSessionCookie } from "better-auth/cookies";
-import { BetterAuthError, parseCookies, type BetterAuthPlugin, type Session, type User } from "better-auth";
-import type { } from "@better-auth/oauth-provider";
+import { APIError, createAuthEndpoint, createAuthMiddleware, getSessionFromCtx } from "better-auth/api";
+import { BetterAuthError, type BetterAuthPlugin, type GenericEndpointContext, type Session, type User } from "better-auth";
 import { type OAuthAccessToken } from "better-auth/plugins";
+import { z } from "zod"
+
+const getOauthSessionFromCtx = async (ctx: GenericEndpointContext) => {
+    let session: {
+        session: Session
+        user: User
+    } | null = null
+
+    try {
+        const oauthPlugin = ctx.context?.getPlugin("oauth-provider")
+        const userInfoResponse = await oauthPlugin?.endpoints.oauth2UserInfo({
+            ...ctx,
+            method: "GET",
+            asResponse: true,
+        })
+        const userInfo = await userInfoResponse?.json()
+
+        const oauthToken = await ctx.context.adapter.findOne<OAuthAccessToken & { user: User, session: Session }>({
+            model: "oauthAccessToken",
+            where: [
+                { field: "userId", value: userInfo?.sub || null },
+                { field: "expiresAt", operator: "gte", value: new Date() }
+            ],
+            join: {
+                session: true,
+                user: true
+            }
+        });
+
+        if (!oauthToken?.user || !oauthToken?.session) return session
+
+        session = { session: oauthToken.session, user: oauthToken.user }
+        ctx.context.session = session
+
+        const cookieConfig = ctx.context.authCookies.sessionToken;
+        const cookieName = cookieConfig.name
+
+        await ctx.setSignedCookie(
+            cookieName,
+            oauthToken.session.token,
+            ctx.context.secret,
+            cookieConfig.attributes,
+        );
+
+        return session
+    } catch (_) {
+        console.error(_)
+        return session
+    }
+}
+
+export const oauthSessionMiddleware = createAuthMiddleware(async (ctx) => {
+    const session = await getOauthSessionFromCtx(ctx);
+    if (!session?.session) throw APIError.from("UNAUTHORIZED", {
+        message: "Unauthorized",
+        code: "UNAUTHORIZED"
+    });
+    return { session };
+});
 
 export const oauthSession = () => {
     return {
@@ -10,75 +67,22 @@ export const oauthSession = () => {
         init: async (ctx) => {
             const oauthPlugin = ctx.getPlugin("oauth-provider");
             const jwtPlugin = ctx.getPlugin("jwt");
-            if (!oauthPlugin || !jwtPlugin) throw new BetterAuthError("oauth-session plugin requires oauth-provider plugin");
-
-
+            if (!oauthPlugin || !jwtPlugin) throw new BetterAuthError("oauth-session requires oauth-provider and jwt plugin");
         },
-        hooks: {
-            before: [{
-                matcher: (context) => {
-                    const authHeader = context.headers?.get("Authorization");
-                    // Only match Bearer tokens, not other auth types
-                    return !!authHeader?.startsWith("Bearer ") && context.method === "GET"
+        endpoints: {
+            getOAuthSession: createAuthEndpoint(
+                "oauth/get-session",
+                {
+                    method: "GET",
+                    query: z.object({
+                        fallbackToGetSession: z.boolean()
+                    }).default({ fallbackToGetSession: true })
                 },
-                handler: createAuthMiddleware(async (ctx) => {
-                    const authHeader = ctx.headers?.get("Authorization");
-                    if (!authHeader) return;
-
-                    try {
-
-                        // Validate using the oauth plugin
-                        const oauthPlugin = ctx.context?.getPlugin("oauth-provider")
-                        if (!oauthPlugin) return
-
-                        const userInfo = await oauthPlugin.endpoints.oauth2UserInfo({
-                            ...ctx,
-                            method: "GET",
-                            asResponse: false,
-                        })
-
-                        // if (!userInfo) throw new APIError("UNAUTHORIZED", {
-                        //     error_description: "user not found",
-                        //     error: "invalid_request"
-                        // })
-
-                        const oauthToken = await ctx.context.adapter.findOne<OAuthAccessToken & { user: User, session: Session }>({
-                            model: "oauthAccessToken",
-                            where: [
-                                { field: "userId", value: userInfo.sub },
-                                { field: "expiresAt", operator: "gte", value: new Date() }
-                            ],
-                            join: {
-                                session: true,
-                                user: true
-                            }
-                        });
-
-                        console.log({ oauthToken })
-
-                        if (!oauthToken?.user || !oauthToken?.session) return
-
-                        const sessionCookieConfig = ctx.context.authCookies.sessionToken;
-                        const cookieName = sessionCookieConfig.name
-                        const sessionToken = oauthToken.session.token
-
-                        const setCookie = await ctx.setSignedCookie(
-                            cookieName,
-                            sessionToken,
-                            ctx.context.secret,
-                            sessionCookieConfig.attributes,
-                        );
-
-                        console.log(setCookie)
-                        const [name, value] = setCookie.split("=") as [string, string]
-                        ctx.setCookie(name, value)
-                        ctx.context.session = { session: oauthToken.session, user: oauthToken.user }
-                    } catch (error) {
-                        // Log but don't block - let normal auth flow handle unauthorized
-                        console.error("[oauth-session] Error validating token:", error);
-                    }
-                })
-            }],
-        },
+                async (ctx) => {
+                    const oauthSession = await getOauthSessionFromCtx(ctx)
+                    return !oauthSession && ctx.query.fallbackToGetSession ? await getSessionFromCtx(ctx) : oauthSession
+                }
+            )
+        }
     } satisfies BetterAuthPlugin;
 };
