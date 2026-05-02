@@ -100,7 +100,7 @@ export const auth = betterAuth({
 			])
 		}),
 		oauthSession(),
-		signedUrl({ path: "/api/v1/upload" }),
+		signedUrl({ path: `${ORIGIN}${API_PREFIX}/tfe/uploads` }),
 		sveltekitCookies(getRequestEvent) // make sure this is the last plugin in the array
 	],
 	advanced: {

@@ -43,6 +43,7 @@
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
 		"@tailwindcss/vite": "^4.2.2",
 		"@tanstack/svelte-query": "catalog:",
+		"file-type": "^22.0.1",
 		"better-auth": "^1.6.9",
 		"drizzle-kit": "beta",
 		"drizzle-orm": "beta",

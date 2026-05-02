@@ -11,6 +11,7 @@ import type z from "zod";
 import { tfeOrganizationsContract } from "./contracts/tfe/tfe.organizations.contract";
 import { TFEConfigurationVersionSchema, tfeOrganizationsWorkspacesContract, tfeWorkspacesContract } from "./contracts/tfe/tfe.workspaces.contract";
 import { toEntityResponseSchema } from "./lib/tfe";
+import { tfeUploadsContract } from "./contracts/tfe/tfe.uploads.contract";
 
 export const contract = {
     organizations: {
@@ -29,7 +30,8 @@ export const contract = {
             ...tfeOrganizationsContract,
             workspaces: tfeOrganizationsWorkspacesContract
         },
-        workspaces: tfeWorkspacesContract
+        workspaces: tfeWorkspacesContract,
+        uploads: tfeUploadsContract
     }
 }
 

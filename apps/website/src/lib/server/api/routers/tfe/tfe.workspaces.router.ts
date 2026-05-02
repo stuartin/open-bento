@@ -84,14 +84,20 @@ const osWrk = createRouter(contract.tfe.workspaces).use(useAuth);
 export const tfeWorkspacesRouter = osWrk.router({
     createConfigurationVersions: osWrk.createConfigurationVersions.handler(async ({ input, context, errors }) => {
         context.resHeaders?.set("TFP-API-Version", "2.6")
-        // const { url } = await context.auth.api.generateSignedUrl({
-        //     headers: context.request.headers
-        // })
-        // console.log(url)
-        const url = "/"
+        const { url } = await context.auth.api.generateSignedUrl({
+            headers: context.request.headers,
+            body: { identifier: DUMMY_CONFIGURATION_RES.data.id }
+        })
+
         return {
-            ...DUMMY_CONFIGURATION_RES,
-            "upload-url": `${ORIGIN}${url}`
+            data: {
+                ...DUMMY_CONFIGURATION_RES.data,
+                attributes: {
+                    ...DUMMY_CONFIGURATION_RES.data.attributes,
+                    "upload-url": url
+                }
+
+            }
         }
     }),
 })
