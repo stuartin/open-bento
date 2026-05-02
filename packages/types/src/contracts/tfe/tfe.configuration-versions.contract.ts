@@ -1,7 +1,6 @@
 import z from 'zod';
-import { NOT_FOUND, FORBIDDEN, CONFLICT } from '../../lib/errors'
+import { NOT_FOUND } from '../../lib/errors'
 import { createContract } from '../../lib/orpc.contract'
-import { tfeEntitySchema } from '../../lib/tfe';
 import { TFEConfigurationVersionSchema } from './tfe.workspaces.contract';
 
 const Tags = ['tfe']
@@ -21,7 +20,7 @@ export const tfeConfigurationVersionsContract = oc.auth
                 })
             )
             .output(
-                tfeEntitySchema("configuration-versions", TFEConfigurationVersionSchema)
+                TFEConfigurationVersionSchema
             )
             .errors({
                 NOT_FOUND
