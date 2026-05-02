@@ -11,6 +11,7 @@ import { tfeOrganizationsRouter } from "./routers/tfe/tfe.organizations.router";
 import type { ResponseHeadersPluginContext } from "@orpc/server/plugins";
 import { tfeWorkspacesRouter } from "./routers/tfe/tfe.workspaces.router";
 import { tfeUploadsRouter } from "./routers/tfe/tfe.uploads.router";
+import { tfeConfigurationVersionsRouter } from "./routers/tfe/tfe.configuration-versions.router";
 
 export type APIContext = {
     request: Request;
@@ -35,6 +36,7 @@ export const router = os
             ping: tfePingRouter,
             organizations: tfeOrganizationsRouter,
             workspaces: tfeWorkspacesRouter,
-            uploads: tfeUploadsRouter
+            uploads: tfeUploadsRouter,
+            configurationVersions: tfeConfigurationVersionsRouter
         },
     });

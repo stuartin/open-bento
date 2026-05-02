@@ -12,6 +12,7 @@ import { tfeOrganizationsContract } from "./contracts/tfe/tfe.organizations.cont
 import { TFEConfigurationVersionSchema, tfeOrganizationsWorkspacesContract, tfeWorkspacesContract } from "./contracts/tfe/tfe.workspaces.contract";
 import { toEntityResponseSchema } from "./lib/tfe";
 import { tfeUploadsContract } from "./contracts/tfe/tfe.uploads.contract";
+import { tfeConfigurationVersionsContract } from "./contracts/tfe/tfe.configuration-versions.contract";
 
 export const contract = {
     organizations: {
@@ -31,7 +32,8 @@ export const contract = {
             workspaces: tfeOrganizationsWorkspacesContract
         },
         workspaces: tfeWorkspacesContract,
-        uploads: tfeUploadsContract
+        uploads: tfeUploadsContract,
+        configurationVersions: tfeConfigurationVersionsContract
     }
 }
 
