@@ -1,4 +1,4 @@
-import { createAuthEndpoint, sessionMiddleware } from "better-auth/api";
+import { createAuthEndpoint } from "better-auth/api";
 import { z } from "zod";
 import type { BetterAuthClientPlugin, BetterAuthPlugin } from "better-auth";
 import { generateRandomString } from "better-auth/crypto";
@@ -20,12 +20,13 @@ export const signedUrl = (options: PreSignedUrlOptions) => {
             generateSignedUrl: createAuthEndpoint(
                 "/signed-url/generate",
                 {
-                    method: "GET",
+                    method: "POST",
                     use: [oauthSessionMiddleware],
+                    body: z.object({ identifier: z.string() })
                 },
                 async (ctx) => {
                     const session = ctx.context.session;
-
+                    const identifier = ctx.body.identifier
                     const expires = Date.now() + expiresIn * 1000;
                     const token = generateRandomString(32);
 
@@ -35,7 +36,7 @@ export const signedUrl = (options: PreSignedUrlOptions) => {
 
                     // Store token → userId mapping
                     await ctx.context.internalAdapter.createVerificationValue({
-                        value: `${session.user.id}:${signedToken}`,
+                        value: `${signedToken}:${identifier}:${session.user.id}`,
                         identifier: `signed-url:${token}`,
                         expiresAt: new Date(expires),
                     });
@@ -50,7 +51,6 @@ export const signedUrl = (options: PreSignedUrlOptions) => {
                 "/signed-url/verify",
                 {
                     method: "GET",
-                    use: [sessionMiddleware],
                     query: z.object({
                         token: z.string(),
                     }),
@@ -76,17 +76,17 @@ export const signedUrl = (options: PreSignedUrlOptions) => {
                     }
 
                     // Verify signature (uses plugin-configured path)
-                    const [userId, signedToken] = verification.value.split(":")
+                    const [signedToken, identifier, userId] = verification.value.split(":")
                     const secret = ctx.context.secret;
                     const expectedSignature = await createHMAC("SHA-256", "base64url").sign(secret, token)
 
                     if (signedToken !== expectedSignature) {
                         throw ctx.error("BAD_REQUEST", {
-                            message: "Invalid token2",
+                            message: "Invalid token",
                         });
                     }
 
-                    return ctx.json({ valid: true, path, userId });
+                    return ctx.json({ ok: true, identifier, userId });
                 }
             ),
         },

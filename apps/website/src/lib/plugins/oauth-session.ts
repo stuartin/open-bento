@@ -1,6 +1,6 @@
 import { APIError, createAuthEndpoint, createAuthMiddleware, getSessionFromCtx } from "better-auth/api";
 import { BetterAuthError, type BetterAuthPlugin, type GenericEndpointContext, type Session, type User } from "better-auth";
-import { type Jwk, type OAuthAccessToken } from "better-auth/plugins";
+import { type OAuthAccessToken } from "better-auth/plugins";
 import { z } from "zod"
 
 const getOauthSessionFromCtx = async (ctx: GenericEndpointContext) => {
