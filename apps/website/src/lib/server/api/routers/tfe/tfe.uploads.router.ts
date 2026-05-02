@@ -1,6 +1,7 @@
 import { contract } from "@open-bento/types";
 import { createRouter } from "../../lib/orpc";
 import { saveStreamWithType } from "../../lib/file-download";
+import { ReadableStream } from "stream/web";
 
 const os = createRouter(contract.tfe.uploads);
 export const tfeUploadsRouter = os.router({
@@ -14,7 +15,7 @@ export const tfeUploadsRouter = os.router({
 
 
         const { ok } = await saveStreamWithType(
-            body,
+            body as ReadableStream,
             `${verifiedUrl.identifier}`
         );
         if (!ok) throw errors.BAD_REQUEST()
