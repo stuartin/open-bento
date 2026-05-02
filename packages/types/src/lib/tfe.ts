@@ -1,7 +1,7 @@
 import z, { ZodAny, ZodObject } from "zod";
 import { IdSchema } from "./shared";
 
-export const toEntityResponseSchema = <T extends ZodObject>(type: string, entitySchema: T) => {
+export const tfeEntitySchema = <TEntity extends ZodObject, TRelationships extends ZodObject>(type: string, entitySchema: TEntity, relationshipsSchema?: TRelationships) => {
     const EntitySchema = z.object({
         id: IdSchema,
         type: z.literal(type),
@@ -9,7 +9,9 @@ export const toEntityResponseSchema = <T extends ZodObject>(type: string, entity
     })
 
     const EntityResponseSchema = z.object({
-        data: EntitySchema,
+        data: relationshipsSchema
+            ? EntitySchema.extend({ relationships: relationshipsSchema })
+            : EntitySchema,
     })
 
     return EntityResponseSchema

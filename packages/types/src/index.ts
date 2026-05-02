@@ -10,7 +10,7 @@ import { IdSchema } from "./lib/shared";
 import type z from "zod";
 import { tfeOrganizationsContract } from "./contracts/tfe/tfe.organizations.contract";
 import { TFEConfigurationVersionSchema, tfeOrganizationsWorkspacesContract, tfeWorkspacesContract } from "./contracts/tfe/tfe.workspaces.contract";
-import { toEntityResponseSchema } from "./lib/tfe";
+import { tfeEntitySchema } from "./lib/tfe";
 import { tfeUploadsContract } from "./contracts/tfe/tfe.uploads.contract";
 import { tfeConfigurationVersionsContract } from "./contracts/tfe/tfe.configuration-versions.contract";
 
@@ -72,7 +72,7 @@ export const zSchema = {
     Workspace: WorkspaceSchema,
     Run: RunSchema,
     TFE: {
-        ConfigurationVersion: toEntityResponseSchema("configuration-versions", TFEConfigurationVersionSchema)
+        ConfigurationVersion: tfeEntitySchema("configuration-versions", TFEConfigurationVersionSchema)
     }
 }
 

@@ -1,7 +1,7 @@
 import z from 'zod';
 import { NOT_FOUND, FORBIDDEN, CONFLICT } from '../../lib/errors'
 import { createContract } from '../../lib/orpc.contract'
-import { toEntityResponseSchema } from '../../lib/tfe';
+import { tfeEntitySchema } from '../../lib/tfe';
 
 const WorkspaceActionsSchema = z.object({
     "is-destroyable": z.boolean(),
@@ -36,54 +36,57 @@ const WorkspaceSettingOverwritesSchema = z.object({
     "agent-pool": z.boolean().optional(),
 })
 
-export const TFEWorkspaceSchema = z.object({
-    // "actions": WorkspaceActionsSchema,
-    // "allow-destroy-plan": z.boolean(),
-    // "assessments-enabled": z.boolean(),
-    // "auto-apply": z.boolean(),
-    // "auto-apply-run-trigger": z.boolean(),
-    // "auto-destroy-at": z.string().nullable(),
-    // "auto-destroy-status": z.string().nullable(),
-    // "auto-destroy-activity-duration": z.string().nullable(),
-    // "inherits-project-auto-destroy": z.boolean().nullable(),
-    "description": z.string().nullable(),
-    // "environment": z.string(),
-    "execution-mode": z.enum(["remote", "local", "agent"]),
-    // "file-triggers-enabled": z.boolean(),
-    // "global-remote-state": z.boolean(),
-    // "latest-change-at": z.string(),
-    // "last-assessment-result-at": z.string().nullable(),
-    "locked": z.boolean(),
-    "locked-reason": z.string().nullable(),
-    "name": z.string(),
-    // "oauth-client-name": z.string().nullable(),
-    // "operations": z.boolean(),
-    // "permissions": WorkspacePermissionsSchema,
-    "permissions": z.object({
-        "can-queue-run": z.boolean().default(true)
-    }),
-    // "apply-duration-average": z.number().nullable(),
-    // "plan-duration-average": z.number().nullable(),
-    // "policy-check-failures": z.number().nullable(),
-    // "queue-all-runs": z.boolean(),
-    // "resource-count": z.number(),
-    // "run-failures": z.number().nullable(),
-    // "source": z.string(),
-    // "source-name": z.string().nullable(),
-    // "source-url": z.string().nullable(),
-    // "speculative-enabled": z.boolean(),
-    // "structured-run-output-enabled": z.boolean(),
-    // "tag-names": z.array(z.string()),
-    "terraform-version": z.string(),
-    // "trigger-prefixes": z.array(z.string()),
-    "created-at": z.iso.datetime(),
-    "updated-at": z.iso.datetime(),
-    // "vcs-repo": z.unknown().nullable(),
-    // "vcs-repo-identifier": z.string().nullable(),
-    "working-directory": z.string().nullable(),
-    // "workspace-kpis-runs-count": z.number(),
-    // "setting-overwrites": WorkspaceSettingOverwritesSchema,
-})
+export const TFEWorkspaceSchema = tfeEntitySchema(
+    "workspaces",
+    z.object({
+        // "actions": WorkspaceActionsSchema,
+        // "allow-destroy-plan": z.boolean(),
+        // "assessments-enabled": z.boolean(),
+        // "auto-apply": z.boolean(),
+        // "auto-apply-run-trigger": z.boolean(),
+        // "auto-destroy-at": z.string().nullable(),
+        // "auto-destroy-status": z.string().nullable(),
+        // "auto-destroy-activity-duration": z.string().nullable(),
+        // "inherits-project-auto-destroy": z.boolean().nullable(),
+        "description": z.string().nullable(),
+        // "environment": z.string(),
+        "execution-mode": z.enum(["remote", "local", "agent"]),
+        // "file-triggers-enabled": z.boolean(),
+        // "global-remote-state": z.boolean(),
+        // "latest-change-at": z.string(),
+        // "last-assessment-result-at": z.string().nullable(),
+        "locked": z.boolean(),
+        "locked-reason": z.string().nullable(),
+        "name": z.string(),
+        // "oauth-client-name": z.string().nullable(),
+        // "operations": z.boolean(),
+        // "permissions": WorkspacePermissionsSchema,
+        "permissions": z.object({
+            "can-queue-run": z.boolean().default(true)
+        }),
+        // "apply-duration-average": z.number().nullable(),
+        // "plan-duration-average": z.number().nullable(),
+        // "policy-check-failures": z.number().nullable(),
+        // "queue-all-runs": z.boolean(),
+        // "resource-count": z.number(),
+        // "run-failures": z.number().nullable(),
+        // "source": z.string(),
+        // "source-name": z.string().nullable(),
+        // "source-url": z.string().nullable(),
+        // "speculative-enabled": z.boolean(),
+        // "structured-run-output-enabled": z.boolean(),
+        // "tag-names": z.array(z.string()),
+        "terraform-version": z.string(),
+        // "trigger-prefixes": z.array(z.string()),
+        "created-at": z.iso.datetime(),
+        "updated-at": z.iso.datetime(),
+        // "vcs-repo": z.unknown().nullable(),
+        // "vcs-repo-identifier": z.string().nullable(),
+        "working-directory": z.string().nullable(),
+        // "workspace-kpis-runs-count": z.number(),
+        // "setting-overwrites": WorkspaceSettingOverwritesSchema,
+    })
+)
 
 const StateVersionResourceSchema = z.object({
     "name": z.string(),
@@ -93,26 +96,29 @@ const StateVersionResourceSchema = z.object({
     "provider": z.string(),
 })
 
-export const TFEStateVersionSchema = z.object({
-    // "billable-rum-count": z.number(),
-    "created-at": z.iso.datetime(),
-    // "size": z.number(),
-    // "hosted-state-download-url": z.url(),
-    // "hosted-state-upload-url": z.url().nullable(),
-    // "hosted-json-state-download-url": z.url(),
-    // "hosted-json-state-upload-url": z.url().nullable(),
-    "status": z.enum(["pending", "finalized", "discarded"]),
-    // "intermediate": z.boolean(),
-    "modules": z.record(z.string(), z.record(z.string(), z.number())),
-    "providers": z.record(z.string(), z.record(z.string(), z.number())),
-    "resources": z.array(StateVersionResourceSchema),
-    // "resources-processed": z.boolean(),
-    "serial": z.number(),
-    "state-version": z.number(),
-    "terraform-version": z.string(),
-    // "vcs-commit-url": z.url().nullable(),
-    // "vcs-commit-sha": z.string().nullable(),
-})
+export const TFEStateVersionSchema = tfeEntitySchema(
+    "state-versions",
+    z.object({
+        // "billable-rum-count": z.number(),
+        "created-at": z.iso.datetime(),
+        // "size": z.number(),
+        // "hosted-state-download-url": z.url(),
+        // "hosted-state-upload-url": z.url().nullable(),
+        // "hosted-json-state-download-url": z.url(),
+        // "hosted-json-state-upload-url": z.url().nullable(),
+        "status": z.enum(["pending", "finalized", "discarded"]),
+        // "intermediate": z.boolean(),
+        "modules": z.record(z.string(), z.record(z.string(), z.number())),
+        "providers": z.record(z.string(), z.record(z.string(), z.number())),
+        "resources": z.array(StateVersionResourceSchema),
+        // "resources-processed": z.boolean(),
+        "serial": z.number(),
+        "state-version": z.number(),
+        "terraform-version": z.string(),
+        // "vcs-commit-url": z.url().nullable(),
+        // "vcs-commit-sha": z.string().nullable(),
+    })
+)
 
 const Tags = ['tfe']
 const oc = createContract()
@@ -132,7 +138,7 @@ export const tfeOrganizationsWorkspacesContract = oc.auth
                 })
             )
             .output(
-                toEntityResponseSchema("workspaces", TFEWorkspaceSchema)
+                TFEWorkspaceSchema
             )
             .errors({
                 NOT_FOUND
@@ -155,7 +161,7 @@ export const tfeOrganizationsWorkspacesContract = oc.auth
                 })
             )
             .output(
-                toEntityResponseSchema("workspaces", TFEWorkspaceSchema)
+                TFEWorkspaceSchema
             )
             .errors({
                 FORBIDDEN,
@@ -178,7 +184,7 @@ export const tfeOrganizationsWorkspacesContract = oc.auth
                 })
             )
             .output(
-                toEntityResponseSchema("workspaces", TFEWorkspaceSchema)
+                TFEWorkspaceSchema
             )
             .errors({
                 FORBIDDEN,
@@ -196,7 +202,7 @@ export const tfeOrganizationsWorkspacesContract = oc.auth
                 })
             )
             .output(
-                toEntityResponseSchema("state-versions", TFEStateVersionSchema)
+                TFEStateVersionSchema
             )
             .errors({
                 NOT_FOUND
@@ -204,19 +210,20 @@ export const tfeOrganizationsWorkspacesContract = oc.auth
     })
 
 
-
-
-export const TFEConfigurationVersionSchema = z.object({
-    "auto-queue-runs": z.boolean(),
-    "error": z.string().nullable(),
-    "error-message": z.string().nullable(),
-    "source": z.string(),
-    "speculative": z.boolean(),
-    "status": z.enum(["pending", "fetching", "uploaded", "archiving", "archived", "errored"]),
-    "status-timestamps": z.record(z.string(), z.string()).optional(),
-    "upload-url": z.url(),
-    "provisional": z.boolean(),
-})
+export const TFEConfigurationVersionSchema = tfeEntitySchema(
+    "configuration-versions",
+    z.object({
+        "auto-queue-runs": z.boolean(),
+        "error": z.string().nullable(),
+        "error-message": z.string().nullable(),
+        "source": z.string(),
+        "speculative": z.boolean(),
+        "status": z.enum(["pending", "fetching", "uploaded", "archiving", "archived", "errored"]),
+        "status-timestamps": z.record(z.string(), z.string()).optional(),
+        "upload-url": z.url(),
+        "provisional": z.boolean(),
+    })
+)
 
 export const tfeWorkspacesContract = oc.auth
     .prefix("/tfe")
@@ -241,7 +248,7 @@ export const tfeWorkspacesContract = oc.auth
                 })
             )
             .output(
-                toEntityResponseSchema("configuration-versions", TFEConfigurationVersionSchema)
+                TFEConfigurationVersionSchema
             )
             .errors({
                 NOT_FOUND
