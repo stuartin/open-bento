@@ -24,7 +24,7 @@ export const tfeOrganizationsRouter = os
                 context.resHeaders?.set("TFP-API-Version", "2.6")
                 return {
                     data: {
-                        id: organization.id,
+                        id: "entitlement-sets-id",
                         type: "entitlement-sets",
                         attributes: {
                             agents: true,

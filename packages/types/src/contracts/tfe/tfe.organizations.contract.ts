@@ -3,7 +3,7 @@ import { NOT_FOUND } from '../../lib/errors'
 import { createContract } from '../../lib/orpc.contract'
 import { tfeEntitySchema } from '../../lib/tfe';
 
-export const EntitlementSetSchema = tfeEntitySchema(
+export const TFEEntitlementSetSchema = tfeEntitySchema(
     "entitlement-sets",
     z.object({
         agents: z.boolean(),
@@ -54,7 +54,7 @@ export const tfeOrganizationsContract = oc.auth
                 })
             )
             .output(
-                EntitlementSetSchema
+                TFEEntitlementSetSchema
             )
             .errors({
                 NOT_FOUND

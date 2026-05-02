@@ -12,6 +12,7 @@ import type { ResponseHeadersPluginContext } from "@orpc/server/plugins";
 import { tfeWorkspacesRouter } from "./routers/tfe/tfe.workspaces.router";
 import { tfeUploadsRouter } from "./routers/tfe/tfe.uploads.router";
 import { tfeConfigurationVersionsRouter } from "./routers/tfe/tfe.configuration-versions.router";
+import { tfeRunsRouter } from "./routers/tfe/tfe.runs.router";
 
 export type APIContext = {
     request: Request;
@@ -37,6 +38,7 @@ export const router = os
             organizations: tfeOrganizationsRouter,
             workspaces: tfeWorkspacesRouter,
             uploads: tfeUploadsRouter,
-            configurationVersions: tfeConfigurationVersionsRouter
+            configurationVersions: tfeConfigurationVersionsRouter,
+            runs: tfeRunsRouter,
         },
     });

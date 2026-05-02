@@ -13,6 +13,7 @@ import { TFEConfigurationVersionSchema, tfeOrganizationsWorkspacesContract, tfeW
 import { tfeEntitySchema } from "./lib/tfe";
 import { tfeUploadsContract } from "./contracts/tfe/tfe.uploads.contract";
 import { tfeConfigurationVersionsContract } from "./contracts/tfe/tfe.configuration-versions.contract";
+import { tfeRunsContract } from "./contracts/tfe/tfe.runs.contract";
 
 export const contract = {
     organizations: {
@@ -33,8 +34,9 @@ export const contract = {
         },
         workspaces: tfeWorkspacesContract,
         uploads: tfeUploadsContract,
-        configurationVersions: tfeConfigurationVersionsContract
-    }
+        configurationVersions: tfeConfigurationVersionsContract,
+        runs: tfeRunsContract,
+    },
 }
 
 const openAPIGenerator = new OpenAPIGenerator({

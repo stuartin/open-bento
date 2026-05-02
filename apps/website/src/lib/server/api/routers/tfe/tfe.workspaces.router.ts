@@ -1,14 +1,13 @@
 import { contract } from "@open-bento/types";
 import { createRouter } from "../../lib/orpc";
 import { useAuth } from "../../middleware/use-auth";
-import { ORIGIN } from "$lib/constants";
 
 const DUMMY_WORKSPACE_RES = {
     data: {
-        id: "workspace",
+        id: "workspaces-id",
         type: "workspaces",
         attributes: {
-            name: "test", // required for CREATE
+            name: "workspace-name", // required for CREATE
             description: "",
             "terraform-version": "", // Required for UPDATE
             "working-directory": "",
@@ -26,7 +25,7 @@ const DUMMY_WORKSPACE_RES = {
 
 export const DUMMY_CONFIGURATION_RES = {
     data: {
-        id: "configversion",
+        id: "configuration-versions-id",
         type: "configuration-versions",
         attributes: {
             "auto-queue-runs": true,
@@ -63,7 +62,7 @@ export const tfeOrganizationsWorkspacesRouter = osOrg.router({
 
         return {
             data: {
-                id: "state",
+                id: "state-versions-id",
                 type: "state-versions",
                 attributes: {
                     "state-version": 1,
