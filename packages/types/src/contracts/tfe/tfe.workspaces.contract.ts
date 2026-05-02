@@ -221,7 +221,7 @@ export const TFEConfigurationVersionSchema = z.object({
 export const tfeWorkspacesContract = oc.auth
     .prefix("/tfe")
     .router({
-        createConfigurationVersions: oc.auth
+        createConfigurationVersion: oc.auth
             .route({
                 method: "POST",
                 path: "/workspaces/{workspace}/configuration-versions",

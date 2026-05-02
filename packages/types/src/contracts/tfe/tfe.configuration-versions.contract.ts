@@ -9,7 +9,7 @@ const oc = createContract()
 export const tfeConfigurationVersionsContract = oc.auth
     .prefix("/tfe")
     .router({
-        getConfigurationVersions: oc.auth
+        getConfigurationVersion: oc.auth
             .route({
                 method: "GET",
                 path: "/configuration-versions/{configuration}",

@@ -82,7 +82,7 @@ export const tfeOrganizationsWorkspacesRouter = osOrg.router({
 
 const osWrk = createRouter(contract.tfe.workspaces).use(useAuth);
 export const tfeWorkspacesRouter = osWrk.router({
-    createConfigurationVersions: osWrk.createConfigurationVersions.handler(async ({ input, context, errors }) => {
+    createConfigurationVersions: osWrk.createConfigurationVersion.handler(async ({ input, context, errors }) => {
         context.resHeaders?.set("TFP-API-Version", "2.6")
         const { url } = await context.auth.api.generateSignedUrl({
             headers: context.request.headers,
