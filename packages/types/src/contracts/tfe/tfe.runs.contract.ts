@@ -2,6 +2,9 @@ import z from 'zod';
 import { NOT_FOUND, FORBIDDEN, CONFLICT } from '../../lib/errors'
 import { createContract } from '../../lib/orpc.contract'
 import { tfeEntitySchema } from '../../lib/tfe';
+import { type InferContractRouterOutputs } from "@orpc/contract"
+
+type T = InferContractRouterOutputs<typeof tfeRunsContract>
 
 const RunActionsSchema = z.object({
     "is-cancelable": z.boolean(),
@@ -20,7 +23,7 @@ const RunPermissionsSchema = z.object({
     "can-override-policy-check": z.boolean(),
 });
 
-const RunStatusSchema = z.enum([
+const RunStatusSchema = z.literal([
     "pending",
     "fetching",
     "fetching_completed",
@@ -57,32 +60,50 @@ const RunVariableSchema = z.object({
     value: z.string(),
 });
 
-export const TFERunSchema = tfeEntitySchema(
-    "runs",
-    z.object({
-        // "actions": RunActionsSchema,
-        // "canceled-at": z.string().nullable(),
-        "created-at": z.iso.datetime(),
-        // "has-changes": z.boolean(),
-        // "auto-apply": z.boolean(),
-        // "allow-empty-apply": z.boolean(),
-        // "allow-config-generation": z.boolean(),
-        // "is-destroy": z.boolean(),
-        // "message": z.string().nullable(),
-        // "plan-only": z.boolean(),
-        // "source": z.string(),
-        // "status-timestamps": z.record(z.string(), z.string()),
-        "status": RunStatusSchema,
-        // "trigger-reason": z.string(),
-        // "target-addrs": z.array(z.string()).nullable(),
-        // "permissions": RunPermissionsSchema,
-        // "refresh": z.boolean(),
-        // "refresh-only": z.boolean(),
-        // "replace-addrs": z.array(z.string()).nullable(),
-        // "save-plan": z.boolean(),
-        // "variables": z.array(RunVariableSchema),
-    })
-);
+export const TFERunAttributesSchema = z.object({
+    // "actions": RunActionsSchema,
+    // "canceled-at": z.string().nullable(),
+    "created-at": z.iso.datetime(),
+    // "has-changes": z.boolean(),
+    // "auto-apply": z.boolean(),
+    // "allow-empty-apply": z.boolean(),
+    // "allow-config-generation": z.boolean(),
+    // "is-destroy": z.boolean(),
+    // "message": z.string().nullable(),
+    // "plan-only": z.boolean(),
+    // "source": z.string(),
+    // "status-timestamps": z.record(z.string(), z.string()),
+    "status": RunStatusSchema,
+    // "trigger-reason": z.string(),
+    // "target-addrs": z.array(z.string()).nullable(),
+    // "permissions": RunPermissionsSchema,
+    // "refresh": z.boolean(),
+    // "refresh-only": z.boolean(),
+    // "replace-addrs": z.array(z.string()).nullable(),
+    // "save-plan": z.boolean(),
+    // "variables": z.array(RunVariableSchema),
+})
+
+export const TFERunEventAttributesSchema = z.object({
+    action: z.string(),
+    "created-at": z.iso.datetime(),
+    description: z.string()
+})
+
+
+export const TFERunTaskStageAttributesSchema = z.object({
+    status: z.literal(["pending", "running", "passed", "failed", "errored", "canceled", "unreachable"]),
+    stage: z.literal(["pre_plan", "post_plan", "pre_apply", "post_apply"]),
+    "status-timestamps": z.object({
+        "pending-at": z.iso.datetime().optional(),
+        "running-at": z.iso.datetime().optional(),
+        "passed-at": z.iso.datetime().optional(),
+        "failed-at": z.iso.datetime().optional(),
+        "canceled-at": z.iso.datetime().optional(),
+    }),
+    "created-at": z.iso.datetime(),
+    "updated-at": z.iso.datetime()
+})
 
 
 const Tags = ['tfe']
@@ -90,6 +111,41 @@ const oc = createContract()
 export const tfeRunsContract = oc.auth
     .prefix("/tfe")
     .router({
+        get: oc.auth
+            .route({
+                tags: Tags,
+                method: "GET",
+                path: "/runs/{run}",
+                inputStructure: "detailed"
+            })
+            .input(
+                z.object({
+                    params: z.object({
+                        run: z.string()
+                    }),
+                    query: z.object({
+                        include: z.union([z.literal("task_stages")]).optional()
+                    })
+                })
+            )
+            .output(
+                tfeEntitySchema(
+                    "runs",
+                    TFERunAttributesSchema,
+                ).or(
+                    tfeEntitySchema(
+                        "runs",
+                        TFERunAttributesSchema,
+                        {
+                            includedSchema: z.object({
+                                id: z.string(),
+                                type: z.literal("task-stages"),
+                                attributes: TFERunTaskStageAttributesSchema
+                            }).array()
+                        }
+                    )
+                )
+            ),
         create: oc.auth
             .route({
                 method: "POST",
@@ -127,7 +183,10 @@ export const tfeRunsContract = oc.auth
                 })
             )
             .output(
-                TFERunSchema
+                tfeEntitySchema(
+                    "runs",
+                    TFERunAttributesSchema
+                )
             )
             .errors({
                 NOT_FOUND
@@ -147,14 +206,11 @@ export const tfeRunsContract = oc.auth
                         })
                     )
                     .output(
-                        // https://github.com/hashicorp/go-tfe/blob/main/run_event.go
-                        // not documented?
-                        z.object({
-                            id: z.string(),
-                            action: z.string(),
-                            "created-at": z.iso.ZodISODateTime,
-                            description: z.string()
-                        })
+                        tfeEntitySchema(
+                            "run-events",
+                            TFERunEventAttributesSchema,
+                            { type: "list" }
+                        )
                     )
             })
 

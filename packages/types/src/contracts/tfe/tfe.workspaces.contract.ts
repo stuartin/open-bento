@@ -2,6 +2,7 @@ import z from 'zod';
 import { NOT_FOUND, FORBIDDEN, CONFLICT } from '../../lib/errors'
 import { createContract } from '../../lib/orpc.contract'
 import { tfeEntitySchema } from '../../lib/tfe';
+import { TFERunAttributesSchema } from './tfe.runs.contract';
 
 const WorkspaceActionsSchema = z.object({
     "is-destroyable": z.boolean(),
@@ -228,6 +229,28 @@ export const TFEConfigurationVersionSchema = tfeEntitySchema(
 export const tfeWorkspacesContract = oc.auth
     .prefix("/tfe")
     .router({
+        getRuns: oc.auth
+            .route({
+                method: "GET",
+                path: "/workspaces/{workspace}/runs",
+                tags: Tags,
+            })
+            .input(
+                z.object({
+                    workspace: z.string()
+                })
+            )
+            .output(
+                z.object({
+                    data: tfeEntitySchema(
+                        "runs",
+                        TFERunAttributesSchema
+                    ).shape.data.array()
+                })
+            )
+            .errors({
+                NOT_FOUND
+            }),
         createConfigurationVersion: oc.auth
             .route({
                 method: "POST",

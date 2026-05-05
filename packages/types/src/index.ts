@@ -74,7 +74,7 @@ export const zSchema = {
     Workspace: WorkspaceSchema,
     Run: RunSchema,
     TFE: {
-        ConfigurationVersion: tfeEntitySchema("configuration-versions", TFEConfigurationVersionSchema)
+        ConfigurationVersion: tfeEntitySchema("configuration-versions", TFEConfigurationVersionSchema),
     }
 }
 

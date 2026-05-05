@@ -98,3 +98,13 @@
     }
   }
   ```
+
+- **GET** `/api/v1/tfe/runs/{run}/run-events` > **200**
+
+- **GET** `/api/v1/tfe/runs/{run}?include=task_stages` > **200**
+
+- **GET** `/api/v1/tfe/runs/{run}` > **200**
+
+- **GET** `/api/v1/tfe/organizations/{organization}/workspaces/{workspace}` > **200**
+
+- **GET** `/api/v1/tfe/workspaces/{workspace}/runs` > **200**
