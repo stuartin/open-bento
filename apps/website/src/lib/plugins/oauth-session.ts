@@ -27,7 +27,7 @@ const getOauthSessionFromCtx = async (ctx: GenericEndpointContext) => {
             where: [
                 { field: "userId", value: userInfo?.sub || null },
                 { field: "expiresAt", operator: "gte", value: new Date() },
-                { field: "sessionId", operator: "ne", value: null },
+                // { field: "sessionId", operator: "ne", value: null },
             ],
             join: {
                 session: true,
