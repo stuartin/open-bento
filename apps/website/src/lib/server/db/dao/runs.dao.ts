@@ -1,5 +1,5 @@
-import { zSchema, type ContractInputs, type ContractOutputs, type RunStatus } from "@open-bento/types"
-import { z } from "zod"
+import type { zSchema, ContractInputs, ContractOutputs, RunStatus } from "@open-bento/types"
+import type { z } from "zod"
 
 export const DummyRun: z.infer<typeof zSchema.Run> = {
     id: "run123456",

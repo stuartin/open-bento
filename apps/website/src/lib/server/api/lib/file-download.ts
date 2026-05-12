@@ -2,7 +2,7 @@ import { Readable } from "stream";
 import { rename, mkdir, rm } from "fs/promises";
 import { createWriteStream as createWS } from "fs";
 import { finished } from "stream/promises";
-import { ReadableStream } from "stream/web";
+import type { ReadableStream } from "stream/web";
 import { fileTypeFromStream } from "file-type";
 import path from "path";
 

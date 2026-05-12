@@ -1,7 +1,7 @@
 import { contract } from "@open-bento/types";
 import { createRouter } from "../../lib/orpc";
 import { saveStreamWithType } from "../../lib/file-download";
-import { ReadableStream } from "stream/web";
+import type { ReadableStream } from "stream/web";
 
 const os = createRouter(contract.tfe.uploads);
 export const tfeUploadsRouter = os.router({

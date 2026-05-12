@@ -1,4 +1,4 @@
-import z, { ZodArray, ZodObject } from "zod";
+import z, { type ZodArray, type ZodObject } from "zod";
 
 export const tfeEntitySchema =
     <

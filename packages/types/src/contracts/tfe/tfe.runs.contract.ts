@@ -2,7 +2,7 @@ import z from 'zod';
 import { NOT_FOUND, FORBIDDEN, CONFLICT } from '../../lib/errors'
 import { createContract } from '../../lib/orpc.contract'
 import { tfeEntitySchema } from '../../lib/tfe';
-import { type InferContractRouterOutputs } from "@orpc/contract"
+import type { InferContractRouterOutputs } from "@orpc/contract"
 
 type T = InferContractRouterOutputs<typeof tfeRunsContract>
 

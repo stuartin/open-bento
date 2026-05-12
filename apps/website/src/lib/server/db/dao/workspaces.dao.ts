@@ -1,5 +1,5 @@
-import { zSchema, type ContractInputs, type ContractOutputs } from "@open-bento/types"
-import { z } from "zod"
+import type { zSchema, ContractInputs, ContractOutputs } from "@open-bento/types"
+import type { z } from "zod"
 
 export const DummyWorkspace: z.infer<typeof zSchema.Workspace> = {
     id: "workspace123456",
