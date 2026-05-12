@@ -1,0 +1,13 @@
+{
+  "name": "@open-bento/tfe",
+  "type": "module",
+  "scripts": {
+    "lint": "biome lint .",
+    "format": "biome lint --write .",
+    "test": "pnpm run /^test:/",
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@open-bento/config": "workspace:*"
+  }
+}

@@ -108,3 +108,5 @@
 - **GET** `/api/v1/tfe/organizations/{organization}/workspaces/{workspace}` > **200**
 
 - **GET** `/api/v1/tfe/workspaces/{workspace}/runs` > **200**
+
+- **GET** `/api/v1/tfe/organizations/{organization}/runs/queue` > **200**
