@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { type EntitySerializer } from "@jsonapi-serde/server/response";
+import type { EntitySerializer } from "@jsonapi-serde/server/response";
 import { createDeserializer } from "@jsonapi-serde/client";
 
 // Schema

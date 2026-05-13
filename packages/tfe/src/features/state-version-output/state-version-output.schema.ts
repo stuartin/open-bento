@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { type EntitySerializer } from "@jsonapi-serde/server/response";
+import type { EntitySerializer } from "@jsonapi-serde/server/response";
 
 // Schema
 export const StateVersionOutputAttributesSchema = z.object({

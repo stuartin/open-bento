@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { oc } from "@orpc/contract";
-import { AuthHeadersSchema, JsonApiDocument } from "../../lib/common.schema";
-import { OrganizationAttributesSchema } from "./organization.schema";
+import { AuthHeadersSchema } from "../../lib/common.schema";
 import { RunAttributesSchema } from "../run/run.schema";
 
 // --- Input Types ---

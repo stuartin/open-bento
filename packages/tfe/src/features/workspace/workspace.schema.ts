@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createDeserializer } from "@jsonapi-serde/client";
-import { type EntitySerializer } from "@jsonapi-serde/server/response"
+import type { EntitySerializer } from "@jsonapi-serde/server/response";
 
 // Schema
 export const WorkspaceAttributesSchema = z.object({
