@@ -1,6 +1,9 @@
 {
   "name": "@open-bento/tfe",
   "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "lint": "biome lint .",
     "format": "biome lint --write .",

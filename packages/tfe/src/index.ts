@@ -63,19 +63,19 @@ import { costEstimateContract } from "./features/cost-estimate/cost-estimate.con
 import { taskResultContract } from "./features/task-result/task-result.contract";
 import { policyEvaluationContract } from "./features/policy-evaluation/policy-evaluation.contract";
 
-export const terraformCloudContract = {
-  organizations: organizationContract,
-  workspaces: workspaceContract,
-  configurationVersions: configurationVersionContract,
-  runs: runContract,
-  plans: planContract,
-  applies: applyContract,
-  taskStages: taskStageContract,
-  stateVersions: stateVersionContract,
-  stateVersionOutputs: stateVersionOutputContract,
-  costEstimates: costEstimateContract,
-  taskResults: taskResultContract,
-  policyEvaluations: policyEvaluationContract,
+export const tfeContract = {
+    organizations: organizationContract,
+    workspaces: workspaceContract,
+    configurationVersions: configurationVersionContract,
+    runs: runContract,
+    plans: planContract,
+    applies: applyContract,
+    taskStages: taskStageContract,
+    stateVersions: stateVersionContract,
+    stateVersionOutputs: stateVersionOutputContract,
+    costEstimates: costEstimateContract,
+    taskResults: taskResultContract,
+    policyEvaluations: policyEvaluationContract,
 };
 
 // Unified Serializer
@@ -94,16 +94,16 @@ import { serializeTaskResult } from "./features/task-result/task-result.schema";
 import { serializePolicyEvaluation } from "./features/policy-evaluation/policy-evaluation.schema";
 
 export const serialize = SerializeBuilder.new()
-  .add("workspaces", serializeWorkspace)
-  .add("configuration-versions", serializeConfigurationVersion)
-  .add("runs", serializeRun)
-  .add("plans", serializePlan)
-  .add("applies", serializeApply)
-  .add("task-stages", serializeTaskStage)
-  .add("state-versions", serializeStateVersion)
-  .add("state-version-outputs", serializeStateVersionOutput)
-  .add("organizations", serializeOrganization)
-  .add("cost-estimates", serializeCostEstimate)
-  .add("task-results", serializeTaskResult)
-  .add("policy-evaluations", serializePolicyEvaluation)
-  .build();
+    .add("workspaces", serializeWorkspace)
+    .add("configuration-versions", serializeConfigurationVersion)
+    .add("runs", serializeRun)
+    .add("plans", serializePlan)
+    .add("applies", serializeApply)
+    .add("task-stages", serializeTaskStage)
+    .add("state-versions", serializeStateVersion)
+    .add("state-version-outputs", serializeStateVersionOutput)
+    .add("organizations", serializeOrganization)
+    .add("cost-estimates", serializeCostEstimate)
+    .add("task-results", serializeTaskResult)
+    .add("policy-evaluations", serializePolicyEvaluation)
+    .build();
