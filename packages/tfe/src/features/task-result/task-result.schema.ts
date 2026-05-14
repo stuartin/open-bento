@@ -1,8 +1,17 @@
 import { z } from "zod";
 import type { EntitySerializer } from "@jsonapi-serde/server/response";
 import { createDeserializer } from "@jsonapi-serde/client";
+import { AuthHeadersSchema } from "../../lib/common.schema";
 
-// Schema
+// --- Get Task Result ---
+
+export const GetTaskResultInput = z.object({
+  params: z.object({
+    taskResultId: z.string().describe("Task Result ID"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
 export const TaskResultAttributesSchema = z.object({
   status: z.enum([
     "pending",
@@ -20,13 +29,19 @@ export const TaskResultAttributesSchema = z.object({
   "updated-at": z.string().optional(),
 });
 
-// Type
 export type TaskResult = z.infer<typeof TaskResultAttributesSchema> & {
   id: string;
 };
 
-// Serializer
-export const serializeTaskResult: EntitySerializer<TaskResult> = {
+export const GetTaskResultOutput = z.object({
+  data: z.object({
+    type: z.literal("task-results"),
+    id: z.string(),
+    attributes: TaskResultAttributesSchema,
+  }),
+});
+
+export const serializeGetTaskResultOutput: EntitySerializer<TaskResult> = {
   getId: (tr) => tr.id,
   serialize: (tr) => ({
     attributes: {
@@ -40,8 +55,7 @@ export const serializeTaskResult: EntitySerializer<TaskResult> = {
   }),
 };
 
-// Deserializer
-export const deserializeTaskResult = createDeserializer({
+export const deserializeGetTaskResultOutput = createDeserializer({
   type: "task-results",
   cardinality: "one",
   attributesSchema: TaskResultAttributesSchema,

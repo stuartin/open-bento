@@ -1,8 +1,10 @@
 import { z } from "zod";
 import type { EntitySerializer } from "@jsonapi-serde/server/response";
 import { createDeserializer } from "@jsonapi-serde/client";
+import { AuthHeadersSchema } from "../../lib/common.schema";
 
-// Schema
+// --- Attributes Schema ---
+
 export const TaskStageAttributesSchema = z.object({
   stage: z.enum(["pre_plan", "post_plan", "pre_apply"]),
   status: z.enum([
@@ -20,15 +22,30 @@ export const TaskStageAttributesSchema = z.object({
   "updated-at": z.string().optional(),
 });
 
-// Type
 export type TaskStage = z.infer<typeof TaskStageAttributesSchema> & {
   id: string;
   taskResultIds?: string[];
   policyEvaluationIds?: string[];
 };
 
-// Serializer
-export const serializeTaskStage: EntitySerializer<TaskStage> = {
+// --- Get Task Stage ---
+
+export const GetTaskStageInput = z.object({
+  params: z.object({
+    taskStageId: z.string().describe("Task Stage ID"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
+export const GetTaskStageOutput = z.object({
+  data: z.object({
+    type: z.literal("task-stages"),
+    id: z.string(),
+    attributes: TaskStageAttributesSchema,
+  }),
+});
+
+export const serializeGetTaskStageOutput: EntitySerializer<TaskStage> = {
   getId: (taskStage) => taskStage.id,
   serialize: (taskStage) => ({
     attributes: {
@@ -58,8 +75,7 @@ export const serializeTaskStage: EntitySerializer<TaskStage> = {
   }),
 };
 
-// Deserializers
-export const deserializeTaskStage = createDeserializer({
+export const deserializeGetTaskStageOutput = createDeserializer({
   type: "task-stages",
   cardinality: "one",
   attributesSchema: TaskStageAttributesSchema,
@@ -75,7 +91,38 @@ export const deserializeTaskStage = createDeserializer({
   },
 });
 
-export const deserializeTaskStages = createDeserializer({
+// --- List Task Stages ---
+
+export const ListTaskStagesInput = z.object({
+  params: z.object({
+    runId: z.string().describe("Run ID"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
+export const ListTaskStagesOutput = z.object({
+  data: z.array(
+    z.object({
+      type: z.literal("task-stages"),
+      id: z.string(),
+      attributes: TaskStageAttributesSchema,
+    })
+  ),
+});
+
+export const serializeListTaskStagesOutput: EntitySerializer<TaskStage> = {
+  getId: (taskStage) => taskStage.id,
+  serialize: (taskStage) => ({
+    attributes: {
+      stage: taskStage.stage,
+      status: taskStage.status,
+      "created-at": taskStage["created-at"],
+      "updated-at": taskStage["updated-at"],
+    },
+  }),
+};
+
+export const deserializeListTaskStagesOutput = createDeserializer({
   type: "task-stages",
   cardinality: "many",
   attributesSchema: TaskStageAttributesSchema,

@@ -1,8 +1,18 @@
 import { z } from "zod";
 import { createDeserializer } from "@jsonapi-serde/client";
 import type { EntitySerializer } from "@jsonapi-serde/server/response";
+import { AuthHeadersSchema } from "../../lib/common.schema";
 
-// Schema
+// --- Get Workspace ---
+
+export const GetWorkspaceInput = z.object({
+  params: z.object({
+    organization: z.string().describe("Organization name"),
+    workspace: z.string().describe("Workspace name"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
 export const WorkspaceAttributesSchema = z.object({
   name: z.string(),
   "execution-mode": z.enum(["remote", "local", "agent"]),
@@ -10,15 +20,21 @@ export const WorkspaceAttributesSchema = z.object({
   locked: z.boolean().optional(),
 });
 
-// Type
 export type Workspace = z.infer<typeof WorkspaceAttributesSchema> & {
   id: string;
   organizationId?: string;
   currentStateVersionId?: string;
 };
 
-// Serializer
-export const serializeWorkspace: EntitySerializer<Workspace> = {
+export const GetWorkspaceOutput = z.object({
+  data: z.object({
+    type: z.literal("workspaces"),
+    id: z.string(),
+    attributes: WorkspaceAttributesSchema,
+  }),
+});
+
+export const serializeGetWorkspaceOutput: EntitySerializer<Workspace> = {
   getId: (workspace) => workspace.id,
   serialize: (workspace) => ({
     attributes: {
@@ -42,8 +58,7 @@ export const serializeWorkspace: EntitySerializer<Workspace> = {
   }),
 };
 
-// Deserializers
-export const deserializeWorkspace = createDeserializer({
+export const deserializeGetWorkspaceOutput = createDeserializer({
   type: "workspaces",
   cardinality: "one",
   attributesSchema: WorkspaceAttributesSchema,
@@ -59,7 +74,45 @@ export const deserializeWorkspace = createDeserializer({
   },
 });
 
-export const deserializeWorkspaces = createDeserializer({
+// --- List Workspaces ---
+
+export const ListWorkspacesInput = z.object({
+  params: z.object({
+    organization: z.string().describe("Organization name"),
+  }),
+  query: z
+    .object({
+      "page[number]": z.number().int().min(1).optional(),
+      "page[size]": z.number().int().min(1).max(100).optional(),
+      search: z.string().optional(),
+    })
+    .optional(),
+  headers: AuthHeadersSchema,
+});
+
+export const ListWorkspacesOutput = z.object({
+  data: z.array(
+    z.object({
+      type: z.literal("workspaces"),
+      id: z.string(),
+      attributes: WorkspaceAttributesSchema,
+    })
+  ),
+});
+
+export const serializeListWorkspacesOutput: EntitySerializer<Workspace> = {
+  getId: (workspace) => workspace.id,
+  serialize: (workspace) => ({
+    attributes: {
+      name: workspace.name,
+      "execution-mode": workspace["execution-mode"],
+      "terraform-version": workspace["terraform-version"],
+      locked: workspace.locked,
+    },
+  }),
+};
+
+export const deserializeListWorkspacesOutput = createDeserializer({
   type: "workspaces",
   cardinality: "many",
   attributesSchema: WorkspaceAttributesSchema,

@@ -1,23 +1,9 @@
 import { z } from "zod";
 import { oc } from "@orpc/contract";
-import { AuthHeadersSchema, JsonApiDocument } from "../../lib/common.schema";
-import { PolicyEvaluationAttributesSchema } from "./policy-evaluation.schema";
-
-// --- Input Types ---
-
-const GetPolicyEvaluationInput = z.object({
-  params: z.object({
-    policyEvaluationId: z.string().describe("Policy Evaluation ID"),
-  }),
-  headers: AuthHeadersSchema,
-});
-
-// --- Output Types ---
-
-const PolicyEvaluationOutputSchema = JsonApiDocument(
-  "policy-evaluations",
-  PolicyEvaluationAttributesSchema
-);
+import {
+  GetPolicyEvaluationInput,
+  GetPolicyEvaluationOutput,
+} from "./policy-evaluation.schema";
 
 // --- Contract ---
 
@@ -32,7 +18,7 @@ export const getPolicyEvaluation = oc
   .output(
     z.object({
       status: z.literal(200),
-      body: PolicyEvaluationOutputSchema,
+      body: GetPolicyEvaluationOutput,
     })
   );
 

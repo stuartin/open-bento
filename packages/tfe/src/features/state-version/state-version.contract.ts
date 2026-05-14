@@ -1,51 +1,13 @@
 import { z } from "zod";
 import { oc } from "@orpc/contract";
 import {
-  AuthHeadersSchema,
-  JsonApiDocument,
-  JsonApiCollection,
-} from "../../lib/common.schema";
-import { StateVersionAttributesSchema } from "./state-version.schema";
-
-// --- Input Types ---
-
-const GetCurrentStateVersionInput = z.object({
-  params: z.object({
-    workspaceId: z.string().describe("Workspace ID"),
-  }),
-  headers: AuthHeadersSchema,
-});
-
-const GetStateVersionInput = z.object({
-  params: z.object({
-    stateVersionId: z.string().describe("State Version ID"),
-  }),
-  headers: AuthHeadersSchema,
-});
-
-const ListStateVersionsInput = z.object({
-  params: z.object({
-    workspaceId: z.string().describe("Workspace ID"),
-  }),
-  query: z
-    .object({
-      "page[number]": z.number().int().min(1).optional(),
-      "page[size]": z.number().int().min(1).max(100).optional(),
-    })
-    .optional(),
-  headers: AuthHeadersSchema,
-});
-
-// --- Output Types ---
-
-const StateVersionOutputSchema = z.object({
-  data: JsonApiDocument("state-versions", StateVersionAttributesSchema).shape
-    .data.nullable(),
-});
-const StateVersionsOutputSchema = JsonApiCollection(
-  "state-versions",
-  StateVersionAttributesSchema
-);
+  GetCurrentStateVersionInput,
+  GetCurrentStateVersionOutput,
+  GetStateVersionInput,
+  GetStateVersionOutput,
+  ListStateVersionsInput,
+  ListStateVersionsOutput,
+} from "./state-version.schema";
 
 // --- Contracts ---
 
@@ -60,7 +22,7 @@ export const getCurrentStateVersion = oc
   .output(
     z.object({
       status: z.literal(200),
-      body: StateVersionOutputSchema,
+      body: GetCurrentStateVersionOutput,
     })
   );
 
@@ -75,7 +37,7 @@ export const getStateVersion = oc
   .output(
     z.object({
       status: z.literal(200),
-      body: JsonApiDocument("state-versions", StateVersionAttributesSchema),
+      body: GetStateVersionOutput,
     })
   );
 
@@ -90,7 +52,7 @@ export const listStateVersions = oc
   .output(
     z.object({
       status: z.literal(200),
-      body: StateVersionsOutputSchema,
+      body: ListStateVersionsOutput,
     })
   );
 

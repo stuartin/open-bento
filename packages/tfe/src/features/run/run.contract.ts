@@ -1,89 +1,17 @@
 import { z } from "zod";
 import { oc } from "@orpc/contract";
 import {
-  AuthHeadersSchema,
-  JsonApiDocument,
-  JsonApiCollection,
-} from "../../lib/common.schema";
-import { RunAttributesSchema } from "./run.schema";
-
-// --- Input Types ---
-
-const CreateRunInput = z.object({
-  headers: AuthHeadersSchema,
-  body: z.object({
-    data: z.object({
-      type: z.literal("runs"),
-      attributes: z.object({
-        "auto-apply": z.boolean().default(false),
-        refresh: z.boolean().default(true),
-        "save-plan": z.boolean().default(false),
-        message: z.string().optional(),
-        variables: z
-          .array(
-            z.object({
-              key: z.string(),
-              value: z.string(),
-            })
-          )
-          .optional(),
-      }),
-      relationships: z.object({
-        "configuration-version": z.object({
-          data: z.object({
-            type: z.literal("configuration-versions"),
-            id: z.string(),
-          }),
-        }),
-        workspace: z
-          .object({
-            data: z.object({
-              type: z.literal("workspaces"),
-              id: z.string(),
-            }),
-          })
-          .optional(),
-      }),
-    }),
-  }),
-});
-
-const GetRunInput = z.object({
-  params: z.object({
-    runId: z.string().describe("Run ID"),
-  }),
-  headers: AuthHeadersSchema,
-});
-
-const ListRunsInput = z.object({
-  params: z.object({
-    workspaceId: z.string().describe("Workspace ID"),
-  }),
-  query: z
-    .object({
-      "page[number]": z.number().int().min(1).optional(),
-      "page[size]": z.number().int().min(1).max(100).optional(),
-    })
-    .optional(),
-  headers: AuthHeadersSchema,
-});
-
-const RunActionInput = z.object({
-  params: z.object({
-    runId: z.string().describe("Run ID"),
-  }),
-  headers: AuthHeadersSchema,
-  body: z
-    .object({
-      comment: z.string().optional(),
-    })
-    .optional(),
-});
-
-// --- Output Types ---
-
-const RunOutputSchema = JsonApiDocument("runs", RunAttributesSchema);
-const RunsOutputSchema = JsonApiCollection("runs", RunAttributesSchema);
+  CreateRunInput,
+  CreateRunOutput,
+  GetRunInput,
+  GetRunOutput,
+  ListRunsInput,
+  ListRunsOutput,
+  ApplyRunInput,
+  DiscardRunInput,
+  CancelRunInput,
+  ForceCancelRunInput,
+} from "./run.schema";
 
 // --- Contracts ---
 
@@ -98,7 +26,7 @@ export const createRun = oc
   .output(
     z.object({
       status: z.literal(201),
-      body: RunOutputSchema,
+      body: CreateRunOutput,
     })
   );
 
@@ -113,7 +41,7 @@ export const getRun = oc
   .output(
     z.object({
       status: z.literal(200),
-      body: RunOutputSchema,
+      body: GetRunOutput,
     })
   );
 
@@ -128,7 +56,7 @@ export const listRuns = oc
   .output(
     z.object({
       status: z.literal(200),
-      body: RunsOutputSchema,
+      body: ListRunsOutput,
     })
   );
 
@@ -139,7 +67,7 @@ export const applyRun = oc
     inputStructure: "detailed",
     outputStructure: "detailed",
   })
-  .input(RunActionInput)
+  .input(ApplyRunInput)
   .output(
     z.object({
       status: z.literal(202),
@@ -154,7 +82,7 @@ export const discardRun = oc
     inputStructure: "detailed",
     outputStructure: "detailed",
   })
-  .input(RunActionInput)
+  .input(DiscardRunInput)
   .output(
     z.object({
       status: z.literal(202),
@@ -169,7 +97,7 @@ export const cancelRun = oc
     inputStructure: "detailed",
     outputStructure: "detailed",
   })
-  .input(RunActionInput)
+  .input(CancelRunInput)
   .output(
     z.object({
       status: z.literal(202),
@@ -184,7 +112,7 @@ export const forceCancelRun = oc
     inputStructure: "detailed",
     outputStructure: "detailed",
   })
-  .input(RunActionInput)
+  .input(ForceCancelRunInput)
   .output(
     z.object({
       status: z.literal(202),

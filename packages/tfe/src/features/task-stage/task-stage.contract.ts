@@ -1,38 +1,11 @@
 import { z } from "zod";
 import { oc } from "@orpc/contract";
 import {
-  AuthHeadersSchema,
-  JsonApiDocument,
-  JsonApiCollection,
-} from "../../lib/common.schema";
-import { TaskStageAttributesSchema } from "./task-stage.schema";
-
-// --- Input Types ---
-
-const GetTaskStageInput = z.object({
-  params: z.object({
-    taskStageId: z.string().describe("Task Stage ID"),
-  }),
-  headers: AuthHeadersSchema,
-});
-
-const ListTaskStagesInput = z.object({
-  params: z.object({
-    runId: z.string().describe("Run ID"),
-  }),
-  headers: AuthHeadersSchema,
-});
-
-// --- Output Types ---
-
-const TaskStageOutputSchema = JsonApiDocument(
-  "task-stages",
-  TaskStageAttributesSchema
-);
-const TaskStagesOutputSchema = JsonApiCollection(
-  "task-stages",
-  TaskStageAttributesSchema
-);
+  GetTaskStageInput,
+  GetTaskStageOutput,
+  ListTaskStagesInput,
+  ListTaskStagesOutput,
+} from "./task-stage.schema";
 
 // --- Contracts ---
 
@@ -47,7 +20,7 @@ export const getTaskStage = oc
   .output(
     z.object({
       status: z.literal(200),
-      body: TaskStageOutputSchema,
+      body: GetTaskStageOutput,
     })
   );
 
@@ -62,7 +35,7 @@ export const listTaskStages = oc
   .output(
     z.object({
       status: z.literal(200),
-      body: TaskStagesOutputSchema,
+      body: ListTaskStagesOutput,
     })
   );
 

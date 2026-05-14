@@ -1,43 +1,11 @@
 import { z } from "zod";
 import { oc } from "@orpc/contract";
 import {
-  AuthHeadersSchema,
-  JsonApiDocument,
-} from "../../lib/common.schema";
-import { ConfigurationVersionAttributesSchema } from "./configuration-version.schema";
-
-// --- Input Types ---
-
-const CreateConfigurationVersionInput = z.object({
-  params: z.object({
-    workspaceId: z.string().describe("Workspace ID"),
-  }),
-  headers: AuthHeadersSchema,
-  body: z.object({
-    data: z.object({
-      type: z.literal("configuration-versions"),
-      attributes: z.object({
-        "auto-queue-runs": z.boolean().default(false),
-        provisional: z.boolean().default(false),
-        speculative: z.boolean(),
-      }),
-    }),
-  }),
-});
-
-const GetConfigurationVersionInput = z.object({
-  params: z.object({
-    configurationVersionId: z.string().describe("Configuration Version ID"),
-  }),
-  headers: AuthHeadersSchema,
-});
-
-// --- Output Types ---
-
-const ConfigurationVersionOutputSchema = JsonApiDocument(
-  "configuration-versions",
-  ConfigurationVersionAttributesSchema
-);
+  CreateConfigurationVersionInput,
+  CreateConfigurationVersionOutput,
+  GetConfigurationVersionInput,
+  GetConfigurationVersionOutput,
+} from "./configuration-version.schema";
 
 // --- Contracts ---
 
@@ -52,7 +20,7 @@ export const createConfigurationVersion = oc
   .output(
     z.object({
       status: z.literal(201),
-      body: ConfigurationVersionOutputSchema,
+      body: CreateConfigurationVersionOutput,
     })
   );
 
@@ -67,7 +35,7 @@ export const getConfigurationVersion = oc
   .output(
     z.object({
       status: z.literal(200),
-      body: ConfigurationVersionOutputSchema,
+      body: GetConfigurationVersionOutput,
     })
   );
 

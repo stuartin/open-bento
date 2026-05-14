@@ -1,8 +1,17 @@
 import { z } from "zod";
 import type { EntitySerializer } from "@jsonapi-serde/server/response";
 import { createDeserializer } from "@jsonapi-serde/client";
+import { AuthHeadersSchema } from "../../lib/common.schema";
 
-// Schema
+// --- Get Apply ---
+
+export const GetApplyInput = z.object({
+  params: z.object({
+    applyId: z.string().describe("Apply ID"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
 export const ApplyAttributesSchema = z.object({
   status: z.enum([
     "pending",
@@ -21,13 +30,19 @@ export const ApplyAttributesSchema = z.object({
   "resource-destructions": z.number().optional(),
 });
 
-// Type
 export type Apply = z.infer<typeof ApplyAttributesSchema> & {
   id: string;
 };
 
-// Serializer
-export const serializeApply: EntitySerializer<Apply> = {
+export const GetApplyOutput = z.object({
+  data: z.object({
+    type: z.literal("applies"),
+    id: z.string(),
+    attributes: ApplyAttributesSchema,
+  }),
+});
+
+export const serializeGetApplyOutput: EntitySerializer<Apply> = {
   getId: (apply) => apply.id,
   serialize: (apply) => ({
     attributes: {
@@ -40,8 +55,7 @@ export const serializeApply: EntitySerializer<Apply> = {
   }),
 };
 
-// Deserializer
-export const deserializeApply = createDeserializer({
+export const deserializeGetApplyOutput = createDeserializer({
   type: "applies",
   cardinality: "one",
   attributesSchema: ApplyAttributesSchema,

@@ -1,8 +1,17 @@
 import { z } from "zod";
 import type { EntitySerializer } from "@jsonapi-serde/server/response";
 import { createDeserializer } from "@jsonapi-serde/client";
+import { AuthHeadersSchema } from "../../lib/common.schema";
 
-// Schema
+// --- Get Policy Evaluation ---
+
+export const GetPolicyEvaluationInput = z.object({
+  params: z.object({
+    policyEvaluationId: z.string().describe("Policy Evaluation ID"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
 export const PolicyEvaluationAttributesSchema = z.object({
   status: z.enum([
     "pending",
@@ -26,29 +35,35 @@ export const PolicyEvaluationAttributesSchema = z.object({
   "updated-at": z.string().optional(),
 });
 
-// Type
 export type PolicyEvaluation = z.infer<
   typeof PolicyEvaluationAttributesSchema
 > & {
   id: string;
 };
 
-// Serializer
-export const serializePolicyEvaluation: EntitySerializer<PolicyEvaluation> = {
-  getId: (pe) => pe.id,
-  serialize: (pe) => ({
-    attributes: {
-      status: pe.status,
-      "policy-kind": pe["policy-kind"],
-      "result-count": pe["result-count"],
-      "created-at": pe["created-at"],
-      "updated-at": pe["updated-at"],
-    },
+export const GetPolicyEvaluationOutput = z.object({
+  data: z.object({
+    type: z.literal("policy-evaluations"),
+    id: z.string(),
+    attributes: PolicyEvaluationAttributesSchema,
   }),
-};
+});
 
-// Deserializer
-export const deserializePolicyEvaluation = createDeserializer({
+export const serializeGetPolicyEvaluationOutput: EntitySerializer<PolicyEvaluation> =
+  {
+    getId: (pe) => pe.id,
+    serialize: (pe) => ({
+      attributes: {
+        status: pe.status,
+        "policy-kind": pe["policy-kind"],
+        "result-count": pe["result-count"],
+        "created-at": pe["created-at"],
+        "updated-at": pe["updated-at"],
+      },
+    }),
+  };
+
+export const deserializeGetPolicyEvaluationOutput = createDeserializer({
   type: "policy-evaluations",
   cardinality: "one",
   attributesSchema: PolicyEvaluationAttributesSchema,

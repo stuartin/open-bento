@@ -1,8 +1,17 @@
 import { z } from "zod";
 import type { EntitySerializer } from "@jsonapi-serde/server/response";
 import { createDeserializer } from "@jsonapi-serde/client";
+import { AuthHeadersSchema } from "../../lib/common.schema";
 
-// Schema
+// --- Get Plan ---
+
+export const GetPlanInput = z.object({
+  params: z.object({
+    planId: z.string().describe("Plan ID"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
 export const PlanAttributesSchema = z.object({
   status: z.enum([
     "pending",
@@ -23,13 +32,19 @@ export const PlanAttributesSchema = z.object({
   "resource-destructions": z.number().optional(),
 });
 
-// Type
 export type Plan = z.infer<typeof PlanAttributesSchema> & {
   id: string;
 };
 
-// Serializer
-export const serializePlan: EntitySerializer<Plan> = {
+export const GetPlanOutput = z.object({
+  data: z.object({
+    type: z.literal("plans"),
+    id: z.string(),
+    attributes: PlanAttributesSchema,
+  }),
+});
+
+export const serializeGetPlanOutput: EntitySerializer<Plan> = {
   getId: (plan) => plan.id,
   serialize: (plan) => ({
     attributes: {
@@ -44,9 +59,27 @@ export const serializePlan: EntitySerializer<Plan> = {
   }),
 };
 
-// Deserializer
-export const deserializePlan = createDeserializer({
+export const deserializeGetPlanOutput = createDeserializer({
   type: "plans",
   cardinality: "one",
   attributesSchema: PlanAttributesSchema,
+});
+
+// --- Get Plan JSON Output ---
+
+export const GetPlanJsonOutputInput = z.object({
+  params: z.object({
+    planId: z.string().describe("Plan ID"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
+export const GetPlanJsonOutputOutput = z.object({
+  format_version: z.string(),
+  terraform_version: z.string().optional(),
+  planned_values: z.record(z.any()).optional(),
+  resource_changes: z.array(z.any()).optional(),
+  output_changes: z.record(z.any()).optional(),
+  prior_state: z.record(z.any()).optional(),
+  configuration: z.record(z.any()).optional(),
 });

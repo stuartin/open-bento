@@ -1,37 +1,11 @@
 import { z } from "zod";
 import { oc } from "@orpc/contract";
-import { AuthHeadersSchema, JsonApiDocument } from "../../lib/common.schema";
-import { PlanAttributesSchema } from "./plan.schema";
-
-// --- Input Types ---
-
-const GetPlanInput = z.object({
-  params: z.object({
-    planId: z.string().describe("Plan ID"),
-  }),
-  headers: AuthHeadersSchema,
-});
-
-const GetPlanJsonOutputInput = z.object({
-  params: z.object({
-    planId: z.string().describe("Plan ID"),
-  }),
-  headers: AuthHeadersSchema,
-});
-
-// --- Output Types ---
-
-const PlanOutputSchema = JsonApiDocument("plans", PlanAttributesSchema);
-
-const PlanJsonOutputSchema = z.object({
-  format_version: z.string(),
-  terraform_version: z.string().optional(),
-  planned_values: z.record(z.any()).optional(),
-  resource_changes: z.array(z.any()).optional(),
-  output_changes: z.record(z.any()).optional(),
-  prior_state: z.record(z.any()).optional(),
-  configuration: z.record(z.any()).optional(),
-});
+import {
+  GetPlanInput,
+  GetPlanOutput,
+  GetPlanJsonOutputInput,
+  GetPlanJsonOutputOutput,
+} from "./plan.schema";
 
 // --- Contracts ---
 
@@ -46,7 +20,7 @@ export const getPlan = oc
   .output(
     z.object({
       status: z.literal(200),
-      body: PlanOutputSchema,
+      body: GetPlanOutput,
     })
   );
 
@@ -62,7 +36,7 @@ export const getPlanJsonOutput = oc
     z.union([
       z.object({
         status: z.literal(200),
-        body: PlanJsonOutputSchema,
+        body: GetPlanJsonOutputOutput,
       }),
       z.object({
         status: z.literal(307),
