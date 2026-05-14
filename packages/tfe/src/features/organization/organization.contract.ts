@@ -1,48 +1,11 @@
 import { z } from "zod";
 import { oc } from "@orpc/contract";
-import { AuthHeadersSchema } from "../../lib/common.schema";
-import { RunAttributesSchema } from "../run/run.schema";
-
-// --- Input Types ---
-
-const GetOrganizationEntitlementsInput = z.object({
-  params: z.object({
-    organization: z.string().describe("Organization name"),
-  }),
-  headers: AuthHeadersSchema,
-});
-
-const ListOrganizationRunQueueInput = z.object({
-  params: z.object({
-    organization: z.string().describe("Organization name"),
-  }),
-  headers: AuthHeadersSchema,
-});
-
-// --- Output Types ---
-
-const OrganizationEntitlementsOutputSchema = z.object({
-  data: z.object({
-    type: z.literal("entitlement-sets"),
-    id: z.string(),
-    attributes: z.object({
-      operations: z.boolean(),
-    }),
-  }),
-});
-
-const OrganizationRunQueueOutputSchema = z.object({
-  data: z.array(
-    z.object({
-      type: z.literal("runs"),
-      id: z.string(),
-      attributes: z.object({
-        status: RunAttributesSchema.shape.status,
-        "position-in-queue": z.number().optional(),
-      }),
-    })
-  ),
-});
+import {
+  GetOrganizationEntitlementsInput,
+  GetOrganizationEntitlementsOutput,
+  ListOrganizationRunQueueInput,
+  ListOrganizationRunQueueOutput,
+} from "./organization.schema";
 
 // --- Contracts ---
 
@@ -57,7 +20,7 @@ export const getOrganizationEntitlements = oc
   .output(
     z.object({
       status: z.literal(200),
-      body: OrganizationEntitlementsOutputSchema,
+      body: GetOrganizationEntitlementsOutput,
     })
   );
 
@@ -72,7 +35,7 @@ export const listOrganizationRunQueue = oc
   .output(
     z.object({
       status: z.literal(200),
-      body: OrganizationRunQueueOutputSchema,
+      body: ListOrganizationRunQueueOutput,
     })
   );
 
