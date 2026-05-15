@@ -3,14 +3,9 @@ import type { EntitySerializer } from "@jsonapi-serde/server/response";
 import { createDeserializer } from "@jsonapi-serde/client";
 import { AuthHeadersSchema } from "../../lib/common.schema";
 
-// --- Get State Version Output ---
-
-export const GetStateVersionOutputInput = z.object({
-  params: z.object({
-    stateVersionOutputId: z.string().describe("State Version Output ID"),
-  }),
-  headers: AuthHeadersSchema,
-});
+// ============================================================
+// ENTITY DEFINITION
+// ============================================================
 
 export const StateVersionOutputAttributesSchema = z.object({
   name: z.string(),
@@ -24,14 +19,6 @@ export type StateVersionOutput = z.infer<
 > & {
   id: string;
 };
-
-export const GetStateVersionOutputOutput = z.object({
-  data: z.object({
-    type: z.literal("state-version-outputs"),
-    id: z.string(),
-    attributes: StateVersionOutputAttributesSchema,
-  }),
-});
 
 export const serializeStateVersionOutput: EntitySerializer<StateVersionOutput> =
   {
@@ -50,4 +37,25 @@ export const deserializeStateVersionOutput = createDeserializer({
   type: "state-version-outputs",
   cardinality: "one",
   attributesSchema: StateVersionOutputAttributesSchema,
+});
+
+// ============================================================
+// OPERATION-SPECIFIC SCHEMAS
+// ============================================================
+
+// --- Get State Version Output ---
+
+export const GetStateVersionOutputInput = z.object({
+  params: z.object({
+    stateVersionOutputId: z.string().describe("State Version Output ID"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
+export const GetStateVersionOutputOutput = z.object({
+  data: z.object({
+    type: z.literal("state-version-outputs"),
+    id: z.string(),
+    attributes: StateVersionOutputAttributesSchema,
+  }),
 });

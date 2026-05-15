@@ -2,8 +2,11 @@ import { z } from "zod";
 import type { EntitySerializer } from "@jsonapi-serde/server/response";
 import { createDeserializer } from "@jsonapi-serde/client";
 import { AuthHeadersSchema } from "../../lib/common.schema";
+import { StateVersionOutputAttributesSchema } from "../state-version-output/state-version-output.schema";
 
-// --- Attributes Schema ---
+// ============================================================
+// ENTITY DEFINITION
+// ============================================================
 
 export const StateVersionAttributesSchema = z.object({
   "created-at": z.string(),
@@ -16,25 +19,6 @@ export type StateVersion = z.infer<typeof StateVersionAttributesSchema> & {
   id: string;
   outputIds?: string[];
 };
-
-// --- Get Current State Version ---
-
-export const GetCurrentStateVersionInput = z.object({
-  params: z.object({
-    workspaceId: z.string().describe("Workspace ID"),
-  }),
-  headers: AuthHeadersSchema,
-});
-
-export const GetCurrentStateVersionOutput = z.object({
-  data: z
-    .object({
-      type: z.literal("state-versions"),
-      id: z.string(),
-      attributes: StateVersionAttributesSchema,
-    })
-    .nullable(),
-});
 
 export const serializeStateVersion: EntitySerializer<StateVersion> = {
   getId: (sv) => sv.id,
@@ -66,13 +50,35 @@ export const deserializeStateVersion = createDeserializer({
     outputs: {
       type: "state-version-outputs",
       cardinality: "many",
+      included: {
+        attributesSchema: StateVersionOutputAttributesSchema,
+      },
     },
   },
 });
 
-// Backward compatibility exports
-export const serializeGetCurrentStateVersionOutput = serializeStateVersion;
-export const deserializeGetCurrentStateVersionOutput = deserializeStateVersion;
+// ============================================================
+// OPERATION-SPECIFIC SCHEMAS
+// ============================================================
+
+// --- Get Current State Version ---
+
+export const GetCurrentStateVersionInput = z.object({
+  params: z.object({
+    workspaceId: z.string().describe("Workspace ID"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
+export const GetCurrentStateVersionOutput = z.object({
+  data: z
+    .object({
+      type: z.literal("state-versions"),
+      id: z.string(),
+      attributes: StateVersionAttributesSchema,
+    })
+    .nullable(),
+});
 
 // --- Get State Version ---
 
@@ -90,9 +96,6 @@ export const GetStateVersionOutput = z.object({
     attributes: StateVersionAttributesSchema,
   }),
 });
-
-export const serializeGetStateVersionOutput = serializeStateVersion;
-export const deserializeGetStateVersionOutput = deserializeStateVersion;
 
 // --- List State Versions ---
 
@@ -117,18 +120,4 @@ export const ListStateVersionsOutput = z.object({
       attributes: StateVersionAttributesSchema,
     })
   ),
-});
-
-export const serializeListStateVersionsOutput = serializeStateVersion;
-
-export const deserializeListStateVersionsOutput = createDeserializer({
-  type: "state-versions",
-  cardinality: "many",
-  attributesSchema: StateVersionAttributesSchema,
-  relationships: {
-    outputs: {
-      type: "state-version-outputs",
-      cardinality: "many",
-    },
-  },
 });

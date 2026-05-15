@@ -2,8 +2,16 @@ import { z } from "zod";
 import type { EntitySerializer } from "@jsonapi-serde/server/response";
 import { createDeserializer } from "@jsonapi-serde/client";
 import { AuthHeadersSchema } from "../../lib/common.schema";
+import { PlanAttributesSchema } from "../plan/plan.schema";
+import { ApplyAttributesSchema } from "../apply/apply.schema";
+import { WorkspaceAttributesSchema } from "../workspace/workspace.schema";
+import { ConfigurationVersionAttributesSchema } from "../configuration-version/configuration-version.schema";
+import { CostEstimateAttributesSchema } from "../cost-estimate/cost-estimate.schema";
+import { TaskStageAttributesSchema } from "../task-stage/task-stage.schema";
 
-// --- Attributes Schema ---
+// ============================================================
+// ENTITY DEFINITION
+// ============================================================
 
 export const RunAttributesSchema = z.object({
   status: z.enum([
@@ -51,55 +59,6 @@ export type Run = z.infer<typeof RunAttributesSchema> & {
   costEstimateId?: string;
   taskStageIds?: string[];
 };
-
-// --- Create Run ---
-
-export const CreateRunInput = z.object({
-  headers: AuthHeadersSchema,
-  body: z.object({
-    data: z.object({
-      type: z.literal("runs"),
-      attributes: z.object({
-        "auto-apply": z.boolean().default(false),
-        refresh: z.boolean().default(true),
-        "save-plan": z.boolean().default(false),
-        message: z.string().optional(),
-        variables: z
-          .array(
-            z.object({
-              key: z.string(),
-              value: z.string(),
-            })
-          )
-          .optional(),
-      }),
-      relationships: z.object({
-        "configuration-version": z.object({
-          data: z.object({
-            type: z.literal("configuration-versions"),
-            id: z.string(),
-          }),
-        }),
-        workspace: z
-          .object({
-            data: z.object({
-              type: z.literal("workspaces"),
-              id: z.string(),
-            }),
-          })
-          .optional(),
-      }),
-    }),
-  }),
-});
-
-export const CreateRunOutput = z.object({
-  data: z.object({
-    type: z.literal("runs"),
-    id: z.string(),
-    attributes: RunAttributesSchema,
-  }),
-});
 
 export const serializeRun: EntitySerializer<Run> = {
   getId: (run) => run.id,
@@ -159,33 +118,100 @@ export const deserializeRun = createDeserializer({
     plan: {
       type: "plans",
       cardinality: "one",
+      included: {
+        attributesSchema: PlanAttributesSchema,
+      },
     },
     apply: {
       type: "applies",
       cardinality: "one",
+      included: {
+        attributesSchema: ApplyAttributesSchema,
+      },
     },
     workspace: {
       type: "workspaces",
       cardinality: "one",
+      included: {
+        attributesSchema: WorkspaceAttributesSchema,
+      },
     },
     "configuration-version": {
       type: "configuration-versions",
       cardinality: "one",
+      included: {
+        attributesSchema: ConfigurationVersionAttributesSchema,
+      },
     },
     "cost-estimate": {
       type: "cost-estimates",
       cardinality: "one",
+      included: {
+        attributesSchema: CostEstimateAttributesSchema,
+      },
     },
     "task-stages": {
       type: "task-stages",
       cardinality: "many",
+      included: {
+        attributesSchema: TaskStageAttributesSchema,
+      },
     },
   },
 });
 
-// Backward compatibility exports
-export const serializeCreateRunOutput = serializeRun;
-export const deserializeCreateRunOutput = deserializeRun;
+// ============================================================
+// OPERATION-SPECIFIC SCHEMAS
+// ============================================================
+
+// --- Create Run ---
+
+export const CreateRunInput = z.object({
+  headers: AuthHeadersSchema,
+  body: z.object({
+    data: z.object({
+      type: z.literal("runs"),
+      attributes: z.object({
+        "auto-apply": z.boolean().default(false),
+        refresh: z.boolean().default(true),
+        "save-plan": z.boolean().default(false),
+        message: z.string().optional(),
+        variables: z
+          .array(
+            z.object({
+              key: z.string(),
+              value: z.string(),
+            })
+          )
+          .optional(),
+      }),
+      relationships: z.object({
+        "configuration-version": z.object({
+          data: z.object({
+            type: z.literal("configuration-versions"),
+            id: z.string(),
+          }),
+        }),
+        workspace: z
+          .object({
+            data: z.object({
+              type: z.literal("workspaces"),
+              id: z.string(),
+            }),
+          })
+          .optional(),
+      }),
+    }),
+  }),
+});
+
+export const CreateRunOutput = z.object({
+  data: z.object({
+    type: z.literal("runs"),
+    id: z.string(),
+    attributes: RunAttributesSchema,
+  }),
+});
 
 // --- Get Run ---
 
@@ -203,9 +229,6 @@ export const GetRunOutput = z.object({
     attributes: RunAttributesSchema,
   }),
 });
-
-export const serializeGetRunOutput = serializeRun;
-export const deserializeGetRunOutput = deserializeRun;
 
 // --- List Runs ---
 
@@ -230,40 +253,6 @@ export const ListRunsOutput = z.object({
       attributes: RunAttributesSchema,
     })
   ),
-});
-
-export const serializeListRunsOutput = serializeRun;
-
-export const deserializeListRunsOutput = createDeserializer({
-  type: "runs",
-  cardinality: "many",
-  attributesSchema: RunAttributesSchema,
-  relationships: {
-    plan: {
-      type: "plans",
-      cardinality: "one",
-    },
-    apply: {
-      type: "applies",
-      cardinality: "one",
-    },
-    workspace: {
-      type: "workspaces",
-      cardinality: "one",
-    },
-    "configuration-version": {
-      type: "configuration-versions",
-      cardinality: "one",
-    },
-    "cost-estimate": {
-      type: "cost-estimates",
-      cardinality: "one",
-    },
-    "task-stages": {
-      type: "task-stages",
-      cardinality: "many",
-    },
-  },
 });
 
 // --- Apply Run ---

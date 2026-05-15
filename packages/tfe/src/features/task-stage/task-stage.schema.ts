@@ -2,8 +2,12 @@ import { z } from "zod";
 import type { EntitySerializer } from "@jsonapi-serde/server/response";
 import { createDeserializer } from "@jsonapi-serde/client";
 import { AuthHeadersSchema } from "../../lib/common.schema";
+import { TaskResultAttributesSchema } from "../task-result/task-result.schema";
+import { PolicyEvaluationAttributesSchema } from "../policy-evaluation/policy-evaluation.schema";
 
-// --- Attributes Schema ---
+// ============================================================
+// ENTITY DEFINITION
+// ============================================================
 
 export const TaskStageAttributesSchema = z.object({
   stage: z.enum(["pre_plan", "post_plan", "pre_apply"]),
@@ -27,23 +31,6 @@ export type TaskStage = z.infer<typeof TaskStageAttributesSchema> & {
   taskResultIds?: string[];
   policyEvaluationIds?: string[];
 };
-
-// --- Get Task Stage ---
-
-export const GetTaskStageInput = z.object({
-  params: z.object({
-    taskStageId: z.string().describe("Task Stage ID"),
-  }),
-  headers: AuthHeadersSchema,
-});
-
-export const GetTaskStageOutput = z.object({
-  data: z.object({
-    type: z.literal("task-stages"),
-    id: z.string(),
-    attributes: TaskStageAttributesSchema,
-  }),
-});
 
 export const serializeTaskStage: EntitySerializer<TaskStage> = {
   getId: (taskStage) => taskStage.id,
@@ -83,17 +70,40 @@ export const deserializeTaskStage = createDeserializer({
     "task-results": {
       type: "task-results",
       cardinality: "many",
+      included: {
+        attributesSchema: TaskResultAttributesSchema,
+      },
     },
     "policy-evaluations": {
       type: "policy-evaluations",
       cardinality: "many",
+      included: {
+        attributesSchema: PolicyEvaluationAttributesSchema,
+      },
     },
   },
 });
 
-// Backward compatibility exports
-export const serializeGetTaskStageOutput = serializeTaskStage;
-export const deserializeGetTaskStageOutput = deserializeTaskStage;
+// ============================================================
+// OPERATION-SPECIFIC SCHEMAS
+// ============================================================
+
+// --- Get Task Stage ---
+
+export const GetTaskStageInput = z.object({
+  params: z.object({
+    taskStageId: z.string().describe("Task Stage ID"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
+export const GetTaskStageOutput = z.object({
+  data: z.object({
+    type: z.literal("task-stages"),
+    id: z.string(),
+    attributes: TaskStageAttributesSchema,
+  }),
+});
 
 // --- List Task Stages ---
 
@@ -112,22 +122,4 @@ export const ListTaskStagesOutput = z.object({
       attributes: TaskStageAttributesSchema,
     })
   ),
-});
-
-export const serializeListTaskStagesOutput = serializeTaskStage;
-
-export const deserializeListTaskStagesOutput = createDeserializer({
-  type: "task-stages",
-  cardinality: "many",
-  attributesSchema: TaskStageAttributesSchema,
-  relationships: {
-    "task-results": {
-      type: "task-results",
-      cardinality: "many",
-    },
-    "policy-evaluations": {
-      type: "policy-evaluations",
-      cardinality: "many",
-    },
-  },
 });

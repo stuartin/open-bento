@@ -3,14 +3,9 @@ import type { EntitySerializer } from "@jsonapi-serde/server/response";
 import { createDeserializer } from "@jsonapi-serde/client";
 import { AuthHeadersSchema } from "../../lib/common.schema";
 
-// --- Get Plan ---
-
-export const GetPlanInput = z.object({
-  params: z.object({
-    planId: z.string().describe("Plan ID"),
-  }),
-  headers: AuthHeadersSchema,
-});
+// ============================================================
+// ENTITY DEFINITION
+// ============================================================
 
 export const PlanAttributesSchema = z.object({
   status: z.enum([
@@ -36,14 +31,6 @@ export type Plan = z.infer<typeof PlanAttributesSchema> & {
   id: string;
 };
 
-export const GetPlanOutput = z.object({
-  data: z.object({
-    type: z.literal("plans"),
-    id: z.string(),
-    attributes: PlanAttributesSchema,
-  }),
-});
-
 export const serializePlan: EntitySerializer<Plan> = {
   getId: (plan) => plan.id,
   serialize: (plan) => ({
@@ -63,6 +50,27 @@ export const deserializePlan = createDeserializer({
   type: "plans",
   cardinality: "one",
   attributesSchema: PlanAttributesSchema,
+});
+
+// ============================================================
+// OPERATION-SPECIFIC SCHEMAS
+// ============================================================
+
+// --- Get Plan ---
+
+export const GetPlanInput = z.object({
+  params: z.object({
+    planId: z.string().describe("Plan ID"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
+export const GetPlanOutput = z.object({
+  data: z.object({
+    type: z.literal("plans"),
+    id: z.string(),
+    attributes: PlanAttributesSchema,
+  }),
 });
 
 // --- Get Plan JSON Output ---

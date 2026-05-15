@@ -3,24 +3,9 @@ import type { EntitySerializer } from "@jsonapi-serde/server/response";
 import { createDeserializer } from "@jsonapi-serde/client";
 import { AuthHeadersSchema } from "../../lib/common.schema";
 
-// --- Create Configuration Version ---
-
-export const CreateConfigurationVersionInput = z.object({
-  params: z.object({
-    workspaceId: z.string().describe("Workspace ID"),
-  }),
-  headers: AuthHeadersSchema,
-  body: z.object({
-    data: z.object({
-      type: z.literal("configuration-versions"),
-      attributes: z.object({
-        "auto-queue-runs": z.boolean().default(false),
-        provisional: z.boolean().default(false),
-        speculative: z.boolean(),
-      }),
-    }),
-  }),
-});
+// ============================================================
+// ENTITY DEFINITION
+// ============================================================
 
 export const ConfigurationVersionAttributesSchema = z.object({
   "auto-queue-runs": z.boolean(),
@@ -35,14 +20,6 @@ export type ConfigurationVersion = z.infer<
 > & {
   id: string;
 };
-
-export const CreateConfigurationVersionOutput = z.object({
-  data: z.object({
-    type: z.literal("configuration-versions"),
-    id: z.string(),
-    attributes: ConfigurationVersionAttributesSchema,
-  }),
-});
 
 export const serializeConfigurationVersion: EntitySerializer<ConfigurationVersion> =
 {
@@ -64,6 +41,37 @@ export const deserializeConfigurationVersion = createDeserializer({
   attributesSchema: ConfigurationVersionAttributesSchema,
 });
 
+// ============================================================
+// OPERATION-SPECIFIC SCHEMAS
+// ============================================================
+
+// --- Create Configuration Version ---
+
+export const CreateConfigurationVersionInput = z.object({
+  params: z.object({
+    workspaceId: z.string().describe("Workspace ID"),
+  }),
+  headers: AuthHeadersSchema,
+  body: z.object({
+    data: z.object({
+      type: z.literal("configuration-versions"),
+      attributes: z.object({
+        "auto-queue-runs": z.boolean().default(false),
+        provisional: z.boolean().default(false),
+        speculative: z.boolean(),
+      }),
+    }),
+  }),
+});
+
+export const CreateConfigurationVersionOutput = z.object({
+  data: z.object({
+    type: z.literal("configuration-versions"),
+    id: z.string(),
+    attributes: ConfigurationVersionAttributesSchema,
+  }),
+});
+
 // --- Get Configuration Version ---
 
 export const GetConfigurationVersionInput = z.object({
@@ -80,4 +88,3 @@ export const GetConfigurationVersionOutput = z.object({
     attributes: ConfigurationVersionAttributesSchema,
   }),
 });
-

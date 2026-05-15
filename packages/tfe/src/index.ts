@@ -88,7 +88,7 @@ import { serializeApply } from "./features/apply/apply.schema";
 import { serializeTaskStage } from "./features/task-stage/task-stage.schema";
 import { serializeStateVersion } from "./features/state-version/state-version.schema";
 import { serializeStateVersionOutput } from "./features/state-version-output/state-version-output.schema";
-import { serializeGetOrganizationEntitlementsOutput } from "./features/organization/organization.schema";
+import { serializeEntitlementSet } from "./features/organization/organization.schema";
 import { serializeCostEstimate } from "./features/cost-estimate/cost-estimate.schema";
 import { serializeTaskResult } from "./features/task-result/task-result.schema";
 import { serializePolicyEvaluation } from "./features/policy-evaluation/policy-evaluation.schema";
@@ -102,7 +102,7 @@ export const serialize = SerializeBuilder.new()
     .add("task-stages", serializeTaskStage)
     .add("state-versions", serializeStateVersion)
     .add("state-version-outputs", serializeStateVersionOutput)
-    .add("entitlement-sets", serializeGetOrganizationEntitlementsOutput)
+    .add("entitlement-sets", serializeEntitlementSet)
     .add("cost-estimates", serializeCostEstimate)
     .add("task-results", serializeTaskResult)
     .add("policy-evaluations", serializePolicyEvaluation)

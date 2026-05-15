@@ -2,16 +2,11 @@ import { z } from "zod";
 import { createDeserializer } from "@jsonapi-serde/client";
 import type { EntitySerializer } from "@jsonapi-serde/server/response";
 import { AuthHeadersSchema } from "../../lib/common.schema";
+import { StateVersionAttributesSchema } from "../state-version/state-version.schema";
 
-// --- Get Workspace ---
-
-export const GetWorkspaceInput = z.object({
-  params: z.object({
-    organization: z.string().describe("Organization name"),
-    workspace: z.string().describe("Workspace name"),
-  }),
-  headers: AuthHeadersSchema,
-});
+// ============================================================
+// ENTITY DEFINITION
+// ============================================================
 
 export const WorkspaceAttributesSchema = z.object({
   name: z.string(),
@@ -25,14 +20,6 @@ export type Workspace = z.infer<typeof WorkspaceAttributesSchema> & {
   organizationId?: string;
   currentStateVersionId?: string;
 };
-
-export const GetWorkspaceOutput = z.object({
-  data: z.object({
-    type: z.literal("workspaces"),
-    id: z.string(),
-    attributes: WorkspaceAttributesSchema,
-  }),
-});
 
 export const serializeWorkspace: EntitySerializer<Workspace> = {
   getId: (workspace) => workspace.id,
@@ -70,8 +57,33 @@ export const deserializeWorkspace = createDeserializer({
     "current-state-version": {
       type: "state-versions",
       cardinality: "one",
+      included: {
+        attributesSchema: StateVersionAttributesSchema,
+      },
     },
   },
+});
+
+// ============================================================
+// OPERATION-SPECIFIC SCHEMAS
+// ============================================================
+
+// --- Get Workspace ---
+
+export const GetWorkspaceInput = z.object({
+  params: z.object({
+    organization: z.string().describe("Organization name"),
+    workspace: z.string().describe("Workspace name"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
+export const GetWorkspaceOutput = z.object({
+  data: z.object({
+    type: z.literal("workspaces"),
+    id: z.string(),
+    attributes: WorkspaceAttributesSchema,
+  }),
 });
 
 // --- List Workspaces ---

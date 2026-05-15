@@ -3,14 +3,9 @@ import type { EntitySerializer } from "@jsonapi-serde/server/response";
 import { createDeserializer } from "@jsonapi-serde/client";
 import { AuthHeadersSchema } from "../../lib/common.schema";
 
-// --- Get Cost Estimate ---
-
-export const GetCostEstimateInput = z.object({
-  params: z.object({
-    costEstimateId: z.string().describe("Cost Estimate ID"),
-  }),
-  headers: AuthHeadersSchema,
-});
+// ============================================================
+// ENTITY DEFINITION
+// ============================================================
 
 export const CostEstimateAttributesSchema = z.object({
   status: z.enum([
@@ -33,14 +28,6 @@ export type CostEstimate = z.infer<typeof CostEstimateAttributesSchema> & {
   id: string;
 };
 
-export const GetCostEstimateOutput = z.object({
-  data: z.object({
-    type: z.literal("cost-estimates"),
-    id: z.string(),
-    attributes: CostEstimateAttributesSchema,
-  }),
-});
-
 export const serializeCostEstimate: EntitySerializer<CostEstimate> = {
   getId: (ce) => ce.id,
   serialize: (ce) => ({
@@ -59,4 +46,25 @@ export const deserializeCostEstimate = createDeserializer({
   type: "cost-estimates",
   cardinality: "one",
   attributesSchema: CostEstimateAttributesSchema,
+});
+
+// ============================================================
+// OPERATION-SPECIFIC SCHEMAS
+// ============================================================
+
+// --- Get Cost Estimate ---
+
+export const GetCostEstimateInput = z.object({
+  params: z.object({
+    costEstimateId: z.string().describe("Cost Estimate ID"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
+export const GetCostEstimateOutput = z.object({
+  data: z.object({
+    type: z.literal("cost-estimates"),
+    id: z.string(),
+    attributes: CostEstimateAttributesSchema,
+  }),
 });

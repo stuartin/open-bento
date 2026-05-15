@@ -3,14 +3,9 @@ import type { EntitySerializer } from "@jsonapi-serde/server/response";
 import { createDeserializer } from "@jsonapi-serde/client";
 import { AuthHeadersSchema } from "../../lib/common.schema";
 
-// --- Get Policy Evaluation ---
-
-export const GetPolicyEvaluationInput = z.object({
-  params: z.object({
-    policyEvaluationId: z.string().describe("Policy Evaluation ID"),
-  }),
-  headers: AuthHeadersSchema,
-});
+// ============================================================
+// ENTITY DEFINITION
+// ============================================================
 
 export const PolicyEvaluationAttributesSchema = z.object({
   status: z.enum([
@@ -41,14 +36,6 @@ export type PolicyEvaluation = z.infer<
   id: string;
 };
 
-export const GetPolicyEvaluationOutput = z.object({
-  data: z.object({
-    type: z.literal("policy-evaluations"),
-    id: z.string(),
-    attributes: PolicyEvaluationAttributesSchema,
-  }),
-});
-
 export const serializePolicyEvaluation: EntitySerializer<PolicyEvaluation> = {
   getId: (pe) => pe.id,
   serialize: (pe) => ({
@@ -66,4 +53,25 @@ export const deserializePolicyEvaluation = createDeserializer({
   type: "policy-evaluations",
   cardinality: "one",
   attributesSchema: PolicyEvaluationAttributesSchema,
+});
+
+// ============================================================
+// OPERATION-SPECIFIC SCHEMAS
+// ============================================================
+
+// --- Get Policy Evaluation ---
+
+export const GetPolicyEvaluationInput = z.object({
+  params: z.object({
+    policyEvaluationId: z.string().describe("Policy Evaluation ID"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
+export const GetPolicyEvaluationOutput = z.object({
+  data: z.object({
+    type: z.literal("policy-evaluations"),
+    id: z.string(),
+    attributes: PolicyEvaluationAttributesSchema,
+  }),
 });

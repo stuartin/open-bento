@@ -7,18 +7,25 @@ Based on a review of the [jsonapi-serde documentation](https://jsonapi-serde.js.
 ### 1. Duplicate Serializers Per Operation ❌
 
 **Current Pattern:**
+
 ```typescript
 // workspace.schema.ts
-export const serializeGetWorkspaceOutput: EntitySerializer<Workspace> = { /* ... */ };
-export const serializeListWorkspacesOutput: EntitySerializer<Workspace> = { /* ... */ };
+export const serializeGetWorkspaceOutput: EntitySerializer<Workspace> = {
+  /* ... */
+};
+export const serializeListWorkspacesOutput: EntitySerializer<Workspace> = {
+  /* ... */
+};
 ```
 
 **Problem:**
+
 - Creates nearly identical serializers for each operation (get, list, create, update)
 - Violates the library's design principle of one serializer per resource type
 - Increases bundle size and maintenance burden
 
 **Library's Intended Pattern:**
+
 ```typescript
 // ✅ Single serializer per entity type
 export const serializeWorkspace: EntitySerializer<Workspace> = {
@@ -31,18 +38,26 @@ export const serializeWorkspace: EntitySerializer<Workspace> = {
       locked: workspace.locked,
     },
     relationships: {
-      organization: workspace.organizationId ? {
-        data: { type: "organizations", id: workspace.organizationId }
-      } : undefined,
-      "current-state-version": workspace.currentStateVersionId ? {
-        data: { type: "state-versions", id: workspace.currentStateVersionId }
-      } : undefined,
-    }
-  })
+      organization: workspace.organizationId
+        ? {
+            data: { type: "organizations", id: workspace.organizationId },
+          }
+        : undefined,
+      "current-state-version": workspace.currentStateVersionId
+        ? {
+            data: {
+              type: "state-versions",
+              id: workspace.currentStateVersionId,
+            },
+          }
+        : undefined,
+    },
+  }),
 };
 ```
 
 **Benefits:**
+
 - Single source of truth for serialization logic
 - The library automatically handles wrapping in `data: {...}` vs `data: [...]`
 - Reduced code duplication
@@ -52,6 +67,7 @@ export const serializeWorkspace: EntitySerializer<Workspace> = {
 ### 2. Redundant Output Schemas ⚠️
 
 **Current Pattern:**
+
 ```typescript
 export const GetWorkspaceOutput = z.object({
   data: z.object({
@@ -67,12 +83,13 @@ export const ListWorkspacesOutput = z.object({
       type: z.literal("workspaces"),
       id: z.string(),
       attributes: WorkspaceAttributesSchema,
-    })
+    }),
   ),
 });
 ```
 
 **Problem:**
+
 - These schemas duplicate the structure already defined by the serializer
 - They're only used for contract output validation
 - The serializer's TypeScript types already provide type safety
@@ -80,6 +97,7 @@ export const ListWorkspacesOutput = z.object({
 **Recommendation:**
 
 **Option A - Keep for Contract Validation (Current Approach)**
+
 ```typescript
 // Keep if you need explicit contract output validation
 export const GetWorkspaceOutput = z.object({
@@ -92,6 +110,7 @@ export const GetWorkspaceOutput = z.object({
 ```
 
 **Option B - Use Serializer Types (More DRY)**
+
 ```typescript
 // Let the serializer define the structure
 // Use SerializeMap type for type safety in contracts
@@ -111,21 +130,24 @@ export type SerializeMap = {
 ### 3. SerializeBuilder Registration Issues ❌
 
 **Current Pattern:**
+
 ```typescript
 // index.ts
 export const serialize = SerializeBuilder.new()
   .add("workspaces", serializeWorkspace)
   .add("entitlement-sets", serializeGetOrganizationEntitlementsOutput) // ❌ Operation-specific
-  .add("cost-estimates", serializeCostEstimate)
-  // ...
+  .add("cost-estimates", serializeCostEstimate);
+// ...
 ```
 
 **Problem:**
+
 - Mixing entity-level serializers with operation-specific serializers
 - `serializeGetOrganizationEntitlementsOutput` should be `serializeEntitlementSet`
 - Inconsistent naming convention
 
 **Correct Pattern:**
+
 ```typescript
 // ✅ All registrations should be entity-level
 export const serialize = SerializeBuilder.new()
@@ -149,12 +171,15 @@ export const serialize = SerializeBuilder.new()
 ### 4. Deserializer Cardinality Duplication ℹ️
 
 **Current Pattern:**
+
 ```typescript
 export const deserializeGetWorkspaceOutput = createDeserializer({
   type: "workspaces",
   cardinality: "one",
   attributesSchema: WorkspaceAttributesSchema,
-  relationships: { /* ... */ }
+  relationships: {
+    /* ... */
+  },
 });
 
 export const deserializeListWorkspacesOutput = createDeserializer({
@@ -166,6 +191,7 @@ export const deserializeListWorkspacesOutput = createDeserializer({
 ```
 
 **Problem:**
+
 - Two deserializers for the same entity type
 - Only difference is cardinality
 - List deserializer loses relationship configuration
@@ -173,6 +199,7 @@ export const deserializeListWorkspacesOutput = createDeserializer({
 **Recommendation:**
 
 **Option A - Single Deserializer (Simplest)**
+
 ```typescript
 // ✅ One deserializer, specify cardinality at call site
 export const deserializeWorkspace = createDeserializer({
@@ -189,8 +216,8 @@ export const deserializeWorkspace = createDeserializer({
       type: "state-versions",
       cardinality: "one",
       included: StateVersionAttributesSchema,
-    }
-  }
+    },
+  },
 });
 
 // Can be used for both single and collection responses
@@ -198,12 +225,15 @@ export const deserializeWorkspace = createDeserializer({
 ```
 
 **Option B - Separate Deserializers with Shared Config**
+
 ```typescript
 // If you need different relationship configs for get vs list
 const workspaceDeserializerConfig = {
   type: "workspaces" as const,
   attributesSchema: WorkspaceAttributesSchema,
-  relationships: { /* ... */ }
+  relationships: {
+    /* ... */
+  },
 };
 
 export const deserializeWorkspace = createDeserializer({
@@ -222,6 +252,7 @@ export const deserializeWorkspaces = createDeserializer({
 ### 5. Missing Relationship Expansion Configuration ⚠️
 
 **Current Pattern:**
+
 ```typescript
 relationships: {
   organization: {
@@ -238,11 +269,13 @@ relationships: {
 ```
 
 **Problem:**
+
 - Without `included`, relationships only contain resource identifiers
 - Cannot access related object properties (e.g., `workspace.organization.name`)
 - Misses key feature of the library
 
 **Correct Pattern:**
+
 ```typescript
 relationships: {
   organization: {
@@ -259,6 +292,7 @@ relationships: {
 ```
 
 **Benefits:**
+
 - Access nested properties: `workspace.organization.name`
 - Automatic validation of included resources
 - Recursive relationship support
@@ -304,14 +338,21 @@ export const serializeWorkspace: EntitySerializer<Workspace> = {
       locked: workspace.locked,
     },
     relationships: {
-      organization: workspace.organizationId ? {
-        data: { type: "organizations", id: workspace.organizationId }
-      } : undefined,
-      "current-state-version": workspace.currentStateVersionId ? {
-        data: { type: "state-versions", id: workspace.currentStateVersionId }
-      } : undefined,
-    }
-  })
+      organization: workspace.organizationId
+        ? {
+            data: { type: "organizations", id: workspace.organizationId },
+          }
+        : undefined,
+      "current-state-version": workspace.currentStateVersionId
+        ? {
+            data: {
+              type: "state-versions",
+              id: workspace.currentStateVersionId,
+            },
+          }
+        : undefined,
+    },
+  }),
 };
 
 // ONE deserializer per entity (can be used with different cardinalities)
@@ -329,8 +370,8 @@ export const deserializeWorkspace = createDeserializer({
       type: "state-versions",
       cardinality: "one",
       included: StateVersionAttributesSchema, // Import from state-version.schema.ts
-    }
-  }
+    },
+  },
 });
 
 // ============================================================
@@ -361,11 +402,13 @@ export const ListWorkspacesInput = z.object({
   params: z.object({
     organization: z.string().describe("Organization name"),
   }),
-  query: z.object({
-    "page[number]": z.number().int().min(1).optional(),
-    "page[size]": z.number().int().min(1).max(100).optional(),
-    search: z.string().optional(),
-  }).optional(),
+  query: z
+    .object({
+      "page[number]": z.number().int().min(1).optional(),
+      "page[size]": z.number().int().min(1).max(100).optional(),
+      search: z.string().optional(),
+    })
+    .optional(),
   headers: AuthHeadersSchema,
 });
 
@@ -375,7 +418,7 @@ export const ListWorkspacesOutput = z.object({
       type: z.literal("workspaces"),
       id: z.string(),
       attributes: WorkspaceAttributesSchema,
-    })
+    }),
   ),
 });
 
@@ -443,10 +486,12 @@ export const getWorkspace = oc
     outputStructure: "detailed",
   })
   .input(GetWorkspaceInput)
-  .output(z.object({
-    status: z.literal(200),
-    body: GetWorkspaceOutput,
-  }));
+  .output(
+    z.object({
+      status: z.literal(200),
+      body: GetWorkspaceOutput,
+    }),
+  );
 
 export const listWorkspaces = oc
   .route({
@@ -456,10 +501,12 @@ export const listWorkspaces = oc
     outputStructure: "detailed",
   })
   .input(ListWorkspacesInput)
-  .output(z.object({
-    status: z.literal(200),
-    body: ListWorkspacesOutput,
-  }));
+  .output(
+    z.object({
+      status: z.literal(200),
+      body: ListWorkspacesOutput,
+    }),
+  );
 
 export const createWorkspace = oc
   .route({
@@ -469,10 +516,12 @@ export const createWorkspace = oc
     outputStructure: "detailed",
   })
   .input(CreateWorkspaceInput)
-  .output(z.object({
-    status: z.literal(201),
-    body: CreateWorkspaceOutput,
-  }));
+  .output(
+    z.object({
+      status: z.literal(201),
+      body: CreateWorkspaceOutput,
+    }),
+  );
 
 export const updateWorkspace = oc
   .route({
@@ -482,10 +531,12 @@ export const updateWorkspace = oc
     outputStructure: "detailed",
   })
   .input(UpdateWorkspaceInput)
-  .output(z.object({
-    status: z.literal(200),
-    body: UpdateWorkspaceOutput,
-  }));
+  .output(
+    z.object({
+      status: z.literal(200),
+      body: UpdateWorkspaceOutput,
+    }),
+  );
 
 export const workspaceContract = {
   get: getWorkspace,
@@ -519,9 +570,6 @@ export const serialize = SerializeBuilder.new()
   .add("task-results", serializeTaskResult)
   .add("policy-evaluations", serializePolicyEvaluation)
   .build();
-
-// Export type for type-safe usage
-export type TfeSerializeMap = typeof serialize extends SerializeBuilder<infer M> ? M : never;
 ```
 
 ---
@@ -529,11 +577,13 @@ export type TfeSerializeMap = typeof serialize extends SerializeBuilder<infer M>
 ## Implementation Impact
 
 ### Breaking Changes
+
 - Renaming serializers from operation-specific to entity-specific
 - Potentially removing duplicate output schemas (if not needed for contracts)
 - Updating SerializeBuilder registrations
 
 ### Non-Breaking Optimizations
+
 - Adding `included` to relationship configurations
 - Creating shared deserializer configs
 - Adding type exports for better type safety
