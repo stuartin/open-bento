@@ -44,7 +44,7 @@ export const CreateConfigurationVersionOutput = z.object({
   }),
 });
 
-export const serializeCreateConfigurationVersionOutput: EntitySerializer<ConfigurationVersion> =
+export const serializeConfigurationVersion: EntitySerializer<ConfigurationVersion> =
 {
   getId: (cv) => cv.id,
   serialize: (cv) => ({
@@ -58,7 +58,7 @@ export const serializeCreateConfigurationVersionOutput: EntitySerializer<Configu
   }),
 };
 
-export const deserializeCreateConfigurationVersionOutput = createDeserializer({
+export const deserializeConfigurationVersion = createDeserializer({
   type: "configuration-versions",
   cardinality: "one",
   attributesSchema: ConfigurationVersionAttributesSchema,
@@ -81,22 +81,3 @@ export const GetConfigurationVersionOutput = z.object({
   }),
 });
 
-export const serializeGetConfigurationVersionOutput: EntitySerializer<ConfigurationVersion> =
-{
-  getId: (cv) => cv.id,
-  serialize: (cv) => ({
-    attributes: {
-      "auto-queue-runs": cv["auto-queue-runs"],
-      speculative: cv.speculative,
-      provisional: cv.provisional,
-      status: cv.status,
-      "upload-url": cv["upload-url"],
-    },
-  }),
-};
-
-export const deserializeGetConfigurationVersionOutput = createDeserializer({
-  type: "configuration-versions",
-  cardinality: "one",
-  attributesSchema: ConfigurationVersionAttributesSchema,
-});

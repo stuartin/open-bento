@@ -45,7 +45,7 @@ export const GetTaskStageOutput = z.object({
   }),
 });
 
-export const serializeGetTaskStageOutput: EntitySerializer<TaskStage> = {
+export const serializeTaskStage: EntitySerializer<TaskStage> = {
   getId: (taskStage) => taskStage.id,
   serialize: (taskStage) => ({
     attributes: {
@@ -75,7 +75,7 @@ export const serializeGetTaskStageOutput: EntitySerializer<TaskStage> = {
   }),
 };
 
-export const deserializeGetTaskStageOutput = createDeserializer({
+export const deserializeTaskStage = createDeserializer({
   type: "task-stages",
   cardinality: "one",
   attributesSchema: TaskStageAttributesSchema,
@@ -90,6 +90,10 @@ export const deserializeGetTaskStageOutput = createDeserializer({
     },
   },
 });
+
+// Backward compatibility exports
+export const serializeGetTaskStageOutput = serializeTaskStage;
+export const deserializeGetTaskStageOutput = deserializeTaskStage;
 
 // --- List Task Stages ---
 
@@ -110,20 +114,20 @@ export const ListTaskStagesOutput = z.object({
   ),
 });
 
-export const serializeListTaskStagesOutput: EntitySerializer<TaskStage> = {
-  getId: (taskStage) => taskStage.id,
-  serialize: (taskStage) => ({
-    attributes: {
-      stage: taskStage.stage,
-      status: taskStage.status,
-      "created-at": taskStage["created-at"],
-      "updated-at": taskStage["updated-at"],
-    },
-  }),
-};
+export const serializeListTaskStagesOutput = serializeTaskStage;
 
 export const deserializeListTaskStagesOutput = createDeserializer({
   type: "task-stages",
   cardinality: "many",
   attributesSchema: TaskStageAttributesSchema,
+  relationships: {
+    "task-results": {
+      type: "task-results",
+      cardinality: "many",
+    },
+    "policy-evaluations": {
+      type: "policy-evaluations",
+      cardinality: "many",
+    },
+  },
 });

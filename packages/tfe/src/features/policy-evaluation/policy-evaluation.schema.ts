@@ -49,21 +49,20 @@ export const GetPolicyEvaluationOutput = z.object({
   }),
 });
 
-export const serializeGetPolicyEvaluationOutput: EntitySerializer<PolicyEvaluation> =
-  {
-    getId: (pe) => pe.id,
-    serialize: (pe) => ({
-      attributes: {
-        status: pe.status,
-        "policy-kind": pe["policy-kind"],
-        "result-count": pe["result-count"],
-        "created-at": pe["created-at"],
-        "updated-at": pe["updated-at"],
-      },
-    }),
-  };
+export const serializePolicyEvaluation: EntitySerializer<PolicyEvaluation> = {
+  getId: (pe) => pe.id,
+  serialize: (pe) => ({
+    attributes: {
+      status: pe.status,
+      "policy-kind": pe["policy-kind"],
+      "result-count": pe["result-count"],
+      "created-at": pe["created-at"],
+      "updated-at": pe["updated-at"],
+    },
+  }),
+};
 
-export const deserializeGetPolicyEvaluationOutput = createDeserializer({
+export const deserializePolicyEvaluation = createDeserializer({
   type: "policy-evaluations",
   cardinality: "one",
   attributesSchema: PolicyEvaluationAttributesSchema,

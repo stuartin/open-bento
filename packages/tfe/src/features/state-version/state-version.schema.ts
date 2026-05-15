@@ -36,59 +36,7 @@ export const GetCurrentStateVersionOutput = z.object({
     .nullable(),
 });
 
-export const serializeGetCurrentStateVersionOutput: EntitySerializer<StateVersion> =
-  {
-    getId: (sv) => sv.id,
-    serialize: (sv) => ({
-      attributes: {
-        "created-at": sv["created-at"],
-        serial: sv.serial,
-        status: sv.status,
-        "hosted-state-download-url": sv["hosted-state-download-url"],
-      },
-      relationships: {
-        ...(sv.outputIds && {
-          outputs: {
-            data: sv.outputIds.map((id) => ({
-              type: "state-version-outputs",
-              id,
-            })),
-          },
-        }),
-      },
-    }),
-  };
-
-export const deserializeGetCurrentStateVersionOutput = createDeserializer({
-  type: "state-versions",
-  cardinality: "one",
-  attributesSchema: StateVersionAttributesSchema,
-  relationships: {
-    outputs: {
-      type: "state-version-outputs",
-      cardinality: "many",
-    },
-  },
-});
-
-// --- Get State Version ---
-
-export const GetStateVersionInput = z.object({
-  params: z.object({
-    stateVersionId: z.string().describe("State Version ID"),
-  }),
-  headers: AuthHeadersSchema,
-});
-
-export const GetStateVersionOutput = z.object({
-  data: z.object({
-    type: z.literal("state-versions"),
-    id: z.string(),
-    attributes: StateVersionAttributesSchema,
-  }),
-});
-
-export const serializeGetStateVersionOutput: EntitySerializer<StateVersion> = {
+export const serializeStateVersion: EntitySerializer<StateVersion> = {
   getId: (sv) => sv.id,
   serialize: (sv) => ({
     attributes: {
@@ -110,7 +58,7 @@ export const serializeGetStateVersionOutput: EntitySerializer<StateVersion> = {
   }),
 };
 
-export const deserializeGetStateVersionOutput = createDeserializer({
+export const deserializeStateVersion = createDeserializer({
   type: "state-versions",
   cardinality: "one",
   attributesSchema: StateVersionAttributesSchema,
@@ -121,6 +69,30 @@ export const deserializeGetStateVersionOutput = createDeserializer({
     },
   },
 });
+
+// Backward compatibility exports
+export const serializeGetCurrentStateVersionOutput = serializeStateVersion;
+export const deserializeGetCurrentStateVersionOutput = deserializeStateVersion;
+
+// --- Get State Version ---
+
+export const GetStateVersionInput = z.object({
+  params: z.object({
+    stateVersionId: z.string().describe("State Version ID"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
+export const GetStateVersionOutput = z.object({
+  data: z.object({
+    type: z.literal("state-versions"),
+    id: z.string(),
+    attributes: StateVersionAttributesSchema,
+  }),
+});
+
+export const serializeGetStateVersionOutput = serializeStateVersion;
+export const deserializeGetStateVersionOutput = deserializeStateVersion;
 
 // --- List State Versions ---
 
@@ -147,21 +119,16 @@ export const ListStateVersionsOutput = z.object({
   ),
 });
 
-export const serializeListStateVersionsOutput: EntitySerializer<StateVersion> =
-  {
-    getId: (sv) => sv.id,
-    serialize: (sv) => ({
-      attributes: {
-        "created-at": sv["created-at"],
-        serial: sv.serial,
-        status: sv.status,
-        "hosted-state-download-url": sv["hosted-state-download-url"],
-      },
-    }),
-  };
+export const serializeListStateVersionsOutput = serializeStateVersion;
 
 export const deserializeListStateVersionsOutput = createDeserializer({
   type: "state-versions",
   cardinality: "many",
   attributesSchema: StateVersionAttributesSchema,
+  relationships: {
+    outputs: {
+      type: "state-version-outputs",
+      cardinality: "many",
+    },
+  },
 });

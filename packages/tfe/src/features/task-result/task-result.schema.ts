@@ -41,7 +41,7 @@ export const GetTaskResultOutput = z.object({
   }),
 });
 
-export const serializeGetTaskResultOutput: EntitySerializer<TaskResult> = {
+export const serializeTaskResult: EntitySerializer<TaskResult> = {
   getId: (tr) => tr.id,
   serialize: (tr) => ({
     attributes: {
@@ -55,7 +55,7 @@ export const serializeGetTaskResultOutput: EntitySerializer<TaskResult> = {
   }),
 };
 
-export const deserializeGetTaskResultOutput = createDeserializer({
+export const deserializeTaskResult = createDeserializer({
   type: "task-results",
   cardinality: "one",
   attributesSchema: TaskResultAttributesSchema,

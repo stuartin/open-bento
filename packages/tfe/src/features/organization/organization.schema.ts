@@ -28,7 +28,7 @@ export const GetOrganizationEntitlementsOutput = z.object({
   }),
 });
 
-export const serializeGetOrganizationEntitlementsOutput: EntitySerializer<EntitlementSet> = {
+export const serializeEntitlementSet: EntitySerializer<EntitlementSet> = {
   getId: (entitlementSet) => entitlementSet.id,
   serialize: (entitlementSet) => ({
     attributes: {
@@ -37,7 +37,7 @@ export const serializeGetOrganizationEntitlementsOutput: EntitySerializer<Entitl
   }),
 };
 
-export const deserializeGetOrganizationEntitlementsOutput = createDeserializer({
+export const deserializeEntitlementSet = createDeserializer({
   type: "entitlement-sets",
   cardinality: "one",
   attributesSchema: EntitlementSetAttributesSchema,

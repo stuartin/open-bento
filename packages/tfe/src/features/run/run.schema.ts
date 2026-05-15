@@ -101,7 +101,7 @@ export const CreateRunOutput = z.object({
   }),
 });
 
-export const serializeCreateRunOutput: EntitySerializer<Run> = {
+export const serializeRun: EntitySerializer<Run> = {
   getId: (run) => run.id,
   serialize: (run) => ({
     attributes: {
@@ -151,7 +151,7 @@ export const serializeCreateRunOutput: EntitySerializer<Run> = {
   }),
 };
 
-export const deserializeCreateRunOutput = createDeserializer({
+export const deserializeRun = createDeserializer({
   type: "runs",
   cardinality: "one",
   attributesSchema: RunAttributesSchema,
@@ -182,6 +182,10 @@ export const deserializeCreateRunOutput = createDeserializer({
     },
   },
 });
+
+// Backward compatibility exports
+export const serializeCreateRunOutput = serializeRun;
+export const deserializeCreateRunOutput = deserializeRun;
 
 // --- Get Run ---
 
@@ -200,87 +204,8 @@ export const GetRunOutput = z.object({
   }),
 });
 
-export const serializeGetRunOutput: EntitySerializer<Run> = {
-  getId: (run) => run.id,
-  serialize: (run) => ({
-    attributes: {
-      status: run.status,
-      "has-changes": run["has-changes"],
-      "is-destroy": run["is-destroy"],
-      message: run.message,
-      "created-at": run["created-at"],
-      "position-in-queue": run["position-in-queue"],
-      actions: run.actions,
-    },
-    relationships: {
-      ...(run.planId && {
-        plan: {
-          data: { type: "plans", id: run.planId },
-        },
-      }),
-      ...(run.applyId && {
-        apply: {
-          data: { type: "applies", id: run.applyId },
-        },
-      }),
-      ...(run.workspaceId && {
-        workspace: {
-          data: { type: "workspaces", id: run.workspaceId },
-        },
-      }),
-      ...(run.configurationVersionId && {
-        "configuration-version": {
-          data: {
-            type: "configuration-versions",
-            id: run.configurationVersionId,
-          },
-        },
-      }),
-      ...(run.costEstimateId && {
-        "cost-estimate": {
-          data: { type: "cost-estimates", id: run.costEstimateId },
-        },
-      }),
-      ...(run.taskStageIds && {
-        "task-stages": {
-          data: run.taskStageIds.map((id) => ({ type: "task-stages", id })),
-        },
-      }),
-    },
-  }),
-};
-
-export const deserializeGetRunOutput = createDeserializer({
-  type: "runs",
-  cardinality: "one",
-  attributesSchema: RunAttributesSchema,
-  relationships: {
-    plan: {
-      type: "plans",
-      cardinality: "one",
-    },
-    apply: {
-      type: "applies",
-      cardinality: "one",
-    },
-    workspace: {
-      type: "workspaces",
-      cardinality: "one",
-    },
-    "configuration-version": {
-      type: "configuration-versions",
-      cardinality: "one",
-    },
-    "cost-estimate": {
-      type: "cost-estimates",
-      cardinality: "one",
-    },
-    "task-stages": {
-      type: "task-stages",
-      cardinality: "many",
-    },
-  },
-});
+export const serializeGetRunOutput = serializeRun;
+export const deserializeGetRunOutput = deserializeRun;
 
 // --- List Runs ---
 
@@ -307,25 +232,38 @@ export const ListRunsOutput = z.object({
   ),
 });
 
-export const serializeListRunsOutput: EntitySerializer<Run> = {
-  getId: (run) => run.id,
-  serialize: (run) => ({
-    attributes: {
-      status: run.status,
-      "has-changes": run["has-changes"],
-      "is-destroy": run["is-destroy"],
-      message: run.message,
-      "created-at": run["created-at"],
-      "position-in-queue": run["position-in-queue"],
-      actions: run.actions,
-    },
-  }),
-};
+export const serializeListRunsOutput = serializeRun;
 
 export const deserializeListRunsOutput = createDeserializer({
   type: "runs",
   cardinality: "many",
   attributesSchema: RunAttributesSchema,
+  relationships: {
+    plan: {
+      type: "plans",
+      cardinality: "one",
+    },
+    apply: {
+      type: "applies",
+      cardinality: "one",
+    },
+    workspace: {
+      type: "workspaces",
+      cardinality: "one",
+    },
+    "configuration-version": {
+      type: "configuration-versions",
+      cardinality: "one",
+    },
+    "cost-estimate": {
+      type: "cost-estimates",
+      cardinality: "one",
+    },
+    "task-stages": {
+      type: "task-stages",
+      cardinality: "many",
+    },
+  },
 });
 
 // --- Apply Run ---

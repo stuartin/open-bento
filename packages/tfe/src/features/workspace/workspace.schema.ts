@@ -34,7 +34,7 @@ export const GetWorkspaceOutput = z.object({
   }),
 });
 
-export const serializeGetWorkspaceOutput: EntitySerializer<Workspace> = {
+export const serializeWorkspace: EntitySerializer<Workspace> = {
   getId: (workspace) => workspace.id,
   serialize: (workspace) => ({
     attributes: {
@@ -58,7 +58,7 @@ export const serializeGetWorkspaceOutput: EntitySerializer<Workspace> = {
   }),
 };
 
-export const deserializeGetWorkspaceOutput = createDeserializer({
+export const deserializeWorkspace = createDeserializer({
   type: "workspaces",
   cardinality: "one",
   attributesSchema: WorkspaceAttributesSchema,
@@ -98,22 +98,4 @@ export const ListWorkspacesOutput = z.object({
       attributes: WorkspaceAttributesSchema,
     })
   ),
-});
-
-export const serializeListWorkspacesOutput: EntitySerializer<Workspace> = {
-  getId: (workspace) => workspace.id,
-  serialize: (workspace) => ({
-    attributes: {
-      name: workspace.name,
-      "execution-mode": workspace["execution-mode"],
-      "terraform-version": workspace["terraform-version"],
-      locked: workspace.locked,
-    },
-  }),
-};
-
-export const deserializeListWorkspacesOutput = createDeserializer({
-  type: "workspaces",
-  cardinality: "many",
-  attributesSchema: WorkspaceAttributesSchema,
 });

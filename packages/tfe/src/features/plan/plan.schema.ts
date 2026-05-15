@@ -44,7 +44,7 @@ export const GetPlanOutput = z.object({
   }),
 });
 
-export const serializeGetPlanOutput: EntitySerializer<Plan> = {
+export const serializePlan: EntitySerializer<Plan> = {
   getId: (plan) => plan.id,
   serialize: (plan) => ({
     attributes: {
@@ -59,7 +59,7 @@ export const serializeGetPlanOutput: EntitySerializer<Plan> = {
   }),
 };
 
-export const deserializeGetPlanOutput = createDeserializer({
+export const deserializePlan = createDeserializer({
   type: "plans",
   cardinality: "one",
   attributesSchema: PlanAttributesSchema,

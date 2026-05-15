@@ -41,7 +41,7 @@ export const GetCostEstimateOutput = z.object({
   }),
 });
 
-export const serializeGetCostEstimateOutput: EntitySerializer<CostEstimate> = {
+export const serializeCostEstimate: EntitySerializer<CostEstimate> = {
   getId: (ce) => ce.id,
   serialize: (ce) => ({
     attributes: {
@@ -55,7 +55,7 @@ export const serializeGetCostEstimateOutput: EntitySerializer<CostEstimate> = {
   }),
 };
 
-export const deserializeGetCostEstimateOutput = createDeserializer({
+export const deserializeCostEstimate = createDeserializer({
   type: "cost-estimates",
   cardinality: "one",
   attributesSchema: CostEstimateAttributesSchema,

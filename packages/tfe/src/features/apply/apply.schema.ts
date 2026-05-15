@@ -42,7 +42,7 @@ export const GetApplyOutput = z.object({
   }),
 });
 
-export const serializeGetApplyOutput: EntitySerializer<Apply> = {
+export const serializeApply: EntitySerializer<Apply> = {
   getId: (apply) => apply.id,
   serialize: (apply) => ({
     attributes: {
@@ -55,7 +55,7 @@ export const serializeGetApplyOutput: EntitySerializer<Apply> = {
   }),
 };
 
-export const deserializeGetApplyOutput = createDeserializer({
+export const deserializeApply = createDeserializer({
   type: "applies",
   cardinality: "one",
   attributesSchema: ApplyAttributesSchema,

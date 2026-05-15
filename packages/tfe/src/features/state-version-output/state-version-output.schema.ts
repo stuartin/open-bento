@@ -33,7 +33,7 @@ export const GetStateVersionOutputOutput = z.object({
   }),
 });
 
-export const serializeGetStateVersionOutputOutput: EntitySerializer<StateVersionOutput> =
+export const serializeStateVersionOutput: EntitySerializer<StateVersionOutput> =
   {
     getId: (output) => output.id,
     serialize: (output) => ({
@@ -46,7 +46,7 @@ export const serializeGetStateVersionOutputOutput: EntitySerializer<StateVersion
     }),
   };
 
-export const deserializeGetStateVersionOutputOutput = createDeserializer({
+export const deserializeStateVersionOutput = createDeserializer({
   type: "state-version-outputs",
   cardinality: "one",
   attributesSchema: StateVersionOutputAttributesSchema,
