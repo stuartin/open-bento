@@ -10,8 +10,6 @@
     "test": "pnpm run /^test:/"
   },
   "dependencies": {
-    "@jsonapi-serde/server": "^1.9.1",
-    "@jsonapi-serde/client": "^1.2.3",
     "@orpc/contract": "catalog:",
     "zod": "catalog:"
   },

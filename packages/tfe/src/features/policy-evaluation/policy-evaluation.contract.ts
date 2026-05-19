@@ -1,11 +1,10 @@
-import { z } from "zod";
 import { oc } from "@orpc/contract";
 import {
   GetPolicyEvaluationInput,
   GetPolicyEvaluationOutput,
 } from "./policy-evaluation.schema";
 
-// --- Contract ---
+// --- Contracts ---
 
 export const getPolicyEvaluation = oc
   .route({
@@ -15,12 +14,7 @@ export const getPolicyEvaluation = oc
     outputStructure: "detailed",
   })
   .input(GetPolicyEvaluationInput)
-  .output(
-    z.object({
-      status: z.literal(200),
-      body: GetPolicyEvaluationOutput,
-    })
-  );
+  .output(GetPolicyEvaluationOutput);
 
 // --- Contract Router ---
 

@@ -1,8 +1,7 @@
-import { z } from "zod";
 import { oc } from "@orpc/contract";
 import { GetApplyInput, GetApplyOutput } from "./apply.schema";
 
-// --- Contract ---
+// --- Contracts ---
 
 export const getApply = oc
   .route({
@@ -12,12 +11,7 @@ export const getApply = oc
     outputStructure: "detailed",
   })
   .input(GetApplyInput)
-  .output(
-    z.object({
-      status: z.literal(200),
-      body: GetApplyOutput,
-    })
-  );
+  .output(GetApplyOutput);
 
 // --- Contract Router ---
 

@@ -5,6 +5,7 @@ import {
   GetPlanOutput,
   GetPlanJsonOutputInput,
   GetPlanJsonOutputOutput,
+  GetPlanJsonOutputRedirectOutput,
 } from "./plan.schema";
 
 // --- Contracts ---
@@ -17,12 +18,7 @@ export const getPlan = oc
     outputStructure: "detailed",
   })
   .input(GetPlanInput)
-  .output(
-    z.object({
-      status: z.literal(200),
-      body: GetPlanOutput,
-    })
-  );
+  .output(GetPlanOutput);
 
 export const getPlanJsonOutput = oc
   .route({
@@ -34,17 +30,8 @@ export const getPlanJsonOutput = oc
   .input(GetPlanJsonOutputInput)
   .output(
     z.union([
-      z.object({
-        status: z.literal(200),
-        body: GetPlanJsonOutputOutput,
-      }),
-      z.object({
-        status: z.literal(307),
-        headers: z.object({
-          location: z.string(),
-        }),
-        body: z.undefined(),
-      }),
+      GetPlanJsonOutputOutput,
+      GetPlanJsonOutputRedirectOutput,
     ])
   );
 

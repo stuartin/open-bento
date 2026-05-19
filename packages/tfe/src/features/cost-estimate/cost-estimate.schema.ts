@@ -1,10 +1,8 @@
 import { z } from "zod";
-import type { EntitySerializer } from "@jsonapi-serde/server/response";
-import { createDeserializer } from "@jsonapi-serde/client";
-import { AuthHeadersSchema } from "../../lib/common.schema";
+import { AuthHeadersSchema, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
 
 // ============================================================
-// ENTITY DEFINITION
+// ENTITY DEFINITION - Cost Estimate
 // ============================================================
 
 export const CostEstimateAttributesSchema = z.object({
@@ -24,47 +22,23 @@ export const CostEstimateAttributesSchema = z.object({
   "proposed-monthly-cost": z.string().optional(),
 });
 
-export type CostEstimate = z.infer<typeof CostEstimateAttributesSchema> & {
-  id: string;
-};
-
-export const serializeCostEstimate: EntitySerializer<CostEstimate> = {
-  getId: (ce) => ce.id,
-  serialize: (ce) => ({
-    attributes: {
-      status: ce.status,
-      "matched-resources-count": ce["matched-resources-count"],
-      "unmatched-resources-count": ce["unmatched-resources-count"],
-      "resources-count": ce["resources-count"],
-      "delta-monthly-cost": ce["delta-monthly-cost"],
-      "proposed-monthly-cost": ce["proposed-monthly-cost"],
-    },
-  }),
-};
-
-export const deserializeCostEstimate = createDeserializer({
-  type: "cost-estimates",
-  cardinality: "one",
-  attributesSchema: CostEstimateAttributesSchema,
-});
-
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
 
 // --- Get Cost Estimate ---
 
-export const GetCostEstimateInput = z.object({
+export const GetCostEstimateInput = ORPCInput({
   params: z.object({
     costEstimateId: z.string().describe("Cost Estimate ID"),
   }),
   headers: AuthHeadersSchema,
 });
 
-export const GetCostEstimateOutput = z.object({
-  data: z.object({
-    type: z.literal("cost-estimates"),
-    id: z.string(),
-    attributes: CostEstimateAttributesSchema,
-  }),
+export const GetCostEstimateOutput = ORPCOutput({
+  status: z.literal(200),
+  body: JsonApiDocument(
+    "cost-estimates",
+    CostEstimateAttributesSchema
+  ),
 });

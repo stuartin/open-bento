@@ -1,16 +1,8 @@
 import { z } from "zod";
-import type { EntitySerializer } from "@jsonapi-serde/server/response";
-import { createDeserializer } from "@jsonapi-serde/client";
-import { AuthHeadersSchema } from "../../lib/common.schema";
-import { PlanAttributesSchema } from "../plan/plan.schema";
-import { ApplyAttributesSchema } from "../apply/apply.schema";
-import { WorkspaceAttributesSchema } from "../workspace/workspace.schema";
-import { ConfigurationVersionAttributesSchema } from "../configuration-version/configuration-version.schema";
-import { CostEstimateAttributesSchema } from "../cost-estimate/cost-estimate.schema";
-import { TaskStageAttributesSchema } from "../task-stage/task-stage.schema";
+import { AuthHeadersSchema, JsonApiCollection, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
 
 // ============================================================
-// ENTITY DEFINITION
+// ENTITY DEFINITION - Run
 // ============================================================
 
 export const RunAttributesSchema = z.object({
@@ -50,123 +42,13 @@ export const RunAttributesSchema = z.object({
   }),
 });
 
-export type Run = z.infer<typeof RunAttributesSchema> & {
-  id: string;
-  planId?: string;
-  applyId?: string;
-  workspaceId?: string;
-  configurationVersionId?: string;
-  costEstimateId?: string;
-  taskStageIds?: string[];
-};
-
-export const serializeRun: EntitySerializer<Run> = {
-  getId: (run) => run.id,
-  serialize: (run) => ({
-    attributes: {
-      status: run.status,
-      "has-changes": run["has-changes"],
-      "is-destroy": run["is-destroy"],
-      message: run.message,
-      "created-at": run["created-at"],
-      "position-in-queue": run["position-in-queue"],
-      actions: run.actions,
-    },
-    relationships: {
-      ...(run.planId && {
-        plan: {
-          data: { type: "plans", id: run.planId },
-        },
-      }),
-      ...(run.applyId && {
-        apply: {
-          data: { type: "applies", id: run.applyId },
-        },
-      }),
-      ...(run.workspaceId && {
-        workspace: {
-          data: { type: "workspaces", id: run.workspaceId },
-        },
-      }),
-      ...(run.configurationVersionId && {
-        "configuration-version": {
-          data: {
-            type: "configuration-versions",
-            id: run.configurationVersionId,
-          },
-        },
-      }),
-      ...(run.costEstimateId && {
-        "cost-estimate": {
-          data: { type: "cost-estimates", id: run.costEstimateId },
-        },
-      }),
-      ...(run.taskStageIds && {
-        "task-stages": {
-          data: run.taskStageIds.map((id) => ({ type: "task-stages", id })),
-        },
-      }),
-    },
-  }),
-};
-
-export const deserializeRun = createDeserializer({
-  type: "runs",
-  cardinality: "one",
-  attributesSchema: RunAttributesSchema,
-  relationships: {
-    plan: {
-      type: "plans",
-      cardinality: "one",
-      included: {
-        attributesSchema: PlanAttributesSchema,
-      },
-    },
-    apply: {
-      type: "applies",
-      cardinality: "one",
-      included: {
-        attributesSchema: ApplyAttributesSchema,
-      },
-    },
-    workspace: {
-      type: "workspaces",
-      cardinality: "one",
-      included: {
-        attributesSchema: WorkspaceAttributesSchema,
-      },
-    },
-    "configuration-version": {
-      type: "configuration-versions",
-      cardinality: "one",
-      included: {
-        attributesSchema: ConfigurationVersionAttributesSchema,
-      },
-    },
-    "cost-estimate": {
-      type: "cost-estimates",
-      cardinality: "one",
-      included: {
-        attributesSchema: CostEstimateAttributesSchema,
-      },
-    },
-    "task-stages": {
-      type: "task-stages",
-      cardinality: "many",
-      included: {
-        attributesSchema: TaskStageAttributesSchema,
-      },
-    },
-  },
-});
-
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
 
 // --- Create Run ---
 
-export const CreateRunInput = z.object({
+export const CreateRunInput = ORPCInput({
   headers: AuthHeadersSchema,
   body: z.object({
     data: z.object({
@@ -205,34 +87,34 @@ export const CreateRunInput = z.object({
   }),
 });
 
-export const CreateRunOutput = z.object({
-  data: z.object({
-    type: z.literal("runs"),
-    id: z.string(),
-    attributes: RunAttributesSchema,
-  }),
+export const CreateRunOutput = ORPCOutput({
+  status: z.literal(201),
+  body: JsonApiDocument(
+    "runs",
+    RunAttributesSchema
+  ),
 });
 
 // --- Get Run ---
 
-export const GetRunInput = z.object({
+export const GetRunInput = ORPCInput({
   params: z.object({
     runId: z.string().describe("Run ID"),
   }),
   headers: AuthHeadersSchema,
 });
 
-export const GetRunOutput = z.object({
-  data: z.object({
-    type: z.literal("runs"),
-    id: z.string(),
-    attributes: RunAttributesSchema,
-  }),
+export const GetRunOutput = ORPCOutput({
+  status: z.literal(200),
+  body: JsonApiDocument(
+    "runs",
+    RunAttributesSchema
+  ),
 });
 
 // --- List Runs ---
 
-export const ListRunsInput = z.object({
+export const ListRunsInput = ORPCInput({
   params: z.object({
     workspaceId: z.string().describe("Workspace ID"),
   }),
@@ -245,19 +127,17 @@ export const ListRunsInput = z.object({
   headers: AuthHeadersSchema,
 });
 
-export const ListRunsOutput = z.object({
-  data: z.array(
-    z.object({
-      type: z.literal("runs"),
-      id: z.string(),
-      attributes: RunAttributesSchema,
-    })
+export const ListRunsOutput = ORPCOutput({
+  status: z.literal(200),
+  body: JsonApiCollection(
+    "runs",
+    RunAttributesSchema
   ),
 });
 
 // --- Apply Run ---
 
-export const ApplyRunInput = z.object({
+export const ApplyRunInput = ORPCInput({
   params: z.object({
     runId: z.string().describe("Run ID"),
   }),
@@ -267,11 +147,16 @@ export const ApplyRunInput = z.object({
       comment: z.string().optional(),
     })
     .optional(),
+});
+
+export const ApplyRunOutput = ORPCOutput({
+  status: z.literal(202),
+  body: z.undefined(),
 });
 
 // --- Discard Run ---
 
-export const DiscardRunInput = z.object({
+export const DiscardRunInput = ORPCInput({
   params: z.object({
     runId: z.string().describe("Run ID"),
   }),
@@ -281,11 +166,16 @@ export const DiscardRunInput = z.object({
       comment: z.string().optional(),
     })
     .optional(),
+});
+
+export const DiscardRunOutput = ORPCOutput({
+  status: z.literal(202),
+  body: z.undefined(),
 });
 
 // --- Cancel Run ---
 
-export const CancelRunInput = z.object({
+export const CancelRunInput = ORPCInput({
   params: z.object({
     runId: z.string().describe("Run ID"),
   }),
@@ -297,9 +187,14 @@ export const CancelRunInput = z.object({
     .optional(),
 });
 
+export const CancelRunOutput = ORPCOutput({
+  status: z.literal(202),
+  body: z.undefined(),
+});
+
 // --- Force Cancel Run ---
 
-export const ForceCancelRunInput = z.object({
+export const ForceCancelRunInput = ORPCInput({
   params: z.object({
     runId: z.string().describe("Run ID"),
   }),
@@ -309,4 +204,9 @@ export const ForceCancelRunInput = z.object({
       comment: z.string().optional(),
     })
     .optional(),
+});
+
+export const ForceCancelRunOutput = ORPCOutput({
+  status: z.literal(202),
+  body: z.undefined(),
 });

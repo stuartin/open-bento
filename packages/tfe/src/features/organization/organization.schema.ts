@@ -1,7 +1,5 @@
 import { z } from "zod";
-import type { EntitySerializer } from "@jsonapi-serde/server/response";
-import { createDeserializer } from "@jsonapi-serde/client";
-import { AuthHeadersSchema } from "../../lib/common.schema";
+import { AuthHeadersSchema, JsonApiCollection, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
 
 // ============================================================
 // ENTITY DEFINITION - Entitlement Set
@@ -9,25 +7,6 @@ import { AuthHeadersSchema } from "../../lib/common.schema";
 
 export const EntitlementSetAttributesSchema = z.object({
   operations: z.boolean(),
-});
-
-export type EntitlementSet = z.infer<typeof EntitlementSetAttributesSchema> & {
-  id: string;
-};
-
-export const serializeEntitlementSet: EntitySerializer<EntitlementSet> = {
-  getId: (entitlementSet) => entitlementSet.id,
-  serialize: (entitlementSet) => ({
-    attributes: {
-      operations: entitlementSet.operations,
-    },
-  }),
-};
-
-export const deserializeEntitlementSet = createDeserializer({
-  type: "entitlement-sets",
-  cardinality: "one",
-  attributesSchema: EntitlementSetAttributesSchema,
 });
 
 // ============================================================
@@ -59,62 +38,42 @@ export const RunQueueItemAttributesSchema = z.object({
   "position-in-queue": z.number().optional(),
 });
 
-export type RunQueueItem = z.infer<typeof RunQueueItemAttributesSchema> & {
-  id: string;
-};
-
-export const serializeOrganizationRunQueue: EntitySerializer<RunQueueItem> = {
-  getId: (item) => item.id,
-  serialize: (item) => ({
-    attributes: {
-      status: item.status,
-      "position-in-queue": item["position-in-queue"],
-    },
-  }),
-};
-
-export const deserializeOrganizationRunQueue = createDeserializer({
-  type: "runs",
-  cardinality: "many",
-  attributesSchema: RunQueueItemAttributesSchema,
-});
-
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
 
 // --- Get Organization Entitlements ---
 
-export const GetOrganizationEntitlementsInput = z.object({
+export const GetOrganizationEntitlementsInput = ORPCInput({
   params: z.object({
     organization: z.string().describe("Organization name"),
   }),
   headers: AuthHeadersSchema,
 });
 
-export const GetOrganizationEntitlementsOutput = z.object({
-  data: z.object({
-    type: z.literal("entitlement-sets"),
-    id: z.string(),
-    attributes: EntitlementSetAttributesSchema,
-  }),
+type T = z.infer<typeof GetOrganizationEntitlementsInput>
+
+export const GetOrganizationEntitlementsOutput = ORPCOutput({
+  status: z.literal(200),
+  body: JsonApiDocument(
+    "entitlement-sets",
+    EntitlementSetAttributesSchema
+  )
 });
 
 // --- List Organization Run Queue ---
 
-export const ListOrganizationRunQueueInput = z.object({
+export const ListOrganizationRunQueueInput = ORPCInput({
   params: z.object({
     organization: z.string().describe("Organization name"),
   }),
   headers: AuthHeadersSchema,
 });
 
-export const ListOrganizationRunQueueOutput = z.object({
-  data: z.array(
-    z.object({
-      type: z.literal("runs"),
-      id: z.string(),
-      attributes: RunQueueItemAttributesSchema,
-    })
+export const ListOrganizationRunQueueOutput = ORPCOutput({
+  status: z.literal(200),
+  body: JsonApiCollection(
+    "runs",
+    RunQueueItemAttributesSchema
   ),
 });

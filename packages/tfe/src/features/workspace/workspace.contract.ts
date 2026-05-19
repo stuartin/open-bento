@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { oc } from "@orpc/contract";
 import {
   GetWorkspaceInput,
@@ -17,12 +16,7 @@ export const getWorkspace = oc
     outputStructure: "detailed",
   })
   .input(GetWorkspaceInput)
-  .output(
-    z.object({
-      status: z.literal(200),
-      body: GetWorkspaceOutput,
-    })
-  );
+  .output(GetWorkspaceOutput);
 
 export const listWorkspaces = oc
   .route({
@@ -32,12 +26,7 @@ export const listWorkspaces = oc
     outputStructure: "detailed",
   })
   .input(ListWorkspacesInput)
-  .output(
-    z.object({
-      status: z.literal(200),
-      body: ListWorkspacesOutput,
-    })
-  );
+  .output(ListWorkspacesOutput);
 
 // --- Contract Router ---
 

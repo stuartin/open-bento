@@ -1,11 +1,10 @@
-import { z } from "zod";
 import { oc } from "@orpc/contract";
 import {
   GetStateVersionOutputInput,
   GetStateVersionOutputOutput,
 } from "./state-version-output.schema";
 
-// --- Contract ---
+// --- Contracts ---
 
 export const getStateVersionOutput = oc
   .route({
@@ -15,12 +14,7 @@ export const getStateVersionOutput = oc
     outputStructure: "detailed",
   })
   .input(GetStateVersionOutputInput)
-  .output(
-    z.object({
-      status: z.literal(200),
-      body: GetStateVersionOutputOutput,
-    })
-  );
+  .output(GetStateVersionOutputOutput);
 
 // --- Contract Router ---
 

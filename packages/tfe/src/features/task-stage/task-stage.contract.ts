@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { oc } from "@orpc/contract";
 import {
   GetTaskStageInput,
@@ -17,12 +16,7 @@ export const getTaskStage = oc
     outputStructure: "detailed",
   })
   .input(GetTaskStageInput)
-  .output(
-    z.object({
-      status: z.literal(200),
-      body: GetTaskStageOutput,
-    })
-  );
+  .output(GetTaskStageOutput);
 
 export const listTaskStages = oc
   .route({
@@ -32,12 +26,7 @@ export const listTaskStages = oc
     outputStructure: "detailed",
   })
   .input(ListTaskStagesInput)
-  .output(
-    z.object({
-      status: z.literal(200),
-      body: ListTaskStagesOutput,
-    })
-  );
+  .output(ListTaskStagesOutput);
 
 // --- Contract Router ---
 

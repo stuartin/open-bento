@@ -1,10 +1,8 @@
 import { z } from "zod";
-import type { EntitySerializer } from "@jsonapi-serde/server/response";
-import { createDeserializer } from "@jsonapi-serde/client";
-import { AuthHeadersSchema } from "../../lib/common.schema";
+import { AuthHeadersSchema, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
 
 // ============================================================
-// ENTITY DEFINITION
+// ENTITY DEFINITION - Policy Evaluation
 // ============================================================
 
 export const PolicyEvaluationAttributesSchema = z.object({
@@ -30,48 +28,23 @@ export const PolicyEvaluationAttributesSchema = z.object({
   "updated-at": z.string().optional(),
 });
 
-export type PolicyEvaluation = z.infer<
-  typeof PolicyEvaluationAttributesSchema
-> & {
-  id: string;
-};
-
-export const serializePolicyEvaluation: EntitySerializer<PolicyEvaluation> = {
-  getId: (pe) => pe.id,
-  serialize: (pe) => ({
-    attributes: {
-      status: pe.status,
-      "policy-kind": pe["policy-kind"],
-      "result-count": pe["result-count"],
-      "created-at": pe["created-at"],
-      "updated-at": pe["updated-at"],
-    },
-  }),
-};
-
-export const deserializePolicyEvaluation = createDeserializer({
-  type: "policy-evaluations",
-  cardinality: "one",
-  attributesSchema: PolicyEvaluationAttributesSchema,
-});
-
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
 
 // --- Get Policy Evaluation ---
 
-export const GetPolicyEvaluationInput = z.object({
+export const GetPolicyEvaluationInput = ORPCInput({
   params: z.object({
     policyEvaluationId: z.string().describe("Policy Evaluation ID"),
   }),
   headers: AuthHeadersSchema,
 });
 
-export const GetPolicyEvaluationOutput = z.object({
-  data: z.object({
-    type: z.literal("policy-evaluations"),
-    id: z.string(),
-    attributes: PolicyEvaluationAttributesSchema,
-  }),
+export const GetPolicyEvaluationOutput = ORPCOutput({
+  status: z.literal(200),
+  body: JsonApiDocument(
+    "policy-evaluations",
+    PolicyEvaluationAttributesSchema
+  ),
 });

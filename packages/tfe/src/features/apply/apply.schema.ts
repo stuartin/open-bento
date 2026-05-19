@@ -1,10 +1,8 @@
 import { z } from "zod";
-import type { EntitySerializer } from "@jsonapi-serde/server/response";
-import { createDeserializer } from "@jsonapi-serde/client";
-import { AuthHeadersSchema } from "../../lib/common.schema";
+import { AuthHeadersSchema, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
 
 // ============================================================
-// ENTITY DEFINITION
+// ENTITY DEFINITION - Apply
 // ============================================================
 
 export const ApplyAttributesSchema = z.object({
@@ -25,46 +23,23 @@ export const ApplyAttributesSchema = z.object({
   "resource-destructions": z.number().optional(),
 });
 
-export type Apply = z.infer<typeof ApplyAttributesSchema> & {
-  id: string;
-};
-
-export const serializeApply: EntitySerializer<Apply> = {
-  getId: (apply) => apply.id,
-  serialize: (apply) => ({
-    attributes: {
-      status: apply.status,
-      "log-read-url": apply["log-read-url"],
-      "resource-additions": apply["resource-additions"],
-      "resource-changes": apply["resource-changes"],
-      "resource-destructions": apply["resource-destructions"],
-    },
-  }),
-};
-
-export const deserializeApply = createDeserializer({
-  type: "applies",
-  cardinality: "one",
-  attributesSchema: ApplyAttributesSchema,
-});
-
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
 
 // --- Get Apply ---
 
-export const GetApplyInput = z.object({
+export const GetApplyInput = ORPCInput({
   params: z.object({
     applyId: z.string().describe("Apply ID"),
   }),
   headers: AuthHeadersSchema,
 });
 
-export const GetApplyOutput = z.object({
-  data: z.object({
-    type: z.literal("applies"),
-    id: z.string(),
-    attributes: ApplyAttributesSchema,
-  }),
+export const GetApplyOutput = ORPCOutput({
+  status: z.literal(200),
+  body: JsonApiDocument(
+    "applies",
+    ApplyAttributesSchema
+  ),
 });

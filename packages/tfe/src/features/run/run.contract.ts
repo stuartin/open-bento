@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { oc } from "@orpc/contract";
 import {
   CreateRunInput,
@@ -8,9 +7,13 @@ import {
   ListRunsInput,
   ListRunsOutput,
   ApplyRunInput,
+  ApplyRunOutput,
   DiscardRunInput,
+  DiscardRunOutput,
   CancelRunInput,
+  CancelRunOutput,
   ForceCancelRunInput,
+  ForceCancelRunOutput,
 } from "./run.schema";
 
 // --- Contracts ---
@@ -23,12 +26,7 @@ export const createRun = oc
     outputStructure: "detailed",
   })
   .input(CreateRunInput)
-  .output(
-    z.object({
-      status: z.literal(201),
-      body: CreateRunOutput,
-    })
-  );
+  .output(CreateRunOutput);
 
 export const getRun = oc
   .route({
@@ -38,12 +36,7 @@ export const getRun = oc
     outputStructure: "detailed",
   })
   .input(GetRunInput)
-  .output(
-    z.object({
-      status: z.literal(200),
-      body: GetRunOutput,
-    })
-  );
+  .output(GetRunOutput);
 
 export const listRuns = oc
   .route({
@@ -53,12 +46,7 @@ export const listRuns = oc
     outputStructure: "detailed",
   })
   .input(ListRunsInput)
-  .output(
-    z.object({
-      status: z.literal(200),
-      body: ListRunsOutput,
-    })
-  );
+  .output(ListRunsOutput);
 
 export const applyRun = oc
   .route({
@@ -68,12 +56,7 @@ export const applyRun = oc
     outputStructure: "detailed",
   })
   .input(ApplyRunInput)
-  .output(
-    z.object({
-      status: z.literal(202),
-      body: z.undefined(),
-    })
-  );
+  .output(ApplyRunOutput);
 
 export const discardRun = oc
   .route({
@@ -83,12 +66,7 @@ export const discardRun = oc
     outputStructure: "detailed",
   })
   .input(DiscardRunInput)
-  .output(
-    z.object({
-      status: z.literal(202),
-      body: z.undefined(),
-    })
-  );
+  .output(DiscardRunOutput);
 
 export const cancelRun = oc
   .route({
@@ -98,12 +76,7 @@ export const cancelRun = oc
     outputStructure: "detailed",
   })
   .input(CancelRunInput)
-  .output(
-    z.object({
-      status: z.literal(202),
-      body: z.undefined(),
-    })
-  );
+  .output(CancelRunOutput);
 
 export const forceCancelRun = oc
   .route({
@@ -113,12 +86,7 @@ export const forceCancelRun = oc
     outputStructure: "detailed",
   })
   .input(ForceCancelRunInput)
-  .output(
-    z.object({
-      status: z.literal(202),
-      body: z.undefined(),
-    })
-  );
+  .output(ForceCancelRunOutput);
 
 // --- Contract Router ---
 

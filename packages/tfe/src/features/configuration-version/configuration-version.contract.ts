@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { oc } from "@orpc/contract";
 import {
   CreateConfigurationVersionInput,
@@ -17,12 +16,7 @@ export const createConfigurationVersion = oc
     outputStructure: "detailed",
   })
   .input(CreateConfigurationVersionInput)
-  .output(
-    z.object({
-      status: z.literal(201),
-      body: CreateConfigurationVersionOutput,
-    })
-  );
+  .output(CreateConfigurationVersionOutput);
 
 export const getConfigurationVersion = oc
   .route({
@@ -32,12 +26,7 @@ export const getConfigurationVersion = oc
     outputStructure: "detailed",
   })
   .input(GetConfigurationVersionInput)
-  .output(
-    z.object({
-      status: z.literal(200),
-      body: GetConfigurationVersionOutput,
-    })
-  );
+  .output(GetConfigurationVersionOutput);
 
 // --- Contract Router ---
 

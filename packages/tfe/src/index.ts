@@ -77,33 +77,3 @@ export const tfeContract = {
     taskResults: taskResultContract,
     policyEvaluations: policyEvaluationContract,
 };
-
-// Unified Serializer
-import { SerializeBuilder } from "@jsonapi-serde/server/response";
-import { serializeWorkspace } from "./features/workspace/workspace.schema";
-import { serializeConfigurationVersion } from "./features/configuration-version/configuration-version.schema";
-import { serializeRun } from "./features/run/run.schema";
-import { serializePlan } from "./features/plan/plan.schema";
-import { serializeApply } from "./features/apply/apply.schema";
-import { serializeTaskStage } from "./features/task-stage/task-stage.schema";
-import { serializeStateVersion } from "./features/state-version/state-version.schema";
-import { serializeStateVersionOutput } from "./features/state-version-output/state-version-output.schema";
-import { serializeEntitlementSet } from "./features/organization/organization.schema";
-import { serializeCostEstimate } from "./features/cost-estimate/cost-estimate.schema";
-import { serializeTaskResult } from "./features/task-result/task-result.schema";
-import { serializePolicyEvaluation } from "./features/policy-evaluation/policy-evaluation.schema";
-
-export const serialize = SerializeBuilder.new()
-    .add("workspaces", serializeWorkspace)
-    .add("configuration-versions", serializeConfigurationVersion)
-    .add("runs", serializeRun)
-    .add("plans", serializePlan)
-    .add("applies", serializeApply)
-    .add("task-stages", serializeTaskStage)
-    .add("state-versions", serializeStateVersion)
-    .add("state-version-outputs", serializeStateVersionOutput)
-    .add("entitlement-sets", serializeEntitlementSet)
-    .add("cost-estimates", serializeCostEstimate)
-    .add("task-results", serializeTaskResult)
-    .add("policy-evaluations", serializePolicyEvaluation)
-    .build();

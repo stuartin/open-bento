@@ -1,11 +1,10 @@
-import { z } from "zod";
 import { oc } from "@orpc/contract";
 import {
   GetCostEstimateInput,
   GetCostEstimateOutput,
 } from "./cost-estimate.schema";
 
-// --- Contract ---
+// --- Contracts ---
 
 export const getCostEstimate = oc
   .route({
@@ -15,12 +14,7 @@ export const getCostEstimate = oc
     outputStructure: "detailed",
   })
   .input(GetCostEstimateInput)
-  .output(
-    z.object({
-      status: z.literal(200),
-      body: GetCostEstimateOutput,
-    })
-  );
+  .output(GetCostEstimateOutput);
 
 // --- Contract Router ---
 

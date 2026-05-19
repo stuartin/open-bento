@@ -1,11 +1,8 @@
 import { z } from "zod";
-import { createDeserializer } from "@jsonapi-serde/client";
-import type { EntitySerializer } from "@jsonapi-serde/server/response";
-import { AuthHeadersSchema } from "../../lib/common.schema";
-import { StateVersionAttributesSchema } from "../state-version/state-version.schema";
+import { AuthHeadersSchema, JsonApiCollection, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
 
 // ============================================================
-// ENTITY DEFINITION
+// ENTITY DEFINITION - Workspace
 // ============================================================
 
 export const WorkspaceAttributesSchema = z.object({
@@ -15,62 +12,13 @@ export const WorkspaceAttributesSchema = z.object({
   locked: z.boolean().optional(),
 });
 
-export type Workspace = z.infer<typeof WorkspaceAttributesSchema> & {
-  id: string;
-  organizationId?: string;
-  currentStateVersionId?: string;
-};
-
-export const serializeWorkspace: EntitySerializer<Workspace> = {
-  getId: (workspace) => workspace.id,
-  serialize: (workspace) => ({
-    attributes: {
-      name: workspace.name,
-      "execution-mode": workspace["execution-mode"],
-      "terraform-version": workspace["terraform-version"],
-      locked: workspace.locked,
-    },
-    relationships: {
-      ...(workspace.organizationId && {
-        organization: {
-          data: { type: "organizations", id: workspace.organizationId },
-        },
-      }),
-      ...(workspace.currentStateVersionId && {
-        "current-state-version": {
-          data: { type: "state-versions", id: workspace.currentStateVersionId },
-        },
-      }),
-    },
-  }),
-};
-
-export const deserializeWorkspace = createDeserializer({
-  type: "workspaces",
-  cardinality: "one",
-  attributesSchema: WorkspaceAttributesSchema,
-  relationships: {
-    organization: {
-      type: "organizations",
-      cardinality: "one",
-    },
-    "current-state-version": {
-      type: "state-versions",
-      cardinality: "one",
-      included: {
-        attributesSchema: StateVersionAttributesSchema,
-      },
-    },
-  },
-});
-
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
 
 // --- Get Workspace ---
 
-export const GetWorkspaceInput = z.object({
+export const GetWorkspaceInput = ORPCInput({
   params: z.object({
     organization: z.string().describe("Organization name"),
     workspace: z.string().describe("Workspace name"),
@@ -78,17 +26,17 @@ export const GetWorkspaceInput = z.object({
   headers: AuthHeadersSchema,
 });
 
-export const GetWorkspaceOutput = z.object({
-  data: z.object({
-    type: z.literal("workspaces"),
-    id: z.string(),
-    attributes: WorkspaceAttributesSchema,
-  }),
+export const GetWorkspaceOutput = ORPCOutput({
+  status: z.literal(200),
+  body: JsonApiDocument(
+    "workspaces",
+    WorkspaceAttributesSchema
+  ),
 });
 
 // --- List Workspaces ---
 
-export const ListWorkspacesInput = z.object({
+export const ListWorkspacesInput = ORPCInput({
   params: z.object({
     organization: z.string().describe("Organization name"),
   }),
@@ -102,12 +50,10 @@ export const ListWorkspacesInput = z.object({
   headers: AuthHeadersSchema,
 });
 
-export const ListWorkspacesOutput = z.object({
-  data: z.array(
-    z.object({
-      type: z.literal("workspaces"),
-      id: z.string(),
-      attributes: WorkspaceAttributesSchema,
-    })
+export const ListWorkspacesOutput = ORPCOutput({
+  status: z.literal(200),
+  body: JsonApiCollection(
+    "workspaces",
+    WorkspaceAttributesSchema
   ),
 });

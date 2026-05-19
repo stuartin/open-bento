@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { oc } from "@orpc/contract";
 import {
   GetOrganizationEntitlementsInput,
@@ -17,12 +16,7 @@ export const getOrganizationEntitlements = oc
     outputStructure: "detailed",
   })
   .input(GetOrganizationEntitlementsInput)
-  .output(
-    z.object({
-      status: z.literal(200),
-      body: GetOrganizationEntitlementsOutput,
-    })
-  );
+  .output(GetOrganizationEntitlementsOutput);
 
 export const listOrganizationRunQueue = oc
   .route({
@@ -32,12 +26,7 @@ export const listOrganizationRunQueue = oc
     outputStructure: "detailed",
   })
   .input(ListOrganizationRunQueueInput)
-  .output(
-    z.object({
-      status: z.literal(200),
-      body: ListOrganizationRunQueueOutput,
-    })
-  );
+  .output(ListOrganizationRunQueueOutput);
 
 // --- Contract Router ---
 

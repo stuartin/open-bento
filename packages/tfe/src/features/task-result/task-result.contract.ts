@@ -1,11 +1,10 @@
-import { z } from "zod";
 import { oc } from "@orpc/contract";
 import {
   GetTaskResultInput,
   GetTaskResultOutput,
 } from "./task-result.schema";
 
-// --- Contract ---
+// --- Contracts ---
 
 export const getTaskResult = oc
   .route({
@@ -15,12 +14,7 @@ export const getTaskResult = oc
     outputStructure: "detailed",
   })
   .input(GetTaskResultInput)
-  .output(
-    z.object({
-      status: z.literal(200),
-      body: GetTaskResultOutput,
-    })
-  );
+  .output(GetTaskResultOutput);
 
 // --- Contract Router ---
 
