@@ -8,7 +8,7 @@ import {
 
 export const getCostEstimate = oc
   .route({
-    path: "/api/v2/cost-estimates/{costEstimateId}",
+    path: "/cost-estimates/{costEstimateId}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",

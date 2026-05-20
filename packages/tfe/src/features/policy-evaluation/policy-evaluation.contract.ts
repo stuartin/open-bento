@@ -8,7 +8,7 @@ import {
 
 export const getPolicyEvaluation = oc
   .route({
-    path: "/api/v2/policy-evaluations/{policyEvaluationId}",
+    path: "/policy-evaluations/{policyEvaluationId}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",

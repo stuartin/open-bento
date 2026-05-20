@@ -10,7 +10,7 @@ import {
 
 export const getOrganizationEntitlements = oc
   .route({
-    path: "/api/v2/organizations/{organization}/entitlement-set",
+    path: "/organizations/{organization}/entitlement-set",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -20,7 +20,7 @@ export const getOrganizationEntitlements = oc
 
 export const listOrganizationRunQueue = oc
   .route({
-    path: "/api/v2/organizations/{organization}/runs/queue",
+    path: "/organizations/{organization}/runs/queue",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",

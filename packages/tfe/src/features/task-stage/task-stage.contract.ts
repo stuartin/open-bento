@@ -10,7 +10,7 @@ import {
 
 export const getTaskStage = oc
   .route({
-    path: "/api/v2/task-stages/{taskStageId}",
+    path: "/task-stages/{taskStageId}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -20,7 +20,7 @@ export const getTaskStage = oc
 
 export const listTaskStages = oc
   .route({
-    path: "/api/v2/runs/{runId}/task-stages",
+    path: "/runs/{runId}/task-stages",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",

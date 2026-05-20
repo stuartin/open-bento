@@ -12,7 +12,7 @@ import {
 
 export const getPlan = oc
   .route({
-    path: "/api/v2/plans/{planId}",
+    path: "/plans/{planId}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -22,7 +22,7 @@ export const getPlan = oc
 
 export const getPlanJsonOutput = oc
   .route({
-    path: "/api/v2/plans/{planId}/json-output-redacted",
+    path: "/plans/{planId}/json-output-redacted",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",

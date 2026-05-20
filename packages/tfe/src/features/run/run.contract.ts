@@ -20,7 +20,7 @@ import {
 
 export const createRun = oc
   .route({
-    path: "/api/v2/runs",
+    path: "/runs",
     method: "POST",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -30,7 +30,7 @@ export const createRun = oc
 
 export const getRun = oc
   .route({
-    path: "/api/v2/runs/{runId}",
+    path: "/runs/{runId}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -40,7 +40,7 @@ export const getRun = oc
 
 export const listRuns = oc
   .route({
-    path: "/api/v2/workspaces/{workspaceId}/runs",
+    path: "/workspaces/{workspaceId}/runs",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -50,7 +50,7 @@ export const listRuns = oc
 
 export const applyRun = oc
   .route({
-    path: "/api/v2/runs/{runId}/actions/apply",
+    path: "/runs/{runId}/actions/apply",
     method: "POST",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -60,7 +60,7 @@ export const applyRun = oc
 
 export const discardRun = oc
   .route({
-    path: "/api/v2/runs/{runId}/actions/discard",
+    path: "/runs/{runId}/actions/discard",
     method: "POST",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -70,7 +70,7 @@ export const discardRun = oc
 
 export const cancelRun = oc
   .route({
-    path: "/api/v2/runs/{runId}/actions/cancel",
+    path: "/runs/{runId}/actions/cancel",
     method: "POST",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -80,7 +80,7 @@ export const cancelRun = oc
 
 export const forceCancelRun = oc
   .route({
-    path: "/api/v2/runs/{runId}/actions/force-cancel",
+    path: "/runs/{runId}/actions/force-cancel",
     method: "POST",
     inputStructure: "detailed",
     outputStructure: "detailed",

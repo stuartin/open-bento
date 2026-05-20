@@ -5,7 +5,7 @@ import { GetApplyInput, GetApplyOutput } from "./apply.schema";
 
 export const getApply = oc
   .route({
-    path: "/api/v2/applies/{applyId}",
+    path: "/applies/{applyId}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",

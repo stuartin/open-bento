@@ -10,7 +10,7 @@ import {
 
 export const getWorkspace = oc
   .route({
-    path: "/api/v2/organizations/{organization}/workspaces/{workspace}",
+    path: "/organizations/{organization}/workspaces/{workspace}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -20,7 +20,7 @@ export const getWorkspace = oc
 
 export const listWorkspaces = oc
   .route({
-    path: "/api/v2/organizations/{organization}/workspaces",
+    path: "/organizations/{organization}/workspaces",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",

@@ -12,7 +12,7 @@ import {
 
 export const getCurrentStateVersion = oc
   .route({
-    path: "/api/v2/workspaces/{workspaceId}/current-state-version",
+    path: "/workspaces/{workspaceId}/current-state-version",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -22,7 +22,7 @@ export const getCurrentStateVersion = oc
 
 export const getStateVersion = oc
   .route({
-    path: "/api/v2/state-versions/{stateVersionId}",
+    path: "/state-versions/{stateVersionId}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -32,7 +32,7 @@ export const getStateVersion = oc
 
 export const listStateVersions = oc
   .route({
-    path: "/api/v2/workspaces/{workspaceId}/state-versions",
+    path: "/workspaces/{workspaceId}/state-versions",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",

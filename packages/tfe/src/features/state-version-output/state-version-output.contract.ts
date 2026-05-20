@@ -8,7 +8,7 @@ import {
 
 export const getStateVersionOutput = oc
   .route({
-    path: "/api/v2/state-version-outputs/{stateVersionOutputId}",
+    path: "/state-version-outputs/{stateVersionOutputId}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",

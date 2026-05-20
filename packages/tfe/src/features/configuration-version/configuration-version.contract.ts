@@ -10,7 +10,7 @@ import {
 
 export const createConfigurationVersion = oc
   .route({
-    path: "/api/v2/workspaces/{workspaceId}/configuration-versions",
+    path: "/workspaces/{workspaceId}/configuration-versions",
     method: "POST",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -20,7 +20,7 @@ export const createConfigurationVersion = oc
 
 export const getConfigurationVersion = oc
   .route({
-    path: "/api/v2/configuration-versions/{configurationVersionId}",
+    path: "/configuration-versions/{configurationVersionId}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",

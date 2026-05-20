@@ -8,7 +8,7 @@ import {
 
 export const getTaskResult = oc
   .route({
-    path: "/api/v2/task-results/{taskResultId}",
+    path: "/task-results/{taskResultId}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",
