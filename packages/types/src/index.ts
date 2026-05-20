@@ -51,20 +51,20 @@ export const openAPISchemaGeneratorOptions: OpenAPIGeneratorGenerateOptions = {
         version: '0.0.1',
     },
     // Hopefully not needed in v2: https://github.com/middleapi/orpc/issues/1423
-    commonSchemas: {
-        Organization: {
-            schema: OrganizationSchema,
-        },
-        Project: {
-            schema: ProjectSchema,
-        },
-        Run: {
-            schema: RunSchema,
-        },
-        Workspace: {
-            schema: WorkspaceSchema,
-        },
-    }
+    // commonSchemas: {
+    //     Organization: {
+    //         schema: OrganizationSchema,
+    //     },
+    //     Project: {
+    //         schema: ProjectSchema,
+    //     },
+    //     Run: {
+    //         schema: RunSchema,
+    //     },
+    //     Workspace: {
+    //         schema: WorkspaceSchema,
+    //     },
+    // }
 }
 
 export const zSchema = {

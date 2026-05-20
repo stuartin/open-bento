@@ -30,6 +30,7 @@
 		"@open-bento/config": "workspace:",
 		"@open-bento/spawner-v3": "workspace:",
 		"@open-bento/types": "workspace:",
+		"@open-bento/tfe": "workspace:",
 		"@orpc/client": "catalog:",
 		"@orpc/openapi": "catalog:",
 		"@orpc/openapi-client": "catalog:",

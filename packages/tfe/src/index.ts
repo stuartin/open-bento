@@ -63,19 +63,22 @@ import { costEstimateContract } from "./features/cost-estimate/cost-estimate.con
 import { taskResultContract } from "./features/task-result/task-result.contract";
 import { policyEvaluationContract } from "./features/policy-evaluation/policy-evaluation.contract";
 import { pingContract } from "./features/ping/ping.contract";
+import { oc } from "@orpc/contract";
 
-export const tfeContract = {
-    ping: pingContract,
-    organizations: organizationContract,
-    // workspaces: workspaceContract,
-    // configurationVersions: configurationVersionContract,
-    // runs: runContract,
-    // plans: planContract,
-    // applies: applyContract,
-    // taskStages: taskStageContract,
-    // stateVersions: stateVersionContract,
-    // stateVersionOutputs: stateVersionOutputContract,
-    // costEstimates: costEstimateContract,
-    // taskResults: taskResultContract,
-    // policyEvaluations: policyEvaluationContract,
-};
+export const tfeContract = oc
+    .prefix("/tfe")
+    .router({
+        ping: pingContract,
+        organizations: organizationContract,
+        // workspaces: workspaceContract,
+        // configurationVersions: configurationVersionContract,
+        // runs: runContract,
+        // plans: planContract,
+        // applies: applyContract,
+        // taskStages: taskStageContract,
+        // stateVersions: stateVersionContract,
+        // stateVersionOutputs: stateVersionOutputContract,
+        // costEstimates: costEstimateContract,
+        // taskResults: taskResultContract,
+        // policyEvaluations: policyEvaluationContract,
+    });

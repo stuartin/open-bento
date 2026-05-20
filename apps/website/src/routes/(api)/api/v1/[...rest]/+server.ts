@@ -1,7 +1,6 @@
 import { OpenAPIHandler } from '@orpc/openapi/fetch'
 import { CORSPlugin } from '@orpc/server/plugins'
 import { onError, ORPCError, ValidationError } from '@orpc/server'
-import { router } from '$lib/server/api'
 import type { RequestHandler } from '@sveltejs/kit'
 import { auth } from '$lib/server/auth'
 import { OpenAPIReferencePlugin } from '@orpc/openapi/plugins'
@@ -11,6 +10,7 @@ import { Spawner } from '@open-bento/spawner-v3'
 import { API_PREFIX } from '$lib/constants'
 import { ResponseHeadersPlugin } from '@orpc/server/plugins'
 import { TFE_ROOT_INTERCEPTOR_CONTEXT_KEY, tfeRootInterceptor } from '$lib/server/api/lib/tfe'
+import { router } from './router.server'
 
 const handler = new OpenAPIHandler(router, {
     plugins: [
