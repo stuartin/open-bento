@@ -70,7 +70,7 @@ export const tfeContract = oc
     .router({
         ping: pingContract,
         organizations: organizationContract,
-        // workspaces: workspaceContract,
+        workspaces: workspaceContract,
         // configurationVersions: configurationVersionContract,
         // runs: runContract,
         // plans: planContract,

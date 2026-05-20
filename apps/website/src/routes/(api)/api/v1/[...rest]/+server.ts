@@ -54,6 +54,7 @@ const handler = new OpenAPIHandler(
                         console.log(JSON.stringify(error, null, 2))
                     }
                 }
+                console.error(error)
             }),
         ],
     })
