@@ -10,49 +10,53 @@ import { Spawner } from '@open-bento/spawner-v3'
 import { API_PREFIX } from '$lib/constants'
 import { ResponseHeadersPlugin } from '@orpc/server/plugins'
 import { TFE_ROOT_INTERCEPTOR_CONTEXT_KEY, tfeRootInterceptor } from '$lib/server/api/lib/tfe'
-import { router } from './router.server'
+import { tfeRouter } from '$features/tfe/index.router.server'
 
-const handler = new OpenAPIHandler(router, {
-    plugins: [
-        new ResponseHeadersPlugin(),
-        new CORSPlugin({
-            exposeHeaders: ['Content-Disposition']
-        }),
-        new OpenAPIReferencePlugin({
-            schemaConverters: [
-                new ZodToJsonSchemaConverter()
-            ],
-            specGenerateOptions: openAPISchemaGeneratorOptions
-        })
-    ],
-    adapterInterceptors: [
-        (options) => {
-            return options.next({
-                ...options,
-                context: {
-                    ...options.context,
-                    [TFE_ROOT_INTERCEPTOR_CONTEXT_KEY as any]: {
-                        fetchRequest: options.request,
-                    },
-                },
+const handler = new OpenAPIHandler(
+    {
+        tfe: tfeRouter
+    },
+    {
+        plugins: [
+            new ResponseHeadersPlugin(),
+            new CORSPlugin({
+                exposeHeaders: ['Content-Disposition']
+            }),
+            new OpenAPIReferencePlugin({
+                schemaConverters: [
+                    new ZodToJsonSchemaConverter()
+                ],
+                specGenerateOptions: openAPISchemaGeneratorOptions
             })
-        },
-    ],
-    rootInterceptors: [
-        // https://orpc.dev/docs/advanced/extend-body-parser
-        (options) => tfeRootInterceptor(options as any)
-    ],
-    interceptors: [
-        onError((error) => {
-            if (error instanceof ORPCError) {
-                console.error(error.message)
-                if (error.cause instanceof ValidationError) {
-                    console.log(JSON.stringify(error, null, 2))
+        ],
+        adapterInterceptors: [
+            (options) => {
+                return options.next({
+                    ...options,
+                    context: {
+                        ...options.context,
+                        [TFE_ROOT_INTERCEPTOR_CONTEXT_KEY as any]: {
+                            fetchRequest: options.request,
+                        },
+                    },
+                })
+            },
+        ],
+        rootInterceptors: [
+            // https://orpc.dev/docs/advanced/extend-body-parser
+            (options) => tfeRootInterceptor(options as any)
+        ],
+        interceptors: [
+            onError((error) => {
+                if (error instanceof ORPCError) {
+                    console.error(error.message)
+                    if (error.cause instanceof ValidationError) {
+                        console.log(JSON.stringify(error, null, 2))
+                    }
                 }
-            }
-        }),
-    ],
-})
+            }),
+        ],
+    })
 
 const handle: RequestHandler = async ({ request }) => {
     console.log({ method: request.method, url: request.url, headers: request.headers })
