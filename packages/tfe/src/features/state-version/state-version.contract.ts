@@ -13,7 +13,7 @@ import { createContract } from "../../lib/contract";
 export const getCurrentStateVersion = createContract()
   .auth
   .route({
-    path: "/workspaces/{workspaceId}/current-state-version",
+    path: "/workspaces/{workspace}/current-state-version",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -24,7 +24,7 @@ export const getCurrentStateVersion = createContract()
 export const getStateVersion = createContract()
   .auth
   .route({
-    path: "/state-versions/{stateVersionId}",
+    path: "/state-versions/{version}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -35,7 +35,7 @@ export const getStateVersion = createContract()
 export const listStateVersions = createContract()
   .auth
   .route({
-    path: "/workspaces/{workspaceId}/state-versions",
+    path: "/workspaces/{workspace}/state-versions",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",

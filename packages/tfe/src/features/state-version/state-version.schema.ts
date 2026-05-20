@@ -20,29 +20,24 @@ export const StateVersionAttributesSchema = z.object({
 
 export const GetCurrentStateVersionInput = ORPCInput({
   params: z.object({
-    workspaceId: z.string().describe("Workspace ID"),
+    workspace: z.string().describe("Workspace ID"),
   }),
   headers: AuthHeadersSchema,
 });
 
 export const GetCurrentStateVersionOutput = ORPCOutput({
   status: z.literal(200),
-  body: z.object({
-    data: z
-      .object({
-        type: z.literal("state-versions"),
-        id: z.string(),
-        attributes: StateVersionAttributesSchema,
-      })
-      .nullable(),
-  }),
+  body: JsonApiDocument(
+    "state-versions",
+    StateVersionAttributesSchema
+  ).nullable()
 });
 
 // --- Get State Version ---
 
 export const GetStateVersionInput = ORPCInput({
   params: z.object({
-    stateVersionId: z.string().describe("State Version ID"),
+    version: z.string().describe("State Version ID"),
   }),
   headers: AuthHeadersSchema,
 });
@@ -59,7 +54,7 @@ export const GetStateVersionOutput = ORPCOutput({
 
 export const ListStateVersionsInput = ORPCInput({
   params: z.object({
-    workspaceId: z.string().describe("Workspace ID"),
+    workspace: z.string().describe("Workspace ID"),
   }),
   query: z
     .object({
