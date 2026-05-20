@@ -51,8 +51,6 @@ export const GetOrganizationEntitlementsInput = ORPCInput({
   headers: AuthHeadersSchema,
 });
 
-type T = z.infer<typeof GetOrganizationEntitlementsInput>
-
 export const GetOrganizationEntitlementsOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiDocument(
