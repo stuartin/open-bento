@@ -1,12 +1,13 @@
-import { oc } from "@orpc/contract";
 import {
   GetCostEstimateInput,
   GetCostEstimateOutput,
 } from "./cost-estimate.schema";
+import { createContract } from "../../lib/contract";
 
 // --- Contracts ---
 
-export const getCostEstimate = oc
+export const getCostEstimate = createContract()
+  .auth
   .route({
     path: "/cost-estimates/{costEstimateId}",
     method: "GET",

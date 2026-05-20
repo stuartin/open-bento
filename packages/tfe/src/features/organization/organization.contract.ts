@@ -1,4 +1,4 @@
-import { oc } from "@orpc/contract";
+import { createContract } from "../../lib/contract";
 import {
   GetOrganizationEntitlementsInput,
   GetOrganizationEntitlementsOutput,
@@ -8,7 +8,8 @@ import {
 
 // --- Contracts ---
 
-export const getOrganizationEntitlements = oc
+export const getOrganizationEntitlements = createContract()
+  .auth
   .route({
     path: "/organizations/{organization}/entitlement-set",
     method: "GET",
@@ -18,7 +19,8 @@ export const getOrganizationEntitlements = oc
   .input(GetOrganizationEntitlementsInput)
   .output(GetOrganizationEntitlementsOutput);
 
-export const listOrganizationRunQueue = oc
+export const listOrganizationRunQueue = createContract()
+  .auth
   .route({
     path: "/organizations/{organization}/runs/queue",
     method: "GET",

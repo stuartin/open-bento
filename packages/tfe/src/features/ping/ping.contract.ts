@@ -1,9 +1,10 @@
-import { oc } from "@orpc/contract";
 import { PingOutput } from "./ping.schema";
+import { createContract } from "../../lib/contract";
 
 // --- Contracts ---
 
-export const ping = oc
+export const ping = createContract()
+  .auth
   .route({
     path: "/ping",
     method: "GET",

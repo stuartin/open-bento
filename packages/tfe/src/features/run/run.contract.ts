@@ -1,4 +1,3 @@
-import { oc } from "@orpc/contract";
 import {
   CreateRunInput,
   CreateRunOutput,
@@ -15,10 +14,12 @@ import {
   ForceCancelRunInput,
   ForceCancelRunOutput,
 } from "./run.schema";
+import { createContract } from "../../lib/contract";
 
 // --- Contracts ---
 
-export const createRun = oc
+export const createRun = createContract()
+  .auth
   .route({
     path: "/runs",
     method: "POST",
@@ -28,7 +29,8 @@ export const createRun = oc
   .input(CreateRunInput)
   .output(CreateRunOutput);
 
-export const getRun = oc
+export const getRun = createContract()
+  .auth
   .route({
     path: "/runs/{runId}",
     method: "GET",
@@ -38,7 +40,8 @@ export const getRun = oc
   .input(GetRunInput)
   .output(GetRunOutput);
 
-export const listRuns = oc
+export const listRuns = createContract()
+  .auth
   .route({
     path: "/workspaces/{workspaceId}/runs",
     method: "GET",
@@ -48,7 +51,8 @@ export const listRuns = oc
   .input(ListRunsInput)
   .output(ListRunsOutput);
 
-export const applyRun = oc
+export const applyRun = createContract()
+  .auth
   .route({
     path: "/runs/{runId}/actions/apply",
     method: "POST",
@@ -58,7 +62,8 @@ export const applyRun = oc
   .input(ApplyRunInput)
   .output(ApplyRunOutput);
 
-export const discardRun = oc
+export const discardRun = createContract()
+  .auth
   .route({
     path: "/runs/{runId}/actions/discard",
     method: "POST",
@@ -68,7 +73,8 @@ export const discardRun = oc
   .input(DiscardRunInput)
   .output(DiscardRunOutput);
 
-export const cancelRun = oc
+export const cancelRun = createContract()
+  .auth
   .route({
     path: "/runs/{runId}/actions/cancel",
     method: "POST",
@@ -78,7 +84,8 @@ export const cancelRun = oc
   .input(CancelRunInput)
   .output(CancelRunOutput);
 
-export const forceCancelRun = oc
+export const forceCancelRun = createContract()
+  .auth
   .route({
     path: "/runs/{runId}/actions/force-cancel",
     method: "POST",

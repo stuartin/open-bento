@@ -1,14 +1,15 @@
-import { oc } from "@orpc/contract";
 import {
   GetTaskStageInput,
   GetTaskStageOutput,
   ListTaskStagesInput,
   ListTaskStagesOutput,
 } from "./task-stage.schema";
+import { createContract } from "../../lib/contract";
 
 // --- Contracts ---
 
-export const getTaskStage = oc
+export const getTaskStage = createContract()
+  .auth
   .route({
     path: "/task-stages/{taskStageId}",
     method: "GET",
@@ -18,7 +19,8 @@ export const getTaskStage = oc
   .input(GetTaskStageInput)
   .output(GetTaskStageOutput);
 
-export const listTaskStages = oc
+export const listTaskStages = createContract()
+  .auth
   .route({
     path: "/runs/{runId}/task-stages",
     method: "GET",

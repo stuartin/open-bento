@@ -1,12 +1,13 @@
-import { oc } from "@orpc/contract";
 import {
   GetPolicyEvaluationInput,
   GetPolicyEvaluationOutput,
 } from "./policy-evaluation.schema";
+import { createContract } from "../../lib/contract";
 
 // --- Contracts ---
 
-export const getPolicyEvaluation = oc
+export const getPolicyEvaluation = createContract()
+  .auth
   .route({
     path: "/policy-evaluations/{policyEvaluationId}",
     method: "GET",

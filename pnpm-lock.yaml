@@ -198,6 +198,9 @@ importers:
       '@orpc/contract':
         specifier: 'catalog:'
         version: 1.13.14
+      '@orpc/openapi':
+        specifier: 'catalog:'
+        version: 1.13.14(ws@8.20.0)
       zod:
         specifier: 'catalog:'
         version: 4.3.6

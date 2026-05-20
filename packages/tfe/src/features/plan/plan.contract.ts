@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { oc } from "@orpc/contract";
 import {
   GetPlanInput,
   GetPlanOutput,
@@ -7,10 +6,12 @@ import {
   GetPlanJsonOutputOutput,
   GetPlanJsonOutputRedirectOutput,
 } from "./plan.schema";
+import { createContract } from "../../lib/contract";
 
 // --- Contracts ---
 
-export const getPlan = oc
+export const getPlan = createContract()
+  .auth
   .route({
     path: "/plans/{planId}",
     method: "GET",
@@ -20,7 +21,8 @@ export const getPlan = oc
   .input(GetPlanInput)
   .output(GetPlanOutput);
 
-export const getPlanJsonOutput = oc
+export const getPlanJsonOutput = createContract()
+  .auth
   .route({
     path: "/plans/{planId}/json-output-redacted",
     method: "GET",

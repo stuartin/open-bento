@@ -1,4 +1,4 @@
-import { oc } from "@orpc/contract";
+import { createContract } from "../../lib/contract";
 import {
   CreateConfigurationVersionInput,
   CreateConfigurationVersionOutput,
@@ -8,7 +8,8 @@ import {
 
 // --- Contracts ---
 
-export const createConfigurationVersion = oc
+export const createConfigurationVersion = createContract()
+  .auth
   .route({
     path: "/workspaces/{workspaceId}/configuration-versions",
     method: "POST",
@@ -18,7 +19,8 @@ export const createConfigurationVersion = oc
   .input(CreateConfigurationVersionInput)
   .output(CreateConfigurationVersionOutput);
 
-export const getConfigurationVersion = oc
+export const getConfigurationVersion = createContract()
+  .auth
   .route({
     path: "/configuration-versions/{configurationVersionId}",
     method: "GET",

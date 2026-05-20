@@ -1,9 +1,10 @@
-import { oc } from "@orpc/contract";
 import { GetApplyInput, GetApplyOutput } from "./apply.schema";
+import { createContract } from "../../lib/contract";
 
 // --- Contracts ---
 
-export const getApply = oc
+export const getApply = createContract()
+  .auth
   .route({
     path: "/applies/{applyId}",
     method: "GET",

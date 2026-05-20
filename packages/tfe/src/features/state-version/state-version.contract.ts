@@ -1,4 +1,3 @@
-import { oc } from "@orpc/contract";
 import {
   GetCurrentStateVersionInput,
   GetCurrentStateVersionOutput,
@@ -7,10 +6,12 @@ import {
   ListStateVersionsInput,
   ListStateVersionsOutput,
 } from "./state-version.schema";
+import { createContract } from "../../lib/contract";
 
 // --- Contracts ---
 
-export const getCurrentStateVersion = oc
+export const getCurrentStateVersion = createContract()
+  .auth
   .route({
     path: "/workspaces/{workspaceId}/current-state-version",
     method: "GET",
@@ -20,7 +21,8 @@ export const getCurrentStateVersion = oc
   .input(GetCurrentStateVersionInput)
   .output(GetCurrentStateVersionOutput);
 
-export const getStateVersion = oc
+export const getStateVersion = createContract()
+  .auth
   .route({
     path: "/state-versions/{stateVersionId}",
     method: "GET",
@@ -30,7 +32,8 @@ export const getStateVersion = oc
   .input(GetStateVersionInput)
   .output(GetStateVersionOutput);
 
-export const listStateVersions = oc
+export const listStateVersions = createContract()
+  .auth
   .route({
     path: "/workspaces/{workspaceId}/state-versions",
     method: "GET",

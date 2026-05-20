@@ -1,14 +1,15 @@
-import { oc } from "@orpc/contract";
 import {
   GetWorkspaceInput,
   GetWorkspaceOutput,
   ListWorkspacesInput,
   ListWorkspacesOutput,
 } from "./workspace.schema";
+import { createContract } from "../../lib/contract";
 
 // --- Contracts ---
 
-export const getWorkspace = oc
+export const getWorkspace = createContract()
+  .auth
   .route({
     path: "/organizations/{organization}/workspaces/{workspace}",
     method: "GET",
@@ -18,7 +19,8 @@ export const getWorkspace = oc
   .input(GetWorkspaceInput)
   .output(GetWorkspaceOutput);
 
-export const listWorkspaces = oc
+export const listWorkspaces = createContract()
+  .auth
   .route({
     path: "/organizations/{organization}/workspaces",
     method: "GET",
