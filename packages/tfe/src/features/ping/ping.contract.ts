@@ -4,7 +4,7 @@ import { createContract } from "../../lib/contract";
 // --- Contracts ---
 
 export const ping = createContract()
-  .auth
+  .pub
   .route({
     path: "/ping",
     method: "GET",
