@@ -7,6 +7,7 @@ import {
   ListStateVersionsOutput,
 } from "./state-version.schema";
 import { createContract } from "../../lib/contract";
+import { NOT_FOUND } from "../../lib/errors";
 
 // --- Contracts ---
 
@@ -17,6 +18,9 @@ export const getCurrentStateVersion = createContract()
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",
+  })
+  .errors({
+    NOT_FOUND
   })
   .input(GetCurrentStateVersionInput)
   .output(GetCurrentStateVersionOutput);

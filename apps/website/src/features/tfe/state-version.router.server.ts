@@ -25,6 +25,9 @@ export const tfeStateVersionsRouter = os
 
             if (!currentVersion.success) throw errors.BAD_REQUEST(currentVersion.error)
 
+            // For testing we assume there is no state
+            if (!currentVersion.data.data.attributes["hosted-state-download-url"]) throw errors.NOT_FOUND()
+
             return {
                 status: 200,
                 body: currentVersion.data

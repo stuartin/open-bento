@@ -1,10 +1,10 @@
 terraform {
   cloud {
     hostname     = "localhost:5173"
-    organization = "org"
+    organization = "organization"
 
     workspaces {
-      name = "workspace_test"
+      name = "workspace"
     }
   }
 }
