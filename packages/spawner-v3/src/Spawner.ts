@@ -1,4 +1,4 @@
-import { ConfigError, Data, Effect, Layer, ManagedRuntime } from "effect";
+import { type ConfigError, Data, Effect, Layer, ManagedRuntime } from "effect";
 import { RunRunner } from "./services/RunRunner";
 import { Config } from "./services/Config";
 import { Docker } from "./services/Docker";

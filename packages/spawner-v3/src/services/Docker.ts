@@ -1,4 +1,4 @@
-import { Command, CommandExecutor } from "@effect/platform";
+import { Command, type CommandExecutor } from "@effect/platform";
 import { Effect, type Stream } from "effect";
 import { Config } from "./Config";
 import type { PlatformError } from "@effect/platform/Error";

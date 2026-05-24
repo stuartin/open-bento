@@ -9,7 +9,11 @@ import type { InferContractRouterInputs, InferContractRouterOutputs } from '@orp
 import { IdSchema } from "./lib/shared";
 import type z from "zod";
 import { tfeOrganizationsContract } from "./contracts/tfe/tfe.organizations.contract";
-import { tfeWorkspacesContract } from "./contracts/tfe/tfe.workspaces.contract";
+import { TFEConfigurationVersionSchema, tfeOrganizationsWorkspacesContract, tfeWorkspacesContract } from "./contracts/tfe/tfe.workspaces.contract";
+import { tfeEntitySchema } from "./lib/tfe";
+import { tfeUploadsContract } from "./contracts/tfe/tfe.uploads.contract";
+import { tfeConfigurationVersionsContract } from "./contracts/tfe/tfe.configuration-versions.contract";
+import { tfeRunsContract } from "./contracts/tfe/tfe.runs.contract";
 
 export const contract = {
     organizations: {
@@ -26,9 +30,13 @@ export const contract = {
         ping: tfePingContract,
         organizations: {
             ...tfeOrganizationsContract,
-            workspaces: tfeWorkspacesContract
-        }
-    }
+            workspaces: tfeOrganizationsWorkspacesContract
+        },
+        workspaces: tfeWorkspacesContract,
+        uploads: tfeUploadsContract,
+        configurationVersions: tfeConfigurationVersionsContract,
+        runs: tfeRunsContract,
+    },
 }
 
 const openAPIGenerator = new OpenAPIGenerator({
@@ -43,20 +51,20 @@ export const openAPISchemaGeneratorOptions: OpenAPIGeneratorGenerateOptions = {
         version: '0.0.1',
     },
     // Hopefully not needed in v2: https://github.com/middleapi/orpc/issues/1423
-    commonSchemas: {
-        Organization: {
-            schema: OrganizationSchema,
-        },
-        Project: {
-            schema: ProjectSchema,
-        },
-        Run: {
-            schema: RunSchema,
-        },
-        Workspace: {
-            schema: WorkspaceSchema,
-        },
-    }
+    // commonSchemas: {
+    //     Organization: {
+    //         schema: OrganizationSchema,
+    //     },
+    //     Project: {
+    //         schema: ProjectSchema,
+    //     },
+    //     Run: {
+    //         schema: RunSchema,
+    //     },
+    //     Workspace: {
+    //         schema: WorkspaceSchema,
+    //     },
+    // }
 }
 
 export const zSchema = {
@@ -65,6 +73,9 @@ export const zSchema = {
     Project: ProjectSchema,
     Workspace: WorkspaceSchema,
     Run: RunSchema,
+    TFE: {
+        ConfigurationVersion: tfeEntitySchema("configuration-versions", TFEConfigurationVersionSchema),
+    }
 }
 
 export type Id = z.infer<typeof zSchema.Id>;

@@ -1,0 +1,21 @@
+{
+  "name": "@open-bento/tfe",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "biome lint .",
+    "format": "biome lint --write .",
+    "test": "pnpm run /^test:/"
+  },
+  "dependencies": {
+    "@orpc/contract": "catalog:",
+    "@orpc/openapi": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@open-bento/config": "workspace:*"
+  }
+}
