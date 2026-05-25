@@ -1,55 +1,111 @@
 import { createRouter } from "$features/orpc/factories";
 import { useAuth } from "$features/auth/middleware/use-auth";
-import { GetWorkspaceOutput, ListWorkspacesOutput, tfeContract } from "@open-bento/tfe";
+import { RESOURCE, tfeContract, toCamel, toKebab } from "@open-bento/tfe";
+import { db } from "$features/db";
+import { workspaces } from "$features/db/schema";
+import { eq } from "drizzle-orm";
 
 const os = createRouter(tfeContract.workspaces).use(useAuth);
 export const tfeWorkspacesRouter = os
     .router({
-        get: os.get.handler(async ({ errors }) => {
+        create: os.create.handler(async ({ errors, input, context }) => {
+            // check if user has permissions...
+            const organization = await db.query.organizations.findFirst({
+                where: {
+                    slug: input.params.organization
+                }
+            })
 
-            const workspace = GetWorkspaceOutput.shape.body.safeParse({
-                data: {
-                    type: "workspaces",
-                    id: "id-workspaces",
-                    attributes: {
-                        name: "workspace",
-                        "execution-mode": "remote",
-                        "terraform-version": "1.7.3",
-                        locked: false,
-                        permissions: {
-                            "can-queue-run": true
-                        }
+            if (!organization) throw errors.NOT_FOUND()
+            if (!context.user.organizationIds.includes(organization.id)) throw errors.UNAUTHORIZED()
+
+            const [workspace] = await db.insert(workspaces).values({
+                organizationId: organization.id,
+                name: input.body.data.attributes.name
+            }).returning()
+
+            if (!workspace) throw errors.NOT_FOUND()
+
+            return {
+                status: 200,
+                body: {
+                    data: {
+                        type: RESOURCE.WORKSPACES,
+                        id: workspace.id,
+                        attributes: toKebab(workspace)
+                    }
+                }
+            }
+        }),
+        update: os.update.handler(async ({ errors, input }) => {
+            const existingWorkspace = await db.query.workspaces.findFirst({
+                where: {
+                    id: input.params["workspace-id"]
+                }
+            })
+
+            if (!existingWorkspace) throw errors.NOT_FOUND()
+
+            const [workspace] = await db
+                .update(workspaces)
+                .set(toCamel(input.body.data.attributes))
+                .where(eq(workspaces.id, existingWorkspace.id))
+                .returning()
+
+            if (!workspace) throw errors.NOT_FOUND()
+
+            return {
+                status: 200,
+                body: {
+                    data: {
+                        type: RESOURCE.WORKSPACES,
+                        id: workspace.id,
+                        attributes: toKebab(workspace)
+                    }
+                }
+            }
+
+        }),
+        get: os.get.handler(async ({ errors, input }) => {
+
+            const workspace = await db.query.workspaces.findFirst({
+                where: {
+                    name: input.params.workspace
+                }
+            })
+
+            if (!workspace) throw errors.NOT_FOUND()
+
+            return {
+                status: 200,
+                body: {
+                    data: {
+                        type: RESOURCE.WORKSPACES,
+                        id: workspace.id,
+                        attributes: toKebab(workspace)
+                    }
+                }
+            }
+        }),
+        list: os.list.handler(async ({ errors, input }) => {
+
+            const workspaces = await db.query.workspaces.findMany({
+                where: {
+                    organization: {
+                        slug: input.params.organization
                     }
                 }
             })
 
-            if (!workspace.success) throw errors.BAD_REQUEST(workspace.error)
-
             return {
                 status: 200,
-                body: workspace.data
-            }
-        }),
-        list: os.list.handler(async ({ errors }) => {
-
-            const workspaces = ListWorkspacesOutput.shape.body.safeParse({
-                data: [{
-                    type: "workspaces",
-                    id: "id-workspaces",
-                    attributes: {
-                        name: "workspace",
-                        "execution-mode": "remote",
-                        "terraform-version": "1.7.3",
-                        locked: false,
-                    }
-                }]
-            })
-
-            if (!workspaces.success) throw errors.BAD_REQUEST(workspaces.error)
-
-            return {
-                status: 200,
-                body: workspaces.data
+                body: {
+                    data: workspaces.map(workspace => ({
+                        type: RESOURCE.WORKSPACES,
+                        id: workspace.id,
+                        attributes: toKebab(workspace)
+                    }))
+                }
             }
 
         })

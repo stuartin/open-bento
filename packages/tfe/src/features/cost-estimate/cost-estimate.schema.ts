@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AuthHeadersSchema, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
+import { AuthHeadersSchema, JsonApiDocument, ORPCInput, ORPCOutput, RESOURCE } from "../../lib/common.schema";
 
 // ============================================================
 // ENTITY DEFINITION - Cost Estimate
@@ -30,7 +30,7 @@ export const CostEstimateAttributesSchema = z.object({
 
 export const GetCostEstimateInput = ORPCInput({
   params: z.object({
-    costEstimateId: z.string().describe("Cost Estimate ID"),
+    estimate: z.string().describe("Cost Estimate ID"),
   }),
   headers: AuthHeadersSchema,
 });
@@ -38,7 +38,7 @@ export const GetCostEstimateInput = ORPCInput({
 export const GetCostEstimateOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiDocument(
-    "cost-estimates",
+    RESOURCE.COST_ESTIMATES,
     CostEstimateAttributesSchema
   ),
 });

@@ -6,7 +6,7 @@ import { createContract } from "../../lib/contract";
 export const getApply = createContract()
   .auth
   .route({
-    path: "/applies/{applyId}",
+    path: "/applies/{apply}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",

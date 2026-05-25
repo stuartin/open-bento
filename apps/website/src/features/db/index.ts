@@ -20,27 +20,27 @@ export const initDB = async () => {
 }
 
 
-class DB {
-    static #instance: DB
+// class DB {
+//     static #instance: DB
 
-    public static async get() {
-        if (!DB.#instance) {
-            DB.#instance = new DB();
-            await DB.#instance.migrate()
-        }
+//     public static async get() {
+//         if (!DB.#instance) {
+//             DB.#instance = new DB();
+//             await DB.#instance.migrate()
+//         }
 
-        return DB.#instance;
-    }
+//         return DB.#instance;
+//     }
 
-    private async migrate() {
-        console.log('DB: Start migrations');
-        console.log('DB: Path: ', DATABASE_MIGRATIONS_PATH)
-        console.log('DB: DB: ', DATABASE_PATH)
+//     private async migrate() {
+//         console.log('DB: Start migrations');
+//         console.log('DB: Path: ', DATABASE_MIGRATIONS_PATH)
+//         console.log('DB: DB: ', DATABASE_PATH)
 
-        await migrate(db, {
-            migrationsFolder: DATABASE_MIGRATIONS_PATH
-        });
-        console.log('DB: End migrations');
-    }
+//         await migrate(db, {
+//             migrationsFolder: DATABASE_MIGRATIONS_PATH
+//         });
+//         console.log('DB: End migrations');
+//     }
 
-}
+// }

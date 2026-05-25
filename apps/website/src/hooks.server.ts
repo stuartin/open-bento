@@ -7,6 +7,7 @@ import { initDB } from '$features/db';
 import { Spawner } from '@open-bento/spawner-v3';
 import { initTerraformClient } from '$features/auth/init/init-terraform-client';
 import { initOrganizationWithAdmin } from '$features/auth/init/init-organization';
+import { initTFE } from '$features/auth/init/init-tfe';
 
 const handleBetterAuth: Handle = async ({ event, resolve }) => {
 	const session = await auth.api.getSession({ headers: event.request.headers });
@@ -25,6 +26,7 @@ export const init: ServerInit = async () => {
 	await initDB()
 	await initTerraformClient()
 	await initOrganizationWithAdmin()
+	await initTFE()
 
 	const spawner = await Spawner.get()
 	spawner.config = {
@@ -32,5 +34,4 @@ export const init: ServerInit = async () => {
 		onStatusUpdate: () => new Promise(() => console.log("onStatusUpdate")),
 	}
 	spawner.start()
-
 };

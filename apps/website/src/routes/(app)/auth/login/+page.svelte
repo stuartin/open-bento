@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { authClient } from "$lib/auth-client";
+  import { authClient } from "$features/auth/auth-client";
 
   const getForm = () => {
     const email = document.getElementById("form-email") as HTMLInputElement;

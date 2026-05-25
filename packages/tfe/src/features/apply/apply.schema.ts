@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AuthHeadersSchema, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
+import { AuthHeadersSchema, JsonApiDocument, ORPCInput, ORPCOutput, RESOURCE } from "../../lib/common.schema";
 
 // ============================================================
 // ENTITY DEFINITION - Apply
@@ -31,7 +31,7 @@ export const ApplyAttributesSchema = z.object({
 
 export const GetApplyInput = ORPCInput({
   params: z.object({
-    applyId: z.string().describe("Apply ID"),
+    apply: z.string().describe("Apply ID"),
   }),
   headers: AuthHeadersSchema,
 });
@@ -39,7 +39,7 @@ export const GetApplyInput = ORPCInput({
 export const GetApplyOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiDocument(
-    "applies",
+    RESOURCE.APPLIES,
     ApplyAttributesSchema
   ),
 });

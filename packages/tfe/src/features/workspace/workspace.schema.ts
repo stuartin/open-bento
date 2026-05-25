@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AuthHeadersSchema, JsonApiCollection, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
+import { AuthHeadersSchema, JsonApiCollection, JsonApiDocument, ORPCInput, ORPCOutput, RESOURCE } from "../../lib/common.schema";
 
 // ============================================================
 // ENTITY DEFINITION - Workspace
@@ -8,7 +8,7 @@ import { AuthHeadersSchema, JsonApiCollection, JsonApiDocument, ORPCInput, ORPCO
 export const WorkspaceAttributesSchema = z.object({
   name: z.string(),
   "execution-mode": z.enum(["remote", "local", "agent"]),
-  "terraform-version": z.string().nullable(),
+  "terraform-version": z.string(),
   locked: z.boolean().optional(),
   permissions: z.object({
     "can-queue-run": z.boolean()
@@ -18,6 +18,54 @@ export const WorkspaceAttributesSchema = z.object({
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
+
+// --- Create Workspace ---
+
+export const CreateWorkspaceInput = ORPCInput({
+  headers: AuthHeadersSchema,
+  params: z.object({
+    organization: z.string()
+  }),
+  body: z.object({
+    data: z.object({
+      type: z.literal(RESOURCE.WORKSPACES),
+      attributes: z.object({
+        "name": z.string(),
+      }),
+    }),
+  }),
+});
+
+export const CreateWorkspaceOutput = ORPCOutput({
+  status: z.literal(200),
+  body: JsonApiDocument(
+    RESOURCE.WORKSPACES,
+    WorkspaceAttributesSchema
+  ),
+});
+
+// --- Update Workspace ---
+
+export const UpdateWorkspaceInput = ORPCInput({
+  headers: AuthHeadersSchema,
+  params: z.object({
+    "workspace-id": z.string()
+  }),
+  body: z.object({
+    data: z.object({
+      type: z.literal(RESOURCE.WORKSPACES),
+      attributes: WorkspaceAttributesSchema.partial()
+    }),
+  }),
+});
+
+export const UpdateWorkspaceOutput = ORPCOutput({
+  status: z.literal(200),
+  body: JsonApiDocument(
+    RESOURCE.WORKSPACES,
+    WorkspaceAttributesSchema
+  ),
+});
 
 // --- Get Workspace ---
 
@@ -32,7 +80,7 @@ export const GetWorkspaceInput = ORPCInput({
 export const GetWorkspaceOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiDocument(
-    "workspaces",
+    RESOURCE.WORKSPACES,
     WorkspaceAttributesSchema
   ),
 });
@@ -56,7 +104,7 @@ export const ListWorkspacesInput = ORPCInput({
 export const ListWorkspacesOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiCollection(
-    "workspaces",
+    RESOURCE.WORKSPACES,
     WorkspaceAttributesSchema
   ),
 });

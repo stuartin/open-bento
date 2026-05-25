@@ -1,4 +1,5 @@
 import { createContract } from "../../lib/contract";
+import { NOT_FOUND } from "../../lib/errors";
 import {
   GetOrganizationEntitlementsInput,
   GetOrganizationEntitlementsOutput,
@@ -17,7 +18,8 @@ export const getOrganizationEntitlements = createContract()
     outputStructure: "detailed",
   })
   .input(GetOrganizationEntitlementsInput)
-  .output(GetOrganizationEntitlementsOutput);
+  .output(GetOrganizationEntitlementsOutput)
+  .errors({ NOT_FOUND })
 
 export const listOrganizationRunQueue = createContract()
   .auth

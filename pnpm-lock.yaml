@@ -11,7 +11,7 @@ catalogs:
       version: 2.4.12
     '@orpc/client':
       specifier: ^1.13.14
-      version: 1.13.14
+      version: 1.14.0
     '@orpc/contract':
       specifier: ^1.13.14
       version: 1.13.14
@@ -83,7 +83,7 @@ importers:
         version: link:../../packages/types
       '@orpc/client':
         specifier: 'catalog:'
-        version: 1.13.14
+        version: 1.14.0
       '@orpc/openapi':
         specifier: 'catalog:'
         version: 1.13.14(ws@8.20.0)
@@ -95,7 +95,7 @@ importers:
         version: 1.13.14(ws@8.20.0)
       '@orpc/tanstack-query':
         specifier: 'catalog:'
-        version: 1.14.0(@orpc/client@1.13.14)(@tanstack/query-core@5.99.2)
+        version: 1.14.0(@orpc/client@1.14.0)(@tanstack/query-core@5.99.2)
       '@orpc/zod':
         specifier: 'catalog:'
         version: 1.13.14(@orpc/contract@1.14.0)(@orpc/server@1.13.14(ws@8.20.0))(ws@8.20.0)(zod@4.3.6)
@@ -201,6 +201,12 @@ importers:
       '@orpc/openapi':
         specifier: 'catalog:'
         version: 1.13.14(ws@8.20.0)
+      camelcase-keys:
+        specifier: ^10.0.2
+        version: 10.0.2
+      decamelize-keys:
+        specifier: ^2.0.1
+        version: 2.0.1
       zod:
         specifier: 'catalog:'
         version: 4.3.6
@@ -1662,6 +1668,14 @@ packages:
   buffer@5.7.1:
     resolution: {integrity: sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==}
 
+  camelcase-keys@10.0.2:
+    resolution: {integrity: sha512-PVHCLVbJ7nWGal0lPAmBN5eSLjIynlMUk2EPmL9aPl6QyJ6+FoszTKwldPzkuVqg5teZbPTbb8Oenzyw9GSJRw==}
+    engines: {node: '>=20'}
+
+  camelcase@9.0.0:
+    resolution: {integrity: sha512-TO9xmyXTZ9HUHI8M1OnvExxYB0eYVS/1e5s7IDMTAoIcwUd+aNcFODs6Xk83mobk0velyHFQgA1yIrvYc6wclw==}
+    engines: {node: '>=20'}
+
   chokidar@4.0.3:
     resolution: {integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==}
     engines: {node: '>= 14.16.0'}
@@ -1696,6 +1710,14 @@ packages:
     peerDependenciesMeta:
       supports-color:
         optional: true
+
+  decamelize-keys@2.0.1:
+    resolution: {integrity: sha512-nrNeSCtU2gV3Apcmn/EZ+aR20zKDuNDStV67jPiupokD3sOAFeMzslLMCFdKv1sPqzwoe5ZUhsSW9IAVgKSL/Q==}
+    engines: {node: '>=14.16'}
+
+  decamelize@6.0.1:
+    resolution: {integrity: sha512-G7Cqgaelq68XHJNGlZ7lrNQyhZGsFqpwtGFexqUv4IQdjKoSYF7ipZ9UuTJZUSQXFj/XaoBLuEVIVqr8EJngEQ==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
   decompress-response@6.0.0:
     resolution: {integrity: sha512-aW35yZM6Bb/4oJlZncMH2LCoZtJXTRxES17vE3hoRiowU2kWHaJKFkSBDnDR+cm9J+9QhXmREyIfv0pji9ejCQ==}
@@ -2094,6 +2116,14 @@ packages:
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
 
+  map-obj@4.3.0:
+    resolution: {integrity: sha512-hdN1wVrZbb29eBGiGjJbeP8JbKjq1urkHJ/LIP/NY48MZ1QVXUsQBV1G1zvYFHn1XE06cwjBsOI2K3Ulnj1YXQ==}
+    engines: {node: '>=8'}
+
+  map-obj@6.0.0:
+    resolution: {integrity: sha512-PwDvwt/tK70+luLw5k9ySLtzLAzwf7tZTY9GBj63Y010nHRPjwHcQTpTd5JwQqITC2ty7prtxBo71iwyYY0TAg==}
+    engines: {node: '>=20'}
+
   mime@3.0.0:
     resolution: {integrity: sha512-jSCU7/VB1loIWBZe14aEYHU/+1UMEHoaO7qxCOVJOw9GgH72VAWppxNcjU+x9a2k3GSIBXNKxXQFqRvvZ7vr3A==}
     engines: {node: '>=10.0.0'}
@@ -2245,6 +2275,14 @@ packages:
 
   pure-rand@6.1.0:
     resolution: {integrity: sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==}
+
+  quick-lru@6.1.2:
+    resolution: {integrity: sha512-AAFUA5O1d83pIHEhJwWCq/RQcRukCkn/NSm2QsTEMle5f2hP0ChI2+3Xb051PZCkLryI/Ir1MVKviT2FIloaTQ==}
+    engines: {node: '>=12'}
+
+  quick-lru@7.3.0:
+    resolution: {integrity: sha512-k9lSsjl36EJdK7I06v7APZCbyGT2vMTsYSRX1Q2nbYmnkBqgUhRkAuzH08Ciotteu/PLJmIF2+tti7o3C/ts2g==}
+    engines: {node: '>=18'}
 
   radash@12.1.1:
     resolution: {integrity: sha512-h36JMxKRqrAxVD8201FrCpyeNuUY9Y5zZwujr20fFO77tpUtGa6EZzfKw/3WaiBX95fq7+MpsuMLNdSnORAwSA==}
@@ -2402,6 +2440,10 @@ packages:
   turbo@2.9.6:
     resolution: {integrity: sha512-+v2QJey7ZUeUiuigkU+uFfklvNUyPI2VO2vBpMYJA+a1hKFLFiKtUYlRHdb3P9CrAvMzi0upbjI4WT+zKtqkBg==}
     hasBin: true
+
+  type-fest@3.13.1:
+    resolution: {integrity: sha512-tLq3bSNx+xSpwvAJnzrK0Ep5CLNWjvFTOp71URMaAEWBfRb9nnJiBoUe0tF8bI4ZFO3omgBR6NvnbzVUT3Ly4g==}
+    engines: {node: '>=14.16'}
 
   type-fest@5.6.0:
     resolution: {integrity: sha512-8ZiHFm91orbSAe2PSAiSVBVko18pbhbiB3U9GglSzF/zCGkR+rxpHx6sEMCUm4kxY4LjDIUGgCfUMtwfZfjfUA==}
@@ -3181,9 +3223,9 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/tanstack-query@1.14.0(@orpc/client@1.13.14)(@tanstack/query-core@5.99.2)':
+  '@orpc/tanstack-query@1.14.0(@orpc/client@1.14.0)(@tanstack/query-core@5.99.2)':
     dependencies:
-      '@orpc/client': 1.13.14
+      '@orpc/client': 1.14.0
       '@orpc/shared': 1.14.0
       '@tanstack/query-core': 5.99.2
     transitivePeerDependencies:
@@ -3708,6 +3750,15 @@ snapshots:
       ieee754: 1.2.1
     optional: true
 
+  camelcase-keys@10.0.2:
+    dependencies:
+      camelcase: 9.0.0
+      map-obj: 6.0.0
+      quick-lru: 7.3.0
+      type-fest: 5.6.0
+
+  camelcase@9.0.0: {}
+
   chokidar@4.0.3:
     dependencies:
       readdirp: 4.1.2
@@ -3731,6 +3782,15 @@ snapshots:
       ms: 2.1.3
     optionalDependencies:
       supports-color: 10.2.2
+
+  decamelize-keys@2.0.1:
+    dependencies:
+      decamelize: 6.0.1
+      map-obj: 4.3.0
+      quick-lru: 6.1.2
+      type-fest: 3.13.1
+
+  decamelize@6.0.1: {}
 
   decompress-response@6.0.0:
     dependencies:
@@ -4038,6 +4098,10 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
 
+  map-obj@4.3.0: {}
+
+  map-obj@6.0.0: {}
+
   mime@3.0.0: {}
 
   mimic-response@3.1.0:
@@ -4196,6 +4260,10 @@ snapshots:
     optional: true
 
   pure-rand@6.1.0: {}
+
+  quick-lru@6.1.2: {}
+
+  quick-lru@7.3.0: {}
 
   radash@12.1.1: {}
 
@@ -4432,6 +4500,8 @@ snapshots:
       '@turbo/linux-arm64': 2.9.6
       '@turbo/windows-64': 2.9.6
       '@turbo/windows-arm64': 2.9.6
+
+  type-fest@3.13.1: {}
 
   type-fest@5.6.0:
     dependencies:

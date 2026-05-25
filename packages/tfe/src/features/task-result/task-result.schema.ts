@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AuthHeadersSchema, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
+import { AuthHeadersSchema, JsonApiDocument, ORPCInput, ORPCOutput, RESOURCE } from "../../lib/common.schema";
 
 // ============================================================
 // ENTITY DEFINITION - Task Result
@@ -30,7 +30,7 @@ export const TaskResultAttributesSchema = z.object({
 
 export const GetTaskResultInput = ORPCInput({
   params: z.object({
-    taskResultId: z.string().describe("Task Result ID"),
+    result: z.string().describe("Task Result ID"),
   }),
   headers: AuthHeadersSchema,
 });
@@ -38,7 +38,7 @@ export const GetTaskResultInput = ORPCInput({
 export const GetTaskResultOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiDocument(
-    "task-results",
+    RESOURCE.TASK_RESULTS,
     TaskResultAttributesSchema
   ),
 });

@@ -54,8 +54,8 @@ export const useAuth = os
 
         return next({
             context: {
-                user: session.user,
-                session: session.session,
+                user: session.user as User,
+                session: session.session as Session,
             },
         });
     });

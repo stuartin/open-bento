@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AuthHeadersSchema, JsonApiCollection, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
+import { AuthHeadersSchema, JsonApiCollection, JsonApiDocument, ORPCInput, ORPCOutput, RESOURCE } from "../../lib/common.schema";
 
 // ============================================================
 // ENTITY DEFINITION - Entitlement Set
@@ -54,7 +54,7 @@ export const GetOrganizationEntitlementsInput = ORPCInput({
 export const GetOrganizationEntitlementsOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiDocument(
-    "entitlement-sets",
+    RESOURCE.ENTITLEMENT_SETS,
     EntitlementSetAttributesSchema
   )
 });
@@ -71,7 +71,7 @@ export const ListOrganizationRunQueueInput = ORPCInput({
 export const ListOrganizationRunQueueOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiCollection(
-    "runs",
+    RESOURCE.RUNS,
     RunQueueItemAttributesSchema
   ),
 });

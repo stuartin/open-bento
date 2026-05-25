@@ -2,6 +2,8 @@ import type { User } from "better-auth"
 import { auth } from "../auth"
 import type { Organization } from "better-auth/plugins"
 import { dev } from "$app/environment"
+import { db } from "$features/db"
+import { entitlementSets } from "$features/db/schema"
 
 export const initOrganizationWithAdmin = async () => {
     const organization = await initOrganization()
@@ -23,8 +25,8 @@ const initOrganization = async () => {
     const organization = await adapter.create<any, Organization>({
         model: "organization",
         data: {
-            name: "org",
-            slug: "org",
+            name: "customer name",
+            slug: "organization",
             createdAt: new Date(),
             updatedAt: new Date(),
         },

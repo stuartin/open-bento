@@ -9,7 +9,7 @@ import { createContract } from "../../lib/contract";
 export const getTaskResult = createContract()
   .auth
   .route({
-    path: "/task-results/{taskResultId}",
+    path: "/task-results/{result}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",

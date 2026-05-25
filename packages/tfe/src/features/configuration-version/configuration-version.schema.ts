@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AuthHeadersSchema, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
+import { AuthHeadersSchema, JsonApiDocument, ORPCInput, ORPCOutput, RESOURCE } from "../../lib/common.schema";
 
 // ============================================================
 // ENTITY DEFINITION - Configuration Version
@@ -26,7 +26,7 @@ export const CreateConfigurationVersionInput = ORPCInput({
   headers: AuthHeadersSchema,
   body: z.object({
     data: z.object({
-      type: z.literal("configuration-versions"),
+      type: z.literal(RESOURCE.CONFIGURATION_VERSIONS),
       attributes: z.object({
         "auto-queue-runs": z.boolean().default(false),
         provisional: z.boolean().default(false),
@@ -39,7 +39,7 @@ export const CreateConfigurationVersionInput = ORPCInput({
 export const CreateConfigurationVersionOutput = ORPCOutput({
   status: z.literal(201),
   body: JsonApiDocument(
-    "configuration-versions",
+    RESOURCE.CONFIGURATION_VERSIONS,
     ConfigurationVersionAttributesSchema
   ),
 });
@@ -56,7 +56,7 @@ export const GetConfigurationVersionInput = ORPCInput({
 export const GetConfigurationVersionOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiDocument(
-    "configuration-versions",
+    RESOURCE.CONFIGURATION_VERSIONS,
     ConfigurationVersionAttributesSchema
   ),
 });

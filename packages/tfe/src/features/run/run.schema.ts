@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AuthHeadersSchema, JsonApiCollection, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
+import { AuthHeadersSchema, JsonApiCollection, JsonApiDocument, ORPCInput, ORPCOutput, RESOURCE } from "../../lib/common.schema";
 
 // ============================================================
 // ENTITY DEFINITION - Run
@@ -76,7 +76,7 @@ export const CreateRunInput = ORPCInput({
   headers: AuthHeadersSchema,
   body: z.object({
     data: z.object({
-      type: z.literal("runs"),
+      type: z.literal(RESOURCE.RUNS),
       attributes: z.object({
         "auto-apply": z.boolean().default(false),
         refresh: z.boolean().default(true),
@@ -94,14 +94,14 @@ export const CreateRunInput = ORPCInput({
       relationships: z.object({
         "configuration-version": z.object({
           data: z.object({
-            type: z.literal("configuration-versions"),
+            type: z.literal(RESOURCE.CONFIGURATION_VERSIONS),
             id: z.string(),
           }),
         }),
         workspace: z
           .object({
             data: z.object({
-              type: z.literal("workspaces"),
+              type: z.literal(RESOURCE.WORKSPACES),
               id: z.string(),
             }),
           })
@@ -113,7 +113,7 @@ export const CreateRunInput = ORPCInput({
 export const CreateRunOutput = ORPCOutput({
   status: z.literal(201),
   body: JsonApiDocument(
-    "runs",
+    RESOURCE.RUNS,
     RunAttributesSchema
   ),
 });
@@ -130,19 +130,19 @@ export const GetRunInput = ORPCInput({
 export const GetRunOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiDocument(
-    "runs",
+    RESOURCE.RUNS,
     RunAttributesSchema,
     z.object({
       plan: z.object({
         data: z.object({
+          type: z.literal(RESOURCE.PLANS),
           id: z.string(),
-          type: z.literal("plans"),
         })
       }),
       workspace: z.object({
         data: z.object({
+          type: z.literal(RESOURCE.WORKSPACES),
           id: z.string(),
-          type: z.literal("workspaces")
         })
       })
     })
@@ -167,7 +167,7 @@ export const ListRunsInput = ORPCInput({
 export const ListRunsOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiCollection(
-    "runs",
+    RESOURCE.RUNS,
     RunAttributesSchema
   ),
 });
@@ -184,7 +184,7 @@ export const GetRunEventsInput = ORPCInput({
 export const GetRunEventsOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiCollection(
-    "run-events",
+    RESOURCE.RUN_EVENTS,
     RunEventsSchema
   ),
 });

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AuthHeadersSchema, JsonApiCollection, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
+import { AuthHeadersSchema, JsonApiCollection, JsonApiDocument, ORPCInput, ORPCOutput, RESOURCE } from "../../lib/common.schema";
 
 // ============================================================
 // ENTITY DEFINITION - State Version
@@ -28,7 +28,7 @@ export const GetCurrentStateVersionInput = ORPCInput({
 export const GetCurrentStateVersionOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiDocument(
-    "state-versions",
+    RESOURCE.STATE_VERSIONS,
     StateVersionAttributesSchema
   ).nullable()
 });
@@ -45,7 +45,7 @@ export const GetStateVersionInput = ORPCInput({
 export const GetStateVersionOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiDocument(
-    "state-versions",
+    RESOURCE.STATE_VERSIONS,
     StateVersionAttributesSchema
   ),
 });
@@ -68,7 +68,7 @@ export const ListStateVersionsInput = ORPCInput({
 export const ListStateVersionsOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiCollection(
-    "state-versions",
+    RESOURCE.STATE_VERSIONS,
     StateVersionAttributesSchema
   ),
 });

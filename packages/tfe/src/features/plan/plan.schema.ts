@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AuthHeadersSchema, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
+import { AuthHeadersSchema, JsonApiDocument, ORPCInput, ORPCOutput, RESOURCE } from "../../lib/common.schema";
 
 // ============================================================
 // ENTITY DEFINITION - Plan
@@ -41,7 +41,7 @@ export const GetPlanInput = ORPCInput({
 export const GetPlanOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiDocument(
-    "plans",
+    RESOURCE.PLANS,
     PlanAttributesSchema
   ),
 });

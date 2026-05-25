@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AuthHeadersSchema, JsonApiCollection, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
+import { AuthHeadersSchema, JsonApiCollection, JsonApiDocument, ORPCInput, ORPCOutput, RESOURCE } from "../../lib/common.schema";
 
 // ============================================================
 // ENTITY DEFINITION - Task Stage
@@ -30,7 +30,7 @@ export const TaskStageAttributesSchema = z.object({
 
 export const GetTaskStageInput = ORPCInput({
   params: z.object({
-    taskStageId: z.string().describe("Task Stage ID"),
+    stage: z.string().describe("Task Stage ID"),
   }),
   headers: AuthHeadersSchema,
 });
@@ -38,7 +38,7 @@ export const GetTaskStageInput = ORPCInput({
 export const GetTaskStageOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiDocument(
-    "task-stages",
+    RESOURCE.TASK_STAGES,
     TaskStageAttributesSchema
   ),
 });
@@ -47,7 +47,7 @@ export const GetTaskStageOutput = ORPCOutput({
 
 export const ListTaskStagesInput = ORPCInput({
   params: z.object({
-    runId: z.string().describe("Run ID"),
+    run: z.string().describe("Run ID"),
   }),
   headers: AuthHeadersSchema,
 });
@@ -55,7 +55,7 @@ export const ListTaskStagesInput = ORPCInput({
 export const ListTaskStagesOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiCollection(
-    "task-stages",
+    RESOURCE.TASK_STAGES,
     TaskStageAttributesSchema
   ),
 });

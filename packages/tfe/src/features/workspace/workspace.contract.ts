@@ -1,12 +1,41 @@
 import {
+  CreateWorkspaceInput,
+  CreateWorkspaceOutput,
   GetWorkspaceInput,
   GetWorkspaceOutput,
   ListWorkspacesInput,
   ListWorkspacesOutput,
+  UpdateWorkspaceInput,
+  UpdateWorkspaceOutput,
 } from "./workspace.schema";
 import { createContract } from "../../lib/contract";
+import { NOT_FOUND } from "../../lib/errors";
 
 // --- Contracts ---
+
+export const createWorkspace = createContract()
+  .auth
+  .route({
+    path: "/organizations/{organization}/workspaces",
+    method: "POST",
+    inputStructure: "detailed",
+    outputStructure: "detailed",
+  })
+  .input(CreateWorkspaceInput)
+  .output(CreateWorkspaceOutput)
+  .errors({ NOT_FOUND })
+
+export const updateWorkspace = createContract()
+  .auth
+  .route({
+    path: "/workspaces/{workspace-id}",
+    method: "PATCH",
+    inputStructure: "detailed",
+    outputStructure: "detailed",
+  })
+  .input(UpdateWorkspaceInput)
+  .output(UpdateWorkspaceOutput)
+  .errors({ NOT_FOUND })
 
 export const getWorkspace = createContract()
   .auth
@@ -17,7 +46,8 @@ export const getWorkspace = createContract()
     outputStructure: "detailed",
   })
   .input(GetWorkspaceInput)
-  .output(GetWorkspaceOutput);
+  .output(GetWorkspaceOutput)
+  .errors({ NOT_FOUND })
 
 export const listWorkspaces = createContract()
   .auth
@@ -33,6 +63,8 @@ export const listWorkspaces = createContract()
 // --- Contract Router ---
 
 export const workspaceContract = {
+  create: createWorkspace,
+  update: updateWorkspace,
   get: getWorkspace,
   list: listWorkspaces,
 };

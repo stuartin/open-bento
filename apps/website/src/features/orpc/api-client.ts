@@ -6,7 +6,7 @@ import { createTanstackQueryUtils } from '@orpc/tanstack-query'
 import { QueryClient } from '@tanstack/svelte-query'
 import { browser } from '$app/environment'
 import { goto } from '$app/navigation'
-import { ORIGIN_API } from './constants'
+import { ORIGIN_API } from '$lib/constants'
 
 const link = new OpenAPILink(contract, {
     url: ORIGIN_API,

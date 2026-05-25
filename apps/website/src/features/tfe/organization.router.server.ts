@@ -1,19 +1,31 @@
 import { createRouter } from "$features/orpc/factories";
 import { useAuth } from "$features/auth/middleware/use-auth";
-import { GetOrganizationEntitlementsOutput, ListOrganizationRunQueueOutput, tfeContract } from "@open-bento/tfe";
+import { GetOrganizationEntitlementsOutput, ListOrganizationRunQueueOutput, RESOURCE, tfeContract } from "@open-bento/tfe";
+import { db } from "$features/db";
 
 const os = createRouter(tfeContract.organizations).use(useAuth);
 export const tfeOrganizationsRouter = os
     .router({
         entitlements: {
-            get: os.entitlements.get.handler(async ({ errors }) => {
+            get: os.entitlements.get.handler(async ({ errors, input }) => {
+
+                const organization = await db.query.organizations.findFirst({
+                    where: {
+                        slug: input.params.organization
+                    },
+                    with: {
+                        entitlementSet: true
+                    }
+                })
+
+                if (!organization) throw errors.NOT_FOUND()
 
                 const entitlementSet = GetOrganizationEntitlementsOutput.shape.body.safeParse({
                     data: {
-                        type: "entitlement-sets",
-                        id: "id-entitlement-sets",
+                        type: RESOURCE.ENTITLEMENT_SETS,
+                        id: organization.entitlementSet.id,
                         attributes: {
-                            operations: true
+                            operations: organization.entitlementSet.operations
                         }
                     }
                 })

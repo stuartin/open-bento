@@ -1,5 +1,20 @@
 import { z } from "zod";
 
+export const RESOURCE = {
+  APPLIES: "applies",
+  CONFIGURATION_VERSIONS: "configuration-versions",
+  COST_ESTIMATES: "cost-estimates",
+  ENTITLEMENT_SETS: "entitlement-sets",
+  PLANS: "plans",
+  POLICY_EVALUATIONS: "policy-evaluations",
+  RUN_EVENTS: "run-events",
+  RUNS: "runs",
+  STATE_VERSION_OUTPUTS: "state-version-outputs",
+  STATE_VERSIONS: "state-versions",
+  TASK_RESULTS: "task-results",
+  TASK_STAGES: "task-stages",
+  WORKSPACES: "workspaces"
+} as const
 
 
 // --- Auth Headers ---
@@ -39,21 +54,6 @@ const JsonApiResource = <
     attributes,
     ...(relationships && { relationships }),
   }) as any;
-
-const test = JsonApiResource(
-  "my-type",
-  z.object({
-    data: z.object({
-      prop: z.string()
-    })
-  }),
-  z.object({
-    plan: z.object({
-      type: z.literal("plans"),
-      id: z.string()
-    })
-  })
-)
 
 // --- JSON:API Document Wrappers ---
 

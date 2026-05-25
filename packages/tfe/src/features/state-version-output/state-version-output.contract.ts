@@ -9,7 +9,7 @@ import { createContract } from "../../lib/contract";
 export const getStateVersionOutput = createContract()
   .auth
   .route({
-    path: "/state-version-outputs/{stateVersionOutputId}",
+    path: "/state-version-outputs/{version}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",

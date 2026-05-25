@@ -9,7 +9,7 @@ import { createContract } from "../../lib/contract";
 export const getCostEstimate = createContract()
   .auth
   .route({
-    path: "/cost-estimates/{costEstimateId}",
+    path: "/cost-estimates/{estimate}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",

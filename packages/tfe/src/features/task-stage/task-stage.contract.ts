@@ -11,7 +11,7 @@ import { createContract } from "../../lib/contract";
 export const getTaskStage = createContract()
   .auth
   .route({
-    path: "/task-stages/{taskStageId}",
+    path: "/task-stages/{stage}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -22,7 +22,7 @@ export const getTaskStage = createContract()
 export const listTaskStages = createContract()
   .auth
   .route({
-    path: "/runs/{runId}/task-stages",
+    path: "/runs/{run}/task-stages",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",

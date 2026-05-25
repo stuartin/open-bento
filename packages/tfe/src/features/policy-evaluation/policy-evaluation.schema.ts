@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AuthHeadersSchema, JsonApiDocument, ORPCInput, ORPCOutput } from "../../lib/common.schema";
+import { AuthHeadersSchema, JsonApiDocument, ORPCInput, ORPCOutput, RESOURCE } from "../../lib/common.schema";
 
 // ============================================================
 // ENTITY DEFINITION - Policy Evaluation
@@ -44,7 +44,7 @@ export const GetPolicyEvaluationInput = ORPCInput({
 export const GetPolicyEvaluationOutput = ORPCOutput({
   status: z.literal(200),
   body: JsonApiDocument(
-    "policy-evaluations",
+    RESOURCE.POLICY_EVALUATIONS,
     PolicyEvaluationAttributesSchema
   ),
 });

@@ -106,9 +106,10 @@
 - **GET** `/api/v1/tfe/runs/{run}` > **200**
 
 - **GET** `/api/v1/tfe/plans/{plan}` > **200**
+  - **GET** `response["log-read-url"]` > **200**
 
-<!-- - **GET** `/api/v1/tfe/organizations/{organization}/workspaces/{workspace}` > **200**
+  - **GET** `response["log-read-url"]` > **204** (done)
 
-- **GET** `/api/v1/tfe/workspaces/{workspace}/runs` > **200**
+- **GET** `/api/v1/tfe/runs/{run}` > **200**
 
-- **GET** `/api/v1/tfe/organizations/{organization}/runs/queue` > **200** -->
+# terraform apply

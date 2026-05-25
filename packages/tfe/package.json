@@ -12,6 +12,8 @@
   "dependencies": {
     "@orpc/contract": "catalog:",
     "@orpc/openapi": "catalog:",
+    "camelcase-keys": "^10.0.2",
+    "decamelize-keys": "^2.0.1",
     "zod": "catalog:"
   },
   "devDependencies": {

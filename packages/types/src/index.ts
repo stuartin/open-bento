@@ -2,18 +2,11 @@ import { ProjectSchema, projectsContract } from "./contracts/projects.contract";
 import { RunSchema, runsContract } from "./contracts/runs.contract";
 import { OrganizationSchema, organizationsContract } from "./contracts/organizations.contract";
 import { WorkspaceSchema, workspacesContract } from "./contracts/workspaces.contract";
-import { tfePingContract } from "./contracts/tfe/tfe.ping.contract";
 import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4'
 import { OpenAPIGenerator, type OpenAPIGeneratorGenerateOptions } from '@orpc/openapi'
 import type { InferContractRouterInputs, InferContractRouterOutputs } from '@orpc/contract'
 import { IdSchema } from "./lib/shared";
 import type z from "zod";
-import { tfeOrganizationsContract } from "./contracts/tfe/tfe.organizations.contract";
-import { TFEConfigurationVersionSchema, tfeOrganizationsWorkspacesContract, tfeWorkspacesContract } from "./contracts/tfe/tfe.workspaces.contract";
-import { tfeEntitySchema } from "./lib/tfe";
-import { tfeUploadsContract } from "./contracts/tfe/tfe.uploads.contract";
-import { tfeConfigurationVersionsContract } from "./contracts/tfe/tfe.configuration-versions.contract";
-import { tfeRunsContract } from "./contracts/tfe/tfe.runs.contract";
 
 export const contract = {
     organizations: {
@@ -25,17 +18,6 @@ export const contract = {
                 runs: runsContract
             }
         },
-    },
-    tfe: {
-        ping: tfePingContract,
-        organizations: {
-            ...tfeOrganizationsContract,
-            workspaces: tfeOrganizationsWorkspacesContract
-        },
-        workspaces: tfeWorkspacesContract,
-        uploads: tfeUploadsContract,
-        configurationVersions: tfeConfigurationVersionsContract,
-        runs: tfeRunsContract,
     },
 }
 
@@ -73,9 +55,6 @@ export const zSchema = {
     Project: ProjectSchema,
     Workspace: WorkspaceSchema,
     Run: RunSchema,
-    TFE: {
-        ConfigurationVersion: tfeEntitySchema("configuration-versions", TFEConfigurationVersionSchema),
-    }
 }
 
 export type Id = z.infer<typeof zSchema.Id>;
