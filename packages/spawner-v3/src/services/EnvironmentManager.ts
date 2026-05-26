@@ -1,4 +1,5 @@
 import { Effect, Queue, Stream } from "effect";
+import { Command } from "@effect/platform";
 import { Docker } from "./Docker";
 import { OutputStorage } from "./OutputStorage";
 import { FileSystem, Path } from "@effect/platform";
@@ -10,14 +11,14 @@ class Environment {
     public outputPath: string,
     public workingDir: string,
     public lastActivityAt: Date,
-    public commandCount: number,
-    public commandQueue: Queue.Queue<CommandTask>
+    public taskCount: number,
+    public taskQueue: Queue.Queue<Task>
   ) { }
 }
 
-interface CommandTask {
-  cmdId: string;
-  command: string[];
+interface Task {
+  id: string;
+  command: Command.Command;
 }
 
 // EnvironmentManager service using Effect.Service pattern
@@ -112,7 +113,7 @@ export class EnvironmentManager extends Effect.Service<EnvironmentManager>()("ru
         }
 
         // Create command queue for this environment
-        const commandQueue = yield* Queue.unbounded<CommandTask>();
+        const commandQueue = yield* Queue.unbounded<Task>();
 
         // Store environment
         const env = new Environment(
@@ -126,43 +127,40 @@ export class EnvironmentManager extends Effect.Service<EnvironmentManager>()("ru
         environments.set(config.id, env);
 
         // Start command processor for this environment
-        yield* processCommandQueue(config.id, env).pipe(Effect.fork);
+        yield* processTaskQueue(config.id, env).pipe(Effect.fork);
 
         // TODO: Implement auto-cleanup timeout using Effect.schedule
       });
 
-    const processCommandQueue = (envId: string, env: Environment) =>
+    const processTaskQueue = (envId: string, env: Environment) =>
       Effect.gen(function* () {
         yield* Effect.forever(
           Effect.gen(function* () {
-            const task = yield* Queue.take(env.commandQueue);
+            const task = yield* Queue.take(env.taskQueue);
 
             // Initialize output files
-            yield* storage.initCommand(task.cmdId, env.outputPath);
+            yield* storage.initCommand(task.id, env.outputPath);
 
-            // Execute command and stream output to files
-            const commandStream = docker.exec(env.containerId, env.workingDir, task.command);
-
-            // Convert Uint8Array stream to string and write to files
-            yield* commandStream.pipe(
-              Stream.decodeText("utf-8"),
-              Stream.mapEffect((chunk) => storage.writeStdout(task.cmdId, env.outputPath, chunk)),
+            // Execute the Command once - stream output and capture exit code
+            const exitCode = yield* task.command.pipe(
+              Command.lines,
+              Stream.mapEffect((line) => storage.writeStdout(task.id, env.outputPath, line + "\n")),
               Stream.runDrain,
+              Effect.as(0), // If successful, exit code is 0
               Effect.catchAll((error) =>
                 Effect.gen(function* () {
-                  yield* storage.writeStderr(task.cmdId, env.outputPath, `Error: ${error}`);
-                  yield* storage.writeExitCode(task.cmdId, env.outputPath, 1);
+                  yield* storage.writeStderr(task.id, env.outputPath, `Error: ${error}`);
+                  return 1; // On error, exit code is 1
                 })
               )
             );
 
-            // Get exit code using execWithExitCode
-            const exitCode = yield* docker.execWithExitCode(env.containerId, env.workingDir, task.command);
-            yield* storage.writeExitCode(task.cmdId, env.outputPath, exitCode);
+            // Write exit code
+            yield* storage.writeExitCode(task.id, env.outputPath, exitCode);
 
             // Update environment activity
             env.lastActivityAt = new Date();
-            env.commandCount++;
+            env.taskCount++;
           })
         );
       });
@@ -174,13 +172,14 @@ export class EnvironmentManager extends Effect.Service<EnvironmentManager>()("ru
           yield* Effect.fail(new Error(`Environment not found: ${envId}`));
         }
 
-        const cmdId = `cmd-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-        commandToEnv.set(cmdId, envId);
+        const id = `cmd-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        commandToEnv.set(id, envId);
 
-        // Queue command for execution
-        yield* Queue.offer(env!.commandQueue, { cmdId, command });
+        // Create the Command and queue it for execution
+        const execCommand = docker.makeExecCommand(env!.containerId, env!.workingDir, command);
+        yield* Queue.offer(env!.taskQueue, { id, command: execCommand });
 
-        return cmdId;
+        return id;
       });
 
     const getOutput = (cmdId: string) =>
@@ -229,7 +228,7 @@ export class EnvironmentManager extends Effect.Service<EnvironmentManager>()("ru
           id: envId,
           status: isRunning ? "ready" : "failed",
           lastActivityAt: env.lastActivityAt,
-          commandCount: env.commandCount
+          commandCount: env.taskCount
         } as EnvironmentInfo;
       });
 
@@ -242,7 +241,7 @@ export class EnvironmentManager extends Effect.Service<EnvironmentManager>()("ru
     } as const;
   }),
   dependencies: [Docker.Default, OutputStorage.Default]
-}) {}
+}) { }
 
 // Export types
 export interface EnvironmentInfo {

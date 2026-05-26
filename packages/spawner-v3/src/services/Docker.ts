@@ -1,5 +1,5 @@
 import { Command } from "@effect/platform";
-import { Effect, Stream } from "effect";
+import { Effect } from "effect";
 
 // Docker service using Effect.Service pattern
 export class Docker extends Effect.Service<Docker>()("runner/Docker", {
@@ -31,8 +31,8 @@ export class Docker extends Effect.Service<Docker>()("runner/Docker", {
       );
     };
 
-    // Execute command inside container and stream output
-    const exec = (
+    // Create a docker exec command (not executed yet)
+    const makeExecCommand = (
       containerId: string,
       workingDir: string,
       command: string[]
@@ -42,21 +42,18 @@ export class Docker extends Effect.Service<Docker>()("runner/Docker", {
         "-w", workingDir,
         containerId,
         ...command
-      ).pipe(Command.stream);
+      );
     };
 
-    // Execute command and get exit code
+    // Execute command and get exit code (for init commands)
     const execWithExitCode = (
       containerId: string,
       workingDir: string,
       command: string[]
     ) => {
-      return Command.make(
-        "docker", "exec",
-        "-w", workingDir,
-        containerId,
-        ...command
-      ).pipe(Command.exitCode);
+      return makeExecCommand(containerId, workingDir, command).pipe(
+        Command.exitCode
+      );
     };
 
     // Download file inside container
@@ -107,7 +104,7 @@ export class Docker extends Effect.Service<Docker>()("runner/Docker", {
 
     return {
       runContainer,
-      exec,
+      makeExecCommand,
       execWithExitCode,
       downloadFile,
       stopContainer,
