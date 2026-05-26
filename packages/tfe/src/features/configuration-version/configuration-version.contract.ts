@@ -1,4 +1,5 @@
 import { createContract } from "../../lib/contract";
+import { NOT_FOUND } from "../../lib/errors";
 import {
   CreateConfigurationVersionInput,
   CreateConfigurationVersionOutput,
@@ -11,13 +12,14 @@ import {
 export const createConfigurationVersion = createContract()
   .auth
   .route({
-    path: "/workspaces/{workspace}/configuration-versions",
+    path: "/workspaces/{workspace-id}/configuration-versions",
     method: "POST",
     inputStructure: "detailed",
     outputStructure: "detailed",
   })
   .input(CreateConfigurationVersionInput)
-  .output(CreateConfigurationVersionOutput);
+  .output(CreateConfigurationVersionOutput)
+  .errors({ NOT_FOUND })
 
 export const getConfigurationVersion = createContract()
   .auth

@@ -1,7 +1,9 @@
 import { saveStreamWithType } from "./lib/save-to-disk";
-import type { ReadableStream } from "stream/web";
 import { createRouter } from "$features/orpc/factories";
 import { tfeContract } from "@open-bento/tfe";
+import { db } from "$features/db";
+import { configurationVersions } from "$features/db/schema";
+import { eq } from "drizzle-orm";
 
 const os = createRouter(tfeContract.uploads);
 export const tfeUploadsRouter = os.router({
@@ -13,11 +15,23 @@ export const tfeUploadsRouter = os.router({
         })
         if (!verifiedUrl.ok) throw errors.BAD_REQUEST()
 
+        const configurationVersion = await db.query.configurationVersions.findFirst({
+            where: {
+                id: verifiedUrl.identifier
+            },
+        })
+
+        if (!configurationVersion) throw errors.NOT_FOUND()
 
         const { ok } = await saveStreamWithType(
-            body as ReadableStream,
-            `${verifiedUrl.identifier}`
+            body,
+            `${configurationVersion.id}`,
+            `./uploads/${configurationVersion.organizationId}/${configurationVersion.workspaceId}`
         );
-        if (!ok) throw errors.BAD_REQUEST()
+
+        await db
+            .update(configurationVersions)
+            .set({ status: ok ? "uploaded" : "errored", uploadUrl: null })
+            .where(eq(configurationVersions.id, configurationVersion.id))
     })
 })

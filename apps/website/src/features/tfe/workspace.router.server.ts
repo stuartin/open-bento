@@ -19,12 +19,14 @@ export const tfeWorkspacesRouter = os
             if (!organization) throw errors.NOT_FOUND()
             if (!context.user.organizationIds.includes(organization.id)) throw errors.UNAUTHORIZED()
 
-            const [workspace] = await db.insert(workspaces).values({
-                organizationId: organization.id,
-                name: input.body.data.attributes.name
-            }).returning()
-
-            if (!workspace) throw errors.NOT_FOUND()
+            const workspace = await db
+                .insert(workspaces)
+                .values({
+                    organizationId: organization.id,
+                    name: input.body.data.attributes.name
+                })
+                .returning()
+                .get()
 
             return {
                 status: 200,
@@ -46,13 +48,12 @@ export const tfeWorkspacesRouter = os
 
             if (!existingWorkspace) throw errors.NOT_FOUND()
 
-            const [workspace] = await db
+            const workspace = await db
                 .update(workspaces)
                 .set(toCamel(input.body.data.attributes))
                 .where(eq(workspaces.id, existingWorkspace.id))
                 .returning()
-
-            if (!workspace) throw errors.NOT_FOUND()
+                .get()
 
             return {
                 status: 200,

@@ -1,13 +1,13 @@
 import { createRouter } from "$features/orpc/factories";
 import { useAuth } from "$features/auth/middleware/use-auth";
-import { GetOrganizationEntitlementsOutput, ListOrganizationRunQueueOutput, RESOURCE, tfeContract } from "@open-bento/tfe";
+import { ListOrganizationRunQueueOutput, RESOURCE, tfeContract, toKebab } from "@open-bento/tfe";
 import { db } from "$features/db";
 
 const os = createRouter(tfeContract.organizations).use(useAuth);
 export const tfeOrganizationsRouter = os
     .router({
         entitlements: {
-            get: os.entitlements.get.handler(async ({ errors, input }) => {
+            get: os.entitlements.get.handler(async ({ errors, input, context }) => {
 
                 const organization = await db.query.organizations.findFirst({
                     where: {
@@ -19,22 +19,17 @@ export const tfeOrganizationsRouter = os
                 })
 
                 if (!organization) throw errors.NOT_FOUND()
-
-                const entitlementSet = GetOrganizationEntitlementsOutput.shape.body.safeParse({
-                    data: {
-                        type: RESOURCE.ENTITLEMENT_SETS,
-                        id: organization.entitlementSet.id,
-                        attributes: {
-                            operations: organization.entitlementSet.operations
-                        }
-                    }
-                })
-
-                if (!entitlementSet.success) throw errors.BAD_REQUEST(entitlementSet.error)
+                if (!context.user.organizationIds.includes(organization.id)) throw errors.UNAUTHORIZED()
 
                 return {
                     status: 200,
-                    body: entitlementSet.data
+                    body: {
+                        data: {
+                            type: RESOURCE.ENTITLEMENT_SETS,
+                            id: organization.entitlementSet.id,
+                            attributes: toKebab(organization.entitlementSet)
+                        }
+                    }
                 }
             })
         },

@@ -1,114 +1,100 @@
 import { createRouter } from "$features/orpc/factories";
 import { useAuth } from "$features/auth/middleware/use-auth";
-import { CreateRunOutput, GetRunEventsOutput, GetRunOutput, ListRunsOutput, tfeContract } from "@open-bento/tfe";
+import { GetRunEventsOutput, ListRunsOutput, RESOURCE, tfeContract, toCamel, toKebab } from "@open-bento/tfe";
 import { createId } from "@paralleldrive/cuid2";
+import { db } from "$features/db";
+import { plans, runs } from "$features/db/schema";
+import { API_PREFIX, ORIGIN } from "$lib/constants";
 
 const os = createRouter(tfeContract.runs).use(useAuth);
 export const tfeRunsRouter = os
     .router({
-        create: os.create.handler(async ({ input, errors }) => {
-            const cuid2 = createId();
-            const id = `run-${cuid2}`;
+        create: os.create.handler(async ({ input, errors, context }) => {
+            if (!context.session.activeOrganizationId) throw errors.UNAUTHORIZED()
 
-            const run = CreateRunOutput.shape.body.safeParse({
-                data: {
-                    type: "runs",
-                    id,
-                    attributes: {
-                        status: "pending",
-                        "has-changes": false,
-                        "is-destroy": false,
-                        "plan-only": true,
-                        refresh: input.body.data.attributes.refresh,
-                        "save-plan": input.body.data.attributes["save-plan"],
-                        "auto-apply": input.body.data.attributes["auto-apply"],
-                        message: input.body.data.attributes.message || null,
-                        "created-at": new Date().toISOString(),
-                        "position-in-queue": 0,
-                        actions: {
-                            "is-cancelable": true,
-                            "is-confirmable": false,
-                            "is-discardable": false,
-                            "is-force-cancelable": false,
-                        },
-                        permissions: {
-                            "can-apply": false,
-                            "can-cancel": false,
-                            "can-comment": false,
-                            "can-discard": false,
-                            "can-force-execute": false,
-                            "can-force-cancel": false,
-                            "can-override-policy-check": false,
-                        },
-                        variables: input.body.data.attributes.variables
-                    },
-                },
-            });
+            const organizationId = context.session.activeOrganizationId
+            const workspaceId = input.body.data.relationships.workspace.data.id
+            const configurationVersionId = input.body.data.relationships["configuration-version"].data.id
 
-            if (!run.success) throw errors.BAD_REQUEST(run.error);
+            const { run } = await db.transaction(async (tx) => {
+
+                const run = await tx
+                    .insert(runs)
+                    .values({
+                        organizationId,
+                        workspaceId,
+                        configurationVersionId,
+                        status: "plan_queued",
+                        ...toCamel(input.body.data.attributes)
+                    })
+                    .returning()
+                    .get()
+
+                const plan = await tx
+                    .insert(plans)
+                    .values({
+                        organizationId,
+                        workspaceId,
+                        runId: run.id,
+                        logReadUrl: `${ORIGIN}${API_PREFIX}/tfe/read-logs/${run.id}/plan`
+                    })
+                    .returning()
+                    .get()
+
+                // if !run["plan-only"] create apply
+
+                return { run, plan }
+            })
 
             return {
-                status: 201 as const,
-                body: run.data,
+                status: 201,
+                body: {
+                    data: {
+                        type: RESOURCE.RUNS,
+                        id: run.id,
+                        attributes: toKebab(run)
+                    }
+                },
             };
         }),
 
         get: os.get.handler(async ({ input, errors }) => {
 
-            const run = GetRunOutput.shape.body.safeParse({
-                data: {
-                    type: "runs",
-                    id: input.params.run,
-                    attributes: {
-                        status: "planned_and_finished",
-                        "has-changes": false,
-                        "is-destroy": false,
-                        "plan-only": true,
-                        refresh: false,
-                        "save-plan": false,
-                        "auto-apply": false,
-                        message: null,
-                        "created-at": new Date().toISOString(),
-                        "position-in-queue": 0,
-                        actions: {
-                            "is-cancelable": true,
-                            "is-confirmable": false,
-                            "is-discardable": false,
-                            "is-force-cancelable": false,
-                        },
-                        permissions: {
-                            "can-apply": false,
-                            "can-cancel": false,
-                            "can-comment": false,
-                            "can-discard": false,
-                            "can-force-execute": false,
-                            "can-force-cancel": false,
-                            "can-override-policy-check": false,
-                        },
-                        variables: []
-                    },
-                    relationships: {
-                        plan: {
-                            data: {
-                                type: "plans",
-                                id: "plan-id",
-                            }
-                        },
-                        workspace: {
-                            data: {
-                                type: "workspaces",
-                                id: "workspace-id"
-                            }
-                        },
-                    }
+            const run = await db.query.runs.findFirst({
+                where: {
+                    id: input.params["run-id"]
                 },
+                with: {
+                    plan: { columns: { id: true } },
+                    workspace: { columns: { id: true } }
+                }
             })
 
-            if (!run.success) throw errors.BAD_REQUEST(run.error);
+            if (!run) throw errors.NOT_FOUND()
 
             return {
                 status: 200,
-                body: run.data,
+                body: {
+                    data: {
+                        type: RESOURCE.RUNS,
+                        id: run.id,
+                        attributes: toKebab({ ...run }),
+                        relationships: {
+                            plan: {
+                                data: {
+                                    type: RESOURCE.PLANS,
+                                    id: run.plan.id
+                                }
+                            },
+                            workspace: {
+                                data: {
+                                    type: RESOURCE.WORKSPACES,
+                                    id: run.workspace.id
+                                }
+                            },
+                        }
+                    }
+                },
             };
         }),
 
@@ -145,6 +131,9 @@ export const tfeRunsRouter = os
 
         events: os.events.router({
             get: os.events.get.handler(async ({ errors }) => {
+                // TODO
+                // Dont know what this endpoint does?
+                // possibly legacy?
                 const runEvents = GetRunEventsOutput.shape.body.safeParse({
                     data: [
                         {

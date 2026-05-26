@@ -6,7 +6,7 @@ export const tfeReadLogsRouter = os
     .router({
         get: os.get.handler(async ({ context }) => {
 
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 3000));
 
             const words = [
                 "lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit",
@@ -25,7 +25,7 @@ export const tfeReadLogsRouter = os
             const lineCount = Math.floor(Math.random() * 10) + 5;
             const lines = Array.from({ length: lineCount }, generateLine)
 
-            const shouldStop = Math.random() < 1 / 3
+            const shouldStop = Math.random() < 1 / 2
 
             if (shouldStop) {
                 return {

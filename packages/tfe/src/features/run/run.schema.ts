@@ -30,18 +30,17 @@ export const RunAttributesSchema = z.object({
     "force_canceled",
   ]),
   "has-changes": z.boolean(),
-  "auto-apply": z.boolean(),
-  refresh: z.boolean(),
-  "is-destroy": z.boolean().optional(),
-  "plan-only": z.boolean(),
+  "auto-apply": z.boolean().describe("`true` when using -auto-approve"),
+  refresh: z.boolean().describe("`false` when -refresh=false"),
+  "is-destroy": z.boolean().describe("`true` during terraform destroy"),
+  "plan-only": z.boolean().describe("`true` during terraform plan, `false` during terraform apply"),
   message: z.string().nullable().optional(),
-  "created-at": z.string().optional(),
-  "position-in-queue": z.number().optional(),
+  "position-in-queue": z.number(),
   actions: z.object({
     "is-cancelable": z.boolean(),
     "is-confirmable": z.boolean(),
     "is-discardable": z.boolean(),
-    "is-force-cancelable": z.boolean().optional(),
+    "is-force-cancelable": z.boolean(),
   }),
   permissions: z.object({
     "can-apply": z.boolean(),
@@ -57,7 +56,9 @@ export const RunAttributesSchema = z.object({
       key: z.string(),
       value: z.string(),
     })
-  )
+  ),
+  "created-at": z.coerce.date(),
+  "updated-at": z.coerce.date(),
 });
 
 export const RunEventsSchema = z.object({
@@ -78,9 +79,9 @@ export const CreateRunInput = ORPCInput({
     data: z.object({
       type: z.literal(RESOURCE.RUNS),
       attributes: z.object({
-        "auto-apply": z.boolean().default(false),
-        refresh: z.boolean().default(true),
-        "save-plan": z.boolean().default(false),
+        "auto-apply": z.boolean(),
+        refresh: z.boolean(),
+        "save-plan": z.boolean(),
         message: z.string().optional(),
         variables: z
           .array(
@@ -122,7 +123,7 @@ export const CreateRunOutput = ORPCOutput({
 
 export const GetRunInput = ORPCInput({
   params: z.object({
-    run: z.string().describe("Run ID"),
+    "run-id": z.string().describe("Run ID"),
   }),
   headers: AuthHeadersSchema,
 });
@@ -176,7 +177,7 @@ export const ListRunsOutput = ORPCOutput({
 
 export const GetRunEventsInput = ORPCInput({
   params: z.object({
-    run: z.string().describe("Run ID"),
+    "run-id": z.string().describe("Run ID"),
   }),
   headers: AuthHeadersSchema,
 });
@@ -193,7 +194,7 @@ export const GetRunEventsOutput = ORPCOutput({
 
 export const ApplyRunInput = ORPCInput({
   params: z.object({
-    run: z.string().describe("Run ID"),
+    "run-id": z.string().describe("Run ID"),
   }),
   headers: AuthHeadersSchema,
   body: z
@@ -212,7 +213,7 @@ export const ApplyRunOutput = ORPCOutput({
 
 export const DiscardRunInput = ORPCInput({
   params: z.object({
-    run: z.string().describe("Run ID"),
+    "run-id": z.string().describe("Run ID"),
   }),
   headers: AuthHeadersSchema,
   body: z
@@ -231,7 +232,7 @@ export const DiscardRunOutput = ORPCOutput({
 
 export const CancelRunInput = ORPCInput({
   params: z.object({
-    run: z.string().describe("Run ID"),
+    "run-id": z.string().describe("Run ID"),
   }),
   headers: AuthHeadersSchema,
   body: z
@@ -250,7 +251,7 @@ export const CancelRunOutput = ORPCOutput({
 
 export const ForceCancelRunInput = ORPCInput({
   params: z.object({
-    run: z.string().describe("Run ID"),
+    "run-id": z.string().describe("Run ID"),
   }),
   headers: AuthHeadersSchema,
   body: z

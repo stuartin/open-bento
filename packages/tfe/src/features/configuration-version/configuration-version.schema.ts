@@ -10,7 +10,7 @@ export const ConfigurationVersionAttributesSchema = z.object({
   speculative: z.boolean(),
   provisional: z.boolean(),
   status: z.enum(["pending", "uploaded", "errored"]),
-  "upload-url": z.string(),
+  "upload-url": z.string().nullable(),
 });
 
 // ============================================================
@@ -21,7 +21,7 @@ export const ConfigurationVersionAttributesSchema = z.object({
 
 export const CreateConfigurationVersionInput = ORPCInput({
   params: z.object({
-    workspace: z.string().describe("Workspace ID"),
+    "workspace-id": z.string().describe("Workspace ID"),
   }),
   headers: AuthHeadersSchema,
   body: z.object({

@@ -17,6 +17,7 @@ import {
   GetRunEventsInput,
 } from "./run.schema";
 import { createContract } from "../../lib/contract";
+import { NOT_FOUND } from "../../lib/errors";
 
 // --- Contracts ---
 
@@ -34,13 +35,14 @@ export const createRun = createContract()
 export const getRun = createContract()
   .auth
   .route({
-    path: "/runs/{run}",
+    path: "/runs/{run-id}",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",
   })
   .input(GetRunInput)
-  .output(GetRunOutput);
+  .output(GetRunOutput)
+  .errors({ NOT_FOUND })
 
 export const listRuns = createContract()
   .auth
@@ -56,7 +58,7 @@ export const listRuns = createContract()
 export const getRunEvents = createContract()
   .auth
   .route({
-    path: "/runs/{run}/run-events",
+    path: "/runs/{run-id}/run-events",
     method: "GET",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -67,7 +69,7 @@ export const getRunEvents = createContract()
 export const applyRun = createContract()
   .auth
   .route({
-    path: "/runs/{run}/actions/apply",
+    path: "/runs/{run-id}/actions/apply",
     method: "POST",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -78,7 +80,7 @@ export const applyRun = createContract()
 export const discardRun = createContract()
   .auth
   .route({
-    path: "/runs/{run}/actions/discard",
+    path: "/runs/{run-id}/actions/discard",
     method: "POST",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -89,7 +91,7 @@ export const discardRun = createContract()
 export const cancelRun = createContract()
   .auth
   .route({
-    path: "/runs/{run}/actions/cancel",
+    path: "/runs/{run-id}/actions/cancel",
     method: "POST",
     inputStructure: "detailed",
     outputStructure: "detailed",
@@ -100,7 +102,7 @@ export const cancelRun = createContract()
 export const forceCancelRun = createContract()
   .auth
   .route({
-    path: "/runs/{run}/actions/force-cancel",
+    path: "/runs/{run-id}/actions/force-cancel",
     method: "POST",
     inputStructure: "detailed",
     outputStructure: "detailed",
