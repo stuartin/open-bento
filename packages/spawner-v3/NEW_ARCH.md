@@ -93,7 +93,7 @@ interface CommandOutput {
 ## Core Components (Internal)
 
 ### 1. Environment (Internal)
-Manages a single container lifecycle.
+Manages a single container lifecycle using Effect Commands.
 
 ```typescript
 class Environment {
@@ -105,17 +105,22 @@ class Environment {
   private commandQueue: Queue<CommandTask>; // Commands run sequentially
   private cleanupSchedule: Effect.Schedule; // Effect-based timeout scheduling
 
-  // Start container with volume mounts
+  // Start container with volume mounts using Effect Command
   start(): Effect<void>;
+  // Implementation: Command.make("docker", "run", "-d", ...args)
 
-  // Download files from URLs
+  // Download files from URLs using Effect Command
   private downloadFiles(): Effect<void>;
+  // Implementation: Command.make("docker", "exec", containerId, "curl", "-L", url, "-o", destination)
 
   // Run initialization commands (fail environment if any command fails)
   private runInitCommands(): Effect<void>;
+  // Implementation: Command.make("docker", "exec", "-w", workingDir, containerId, "sh", "-c", cmd)
 
   // Execute command (returns commandId immediately, queues for execution)
   exec(command: string[]): Effect<string>;
+  // Implementation: Command.make("docker", "exec", "-w", workingDir, containerId, ...command)
+  //                  .pipe(Command.stream) for streaming output to files
 
   // Process command queue sequentially
   private processQueue(): Effect<void>;
@@ -123,28 +128,42 @@ class Environment {
   // Reset auto-cleanup schedule
   private resetTimeout(): Effect<void>;
 
-  // Stop container
+  // Stop container using Effect Command
   stop(): Effect<void>;
+  // Implementation: Command.make("docker", "stop", containerId)
+  //                 >> Command.make("docker", "rm", containerId)
 }
 ```
 
 ### 2. OutputStorage (Internal)
-Handles file I/O for command outputs.
+Handles file I/O for command outputs using Effect FileSystem.
 
 ```typescript
+import { FileSystem } from "@effect/platform/FileSystem";
+import { Path } from "@effect/platform/Path";
+import { Effect } from "effect";
+
 class OutputStorage {
   // Create files for command in specific directory
   initCommand(cmdId: string, outputPath: string): Effect<void>;
+  // Implementation: Uses FileSystem.writeFileString to create empty .stdout/.stderr files
+  //                 and "null" in .exitcode file
 
   // Write stdout/stderr as command executes
   writeStdout(cmdId: string, outputPath: string, data: string): Effect<void>;
+  // Implementation: FileSystem.appendFileString for streaming writes
+
   writeStderr(cmdId: string, outputPath: string, data: string): Effect<void>;
+  // Implementation: FileSystem.appendFileString for streaming writes
 
   // Read full output from specific directory
   readOutput(cmdId: string, outputPath: string): Effect<CommandOutput>;
+  // Implementation: FileSystem.readFileString for all three files
+  //                 Effect.all([readStdout, readStderr, readExitCode])
 
   // Delete command files
   cleanup(cmdId: string, outputPath: string): Effect<void>;
+  // Implementation: FileSystem.remove for each file
 }
 ```
 
@@ -174,29 +193,34 @@ Client: createEnvironment({
   }
 })
            ↓
-Create output directory on host:
-  - mkdir -p /var/outputs/workspace-123
+Create output directory on host using Effect FileSystem:
+  - FileSystem.makeDirectory("/var/outputs/workspace-123", { recursive: true })
            ↓
-Docker run -d --name env-1 \
-  -e TF_VAR_region=us-west-2 \
-  -v /host/path/config.tf:/workspace/config.tf:ro \
-  -v /host/path/vars:/workspace/vars:ro \
-  tofu:1.8.0 sh -c "mkdir -p /workspace && exec sleep infinity"
+Start container using Effect Command:
+  - Docker.runContainer("env-1", "tofu:1.8.0", envVars, volumes, "/workspace")
+  - Command.make("docker", "run", "-d", "--name", "env-1",
+      "-e", "TF_VAR_region=us-west-2",
+      "-v", "/host/path/config.tf:/workspace/config.tf:ro",
+      "-v", "/host/path/vars:/workspace/vars:ro",
+      "tofu:1.8.0", "sh", "-c", "exec sleep infinity")
+  - Returns containerId
            ↓
 [If init.fileFromUrl provided]
-  Download files into container:
+  Download files into container using Effect Commands:
   - For each URL in files:
-    - docker exec env-1 curl -L <url> -o <destination>/<filename>
+    - Docker.downloadFile(containerId, url, destination)
+    - Command.make("docker", "exec", "env-1", "curl", "-L", url, "-o", destination)
            ↓
 [If init.commands provided]
-  Run init commands sequentially:
+  Run init commands sequentially using Effect Commands:
   - For each command:
-    - docker exec -w /workspace env-1 sh -c "<command>"
-    - If exit code != 0: FAIL and destroy container
+    - Docker.execWithExitCode(containerId, "/workspace", ["sh", "-c", command])
+    - If exitCode !== 0: Effect.fail and destroy container
            ↓
-Start auto-cleanup timer (timeoutMs)
+Start auto-cleanup schedule using Effect:
+  - Schedule.once(Duration.millis(timeoutMs))
            ↓
-Store containerId, outputPath, and timer in environments map
+Store containerId, outputPath, and schedule in environments map
 ```
 
 ### 2. Run Command
@@ -211,17 +235,24 @@ Return commandId immediately: "cmd-abc123"
 Add to environment's command queue (sequential execution)
            ↓
 [Asynchronously, when queue processes this command]
-Create output files in environment's outputPath:
-  - /var/outputs/workspace-123/cmd-abc123.stdout
-  - /var/outputs/workspace-123/cmd-abc123.stderr
+Create output files in environment's outputPath using Effect FileSystem:
+  - OutputStorage.initCommand("cmd-abc123", "/var/outputs/workspace-123")
+  - Creates: cmd-abc123.stdout, cmd-abc123.stderr, cmd-abc123.exitcode
            ↓
-Docker exec -w /workspace env-1 tofu init
+Execute command using Effect Command and stream output:
+  - Docker.exec(containerId, "/workspace", ["tofu", "init"])
+  - Command.make("docker", "exec", "-w", "/workspace", "env-1", "tofu", "init")
+    .pipe(Command.stream)
            ↓
-Stream output to files in real-time
+Stream output to files in real-time using Effect Streams:
+  - Stream.run(outputStream, Sink.toFile(stdoutPath))
+  - Stream.run(errorStream, Sink.toFile(stderrPath))
            ↓
-Command completes → Record exit code
+Command completes → Record exit code to file:
+  - FileSystem.writeFileString(exitcodePath, exitCode.toString())
            ↓
-Reset auto-cleanup timer (environment stays alive)
+Reset auto-cleanup schedule using Effect:
+  - Schedule.restart(environment stays alive)
            ↓
 Process next command in queue
 ```
@@ -235,9 +266,10 @@ Lookup commandId in commandToEnv map to find environment
            ↓
 Get environment's outputPath
            ↓
-Read /var/outputs/workspace-123/cmd-abc123.stdout
-Read /var/outputs/workspace-123/cmd-abc123.stderr
-Read /var/outputs/workspace-123/cmd-abc123.exitcode
+Read files using Effect FileSystem:
+  - FileSystem.readFileString("/var/outputs/workspace-123/cmd-abc123.stdout")
+  - FileSystem.readFileString("/var/outputs/workspace-123/cmd-abc123.stderr")
+  - FileSystem.readFileString("/var/outputs/workspace-123/cmd-abc123.exitcode")
            ↓
 Return { stdout, stderr, exitCode }
 ```
@@ -247,9 +279,13 @@ Return { stdout, stderr, exitCode }
 ```
 Client: destroyEnvironment("env-1")
            ↓
-Cancel auto-cleanup schedule
+Cancel auto-cleanup schedule using Effect:
+  - Effect.interrupt(scheduleTask)
            ↓
-Docker stop env-1 && docker rm env-1
+Stop and remove container using Effect Commands:
+  - Docker.stopContainer(containerId)
+  - Command.make("docker", "stop", "env-1")
+    >> Command.make("docker", "rm", "env-1")
            ↓
 Remove from environments map
            ↓
@@ -266,7 +302,9 @@ packages/spawner-v3/
 │   ├── index.ts                    # Export EnvironmentManager
 │   ├── EnvironmentManager.ts       # Main service
 │   ├── Environment.ts              # Single environment wrapper
-│   └── OutputStorage.ts            # File I/O
+│   ├── OutputStorage.ts            # File I/O
+│   └── services/
+│       └── Docker.ts               # Docker CLI wrapper using Effect Commands
 ```
 
 ## Configuration
@@ -294,16 +332,37 @@ const MAX_CONCURRENT_ENVIRONMENTS = 50;
 // timeoutMs = DEFAULT_TIMEOUT_MS
 ```
 
+## Dependencies
+
+### Required Packages
+```json
+{
+  "dependencies": {
+    "effect": "^3.21.2",
+    "@effect/platform": "^0.96.1",
+    "@effect/platform-node": "^0.106.0"
+  }
+}
+```
+
+### System Requirements
+- **Docker** - Must be installed and accessible via CLI
+- **Node.js** - v18+ for Effect-TS compatibility
+
 ## Usage Example
 
 ```typescript
 import { EnvironmentManager } from "@open-bento/spawner-v3";
+import { Effect } from "effect";
+import { NodeContext } from "@effect/platform-node";
 
+// Create manager with Effect runtime
 const manager = EnvironmentManager.make();
 
-// 1. Create environment with init, env vars, and custom output path
-await Effect.runPromise(
-  manager.createEnvironment({
+// Provide the Node.js platform layer for Command execution
+const program = Effect.gen(function* () {
+  // 1. Create environment with init, env vars, and custom output path
+  yield* manager.createEnvironment({
     id: "env-workspace-123",
     image: "tofu:1.8.0",
     outputPath: "/mnt/outputs/workspace-123",
@@ -333,50 +392,38 @@ await Effect.runPromise(
         "unzip -q /workspace/downloads/providers.zip -d /workspace/.terraform"
       ]
     }
-  })
-);
+  });
 
-// Or minimal config with defaults (auto-cleanup after 5min)
-await Effect.runPromise(
-  manager.createEnvironment({
+  // Or minimal config with defaults (auto-cleanup after 5min)
+  yield* manager.createEnvironment({
     id: "env-simple",
     image: "tofu:1.8.0"
-  })
-);
+  });
 
-// Custom timeout (auto-cleanup after 1 hour)
-await Effect.runPromise(
-  manager.createEnvironment({
+  // Custom timeout (auto-cleanup after 1 hour)
+  yield* manager.createEnvironment({
     id: "env-long-running",
     image: "tofu:1.8.0",
     timeoutMs: 3600000 // 1 hour
-  })
-);
+  });
 
-// 2. Run commands (all execute in /workspace with env vars)
-const cmdId1 = await Effect.runPromise(
-  manager.runCommand("env-workspace-123", ["tofu", "init"])
-);
+  // 2. Run commands (all execute in /workspace with env vars)
+  const cmdId1 = yield* manager.runCommand("env-workspace-123", ["tofu", "init"]);
+  const cmdId2 = yield* manager.runCommand("env-workspace-123", ["tofu", "plan", "-out=plan.tfplan"]);
 
-const cmdId2 = await Effect.runPromise(
-  manager.runCommand("env-workspace-123", ["tofu", "plan", "-out=plan.tfplan"])
-);
+  // 3. Get output
+  const output1 = yield* manager.getOutput(cmdId1);
+  console.log(output1.stdout);
+  console.log(output1.exitCode);
 
-// 3. Get output
-const output1 = await Effect.runPromise(
-  manager.getOutput(cmdId1)
-);
-console.log(output1.stdout);
-console.log(output1.exitCode);
+  const output2 = yield* manager.getOutput(cmdId2);
 
-const output2 = await Effect.runPromise(
-  manager.getOutput(cmdId2)
-);
+  // 4. Cleanup
+  yield* manager.destroyEnvironment("env-workspace-123");
+});
 
-// 4. Cleanup
-await Effect.runPromise(
-  manager.destroyEnvironment("env-workspace-123")
-);
+// Run with Node.js platform layer for Command execution
+Effect.runPromise(program.pipe(Effect.provide(NodeContext.layer)));
 ```
 
 ## Benefits
@@ -385,13 +432,128 @@ await Effect.runPromise(
 2. **Resource Efficiency** - Reuse containers instead of creating/destroying
 3. **Simple Output** - All output in files, easy to retrieve anytime
 4. **Sequential Commands** - Run multiple commands in same context
+5. **Effect Commands Integration** - Composable, type-safe process execution
+6. **Streaming Output** - Real-time output capture using Effect Streams
+7. **Error Handling** - Built-in error handling through Effect's type system
+8. **Platform Abstraction** - Effect Platform provides cross-platform compatibility
+
+## Docker Service (Effect Commands)
+
+### Docker.ts
+Wraps Docker CLI operations as Effect Commands for composability.
+
+```typescript
+import { Command } from "@effect/platform/Command";
+import { Effect, Stream } from "effect";
+
+export class Docker {
+  // Start a container with volume mounts
+  static runContainer(
+    name: string,
+    image: string,
+    envVars: Record<string, string>,
+    volumes: Array<{ host: string; container: string; readonly?: boolean }>,
+    workingDir: string
+  ): Effect<string> {
+    const envFlags = Object.entries(envVars).flatMap(([k, v]) => ["-e", `${k}=${v}`]);
+    const volumeFlags = volumes.flatMap(v =>
+      ["-v", `${v.host}:${v.container}${v.readonly ? ":ro" : ""}`]
+    );
+
+    return Command.make(
+      "docker", "run", "-d",
+      "--name", name,
+      ...envFlags,
+      ...volumeFlags,
+      "-w", workingDir,
+      image,
+      "sh", "-c", "exec sleep infinity"
+    ).pipe(
+      Command.string,
+      Effect.map(output => output.trim()) // Returns container ID
+    );
+  }
+
+  // Execute command inside container and stream output
+  static exec(
+    containerId: string,
+    workingDir: string,
+    command: string[]
+  ): Stream.Stream<Uint8Array, Error> {
+    return Command.make(
+      "docker", "exec",
+      "-w", workingDir,
+      containerId,
+      ...command
+    ).pipe(Command.stream);
+  }
+
+  // Execute command and get exit code
+  static execWithExitCode(
+    containerId: string,
+    workingDir: string,
+    command: string[]
+  ): Effect<number> {
+    return Command.make(
+      "docker", "exec",
+      "-w", workingDir,
+      containerId,
+      ...command
+    ).pipe(Command.exitCode);
+  }
+
+  // Download file inside container
+  static downloadFile(
+    containerId: string,
+    url: string,
+    destination: string
+  ): Effect<void> {
+    return Command.make(
+      "docker", "exec",
+      containerId,
+      "curl", "-L", url, "-o", destination
+    ).pipe(
+      Command.exitCode,
+      Effect.flatMap(exitCode =>
+        exitCode === 0
+          ? Effect.void
+          : Effect.fail(new Error(`Failed to download ${url}`))
+      )
+    );
+  }
+
+  // Stop and remove container
+  static stopContainer(containerId: string): Effect<void> {
+    return Command.make("docker", "stop", containerId).pipe(
+      Command.exitCode,
+      Effect.flatMap(() => Command.make("docker", "rm", containerId)),
+      Effect.flatMap(cmd => cmd.pipe(Command.exitCode)),
+      Effect.asVoid
+    );
+  }
+
+  // Check if container is running
+  static isRunning(containerId: string): Effect<boolean> {
+    return Command.make(
+      "docker", "inspect",
+      "--format", "{{.State.Running}}",
+      containerId
+    ).pipe(
+      Command.string,
+      Effect.map(output => output.trim() === "true"),
+      Effect.catchAll(() => Effect.succeed(false))
+    );
+  }
+}
+```
 
 ## Implementation Steps
 
-1. Implement `OutputStorage` (file read/write)
-2. Implement `Environment` (docker run/exec wrapper)
-3. Implement `EnvironmentManager` (main API)
-4. Test with basic tofu commands
+1. Implement `Docker` service (Effect Commands wrapper)
+2. Implement `OutputStorage` (file read/write using Effect filesystem operations)
+3. Implement `Environment` (uses Docker service for container lifecycle)
+4. Implement `EnvironmentManager` (main API)
+5. Test with basic tofu commands
 
 ## Init Configuration
 
