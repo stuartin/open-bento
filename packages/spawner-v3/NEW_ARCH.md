@@ -40,11 +40,26 @@ Each command execution within an environment:
 ### EnvironmentManager
 Single service that manages everything, defined using Effect service patterns.
 
+**File: `src/services/EnvironmentManager.ts`**
+
 ```typescript
 import { Effect } from "effect";
+import { Docker } from "./Docker";
+import { OutputStorage } from "./OutputStorage";
+
+// Internal Environment class (not exported)
+class Environment {
+  constructor(
+    public containerId: string,
+    public outputPath: string,
+    public workingDir: string,
+    public lastActivityAt: Date,
+    public commandCount: number
+  ) {}
+}
 
 // EnvironmentManager service using Effect.Service pattern
-class EnvironmentManager extends Effect.Service<EnvironmentManager>()("spawner/EnvironmentManager", {
+export class EnvironmentManager extends Effect.Service<EnvironmentManager>()("spawner/EnvironmentManager", {
   effect: Effect.gen(function* () {
     const docker = yield* Docker;
     const storage = yield* OutputStorage;
@@ -176,17 +191,15 @@ class EnvironmentManager extends Effect.Service<EnvironmentManager>()("spawner/E
   dependencies: [Docker.Default, OutputStorage.Default]
 }) {}
 
-export { EnvironmentManager };
-
-
-interface EnvironmentInfo {
+// Export types
+export interface EnvironmentInfo {
   id: string;
   status: "starting" | "ready" | "busy" | "failed";
   lastActivityAt: Date;
   commandCount: number;
 }
 
-interface EnvironmentConfig {
+export interface EnvironmentConfig {
   id: string;
   image: string; // Docker image to use (e.g., "tofu:1.8.0")
   env?: Record<string, string>; // Environment variables for all commands
@@ -200,60 +213,19 @@ interface EnvironmentConfig {
   };
 }
 
-interface CommandOutput {
+export interface CommandOutput {
   stdout: string;
   stderr: string;
   exitCode: number | null;
 }
 ```
 
-## Core Components (Internal)
+## Services
 
-### 1. Environment (Internal)
-Manages a single container lifecycle using Effect Commands.
-
-```typescript
-class Environment {
-  private containerId: string;
-  private config: EnvironmentConfig;
-  private outputPath: string; // Resolved output path for this environment
-  private workingDir: string; // Resolved working directory
-  private lastActivityAt: Date;
-  private commandQueue: Queue<CommandTask>; // Commands run sequentially
-  private cleanupSchedule: Effect.Schedule; // Effect-based timeout scheduling
-
-  // Start container with volume mounts using Effect Command
-  start(): Effect<void>;
-  // Implementation: Command.make("docker", "run", "-d", ...args)
-
-  // Download files from URLs using Effect Command
-  private downloadFiles(): Effect<void>;
-  // Implementation: Command.make("docker", "exec", containerId, "curl", "-L", url, "-o", destination)
-
-  // Run initialization commands (fail environment if any command fails)
-  private runInitCommands(): Effect<void>;
-  // Implementation: Command.make("docker", "exec", "-w", workingDir, containerId, "sh", "-c", cmd)
-
-  // Execute command (returns commandId immediately, queues for execution)
-  exec(command: string[]): Effect<string>;
-  // Implementation: Command.make("docker", "exec", "-w", workingDir, containerId, ...command)
-  //                  .pipe(Command.stream) for streaming output to files
-
-  // Process command queue sequentially
-  private processQueue(): Effect<void>;
-
-  // Reset auto-cleanup schedule
-  private resetTimeout(): Effect<void>;
-
-  // Stop container using Effect Command
-  stop(): Effect<void>;
-  // Implementation: Command.make("docker", "stop", containerId)
-  //                 >> Command.make("docker", "rm", containerId)
-}
-```
-
-### 2. OutputStorage (Service)
+### 1. OutputStorage (Service)
 Handles file I/O for command outputs using Effect FileSystem.
+
+**File: `src/services/OutputStorage.ts`**
 
 ```typescript
 import { FileSystem } from "@effect/platform/FileSystem";
@@ -262,7 +234,7 @@ import { Path } from "@effect/platform/Path";
 import { Effect } from "effect";
 
 // OutputStorage service using Effect.Service pattern
-class OutputStorage extends Effect.Service<OutputStorage>()("spawner/OutputStorage", {
+export class OutputStorage extends Effect.Service<OutputStorage>()("spawner/OutputStorage", {
   effect: Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
@@ -330,8 +302,6 @@ class OutputStorage extends Effect.Service<OutputStorage>()("spawner/OutputStora
   }),
   dependencies: [NodeFileSystem.layer]
 }) {}
-
-export { OutputStorage };
 ```
 
 ## Data Flow
@@ -466,12 +436,12 @@ Output files preserved on host (not deleted)
 ```
 packages/spawner-v3/
 ├── src/
-│   ├── index.ts                    # Export EnvironmentManager
-│   ├── EnvironmentManager.ts       # Main service
-│   ├── Environment.ts              # Single environment wrapper
-│   ├── OutputStorage.ts            # File I/O
+│   ├── index.ts                       # Spawner wrapper (ManagedRuntime + async API)
 │   └── services/
-│       └── Docker.ts               # Docker CLI wrapper using Effect Commands
+│       ├── Docker.ts                  # Docker CLI service (Effect.Service)
+│       ├── OutputStorage.ts           # File I/O service (Effect.Service)
+│       └── EnvironmentManager.ts      # Main service (Effect.Service)
+│                                      # Environment class (internal, in same file)
 ```
 
 ## Configuration
@@ -516,102 +486,204 @@ const MAX_CONCURRENT_ENVIRONMENTS = 50;
 - **Docker** - Must be installed and accessible via CLI
 - **Node.js** - v18+ for Effect-TS compatibility
 
+## index.ts - Spawner Wrapper
+
+The main export provides a simple async API using ManagedRuntime:
+
+```typescript
+// src/index.ts
+import { Effect, Layer, ManagedRuntime } from "effect";
+import { NodeContext } from "@effect/platform-node/NodeContext";
+import { EnvironmentManager } from "./services/EnvironmentManager";
+
+export class Spawner {
+  private runtime: ManagedRuntime.ManagedRuntime<EnvironmentManager>;
+
+  private constructor() {
+    // Merge all layers together
+    const RuntimeLayer = Layer.mergeAll(
+      EnvironmentManager.Default,
+      NodeContext.layer
+    );
+
+    this.runtime = ManagedRuntime.make(RuntimeLayer);
+  }
+
+  // Factory method to create spawner instance
+  static make(): Spawner {
+    return new Spawner();
+  }
+
+  // Simple async methods that wrap Effect execution
+
+  async createEnvironment(config: EnvironmentConfig): Promise<void> {
+    return this.runtime.runPromise(
+      Effect.gen(function* () {
+        const manager = yield* EnvironmentManager;
+        return yield* manager.createEnvironment(config);
+      })
+    );
+  }
+
+  async runCommand(envId: string, command: string[]): Promise<string> {
+    return this.runtime.runPromise(
+      Effect.gen(function* () {
+        const manager = yield* EnvironmentManager;
+        return yield* manager.runCommand(envId, command);
+      })
+    );
+  }
+
+  async getOutput(cmdId: string): Promise<CommandOutput> {
+    return this.runtime.runPromise(
+      Effect.gen(function* () {
+        const manager = yield* EnvironmentManager;
+        return yield* manager.getOutput(cmdId);
+      })
+    );
+  }
+
+  async destroyEnvironment(envId: string): Promise<void> {
+    return this.runtime.runPromise(
+      Effect.gen(function* () {
+        const manager = yield* EnvironmentManager;
+        return yield* manager.destroyEnvironment(envId);
+      })
+    );
+  }
+
+  async getEnvironmentInfo(envId: string): Promise<EnvironmentInfo | null> {
+    return this.runtime.runPromise(
+      Effect.gen(function* () {
+        const manager = yield* EnvironmentManager;
+        return yield* manager.getEnvironmentInfo(envId);
+      })
+    );
+  }
+
+  // Cleanup runtime and all resources
+  async dispose(): Promise<void> {
+    await this.runtime.dispose();
+  }
+}
+
+// Re-export types for convenience
+export type { EnvironmentConfig, CommandOutput, EnvironmentInfo } from "./services/EnvironmentManager";
+```
+
 ## Usage Example
+
+### Simple Async API (Recommended)
+
+```typescript
+import { Spawner } from "@open-bento/spawner-v3";
+
+// 1. Create spawner instance
+const spawner = Spawner.make();
+
+// 2. Create environment with init, env vars, and custom output path
+await spawner.createEnvironment({
+  id: "env-workspace-123",
+  image: "tofu:1.8.0",
+  outputPath: "/mnt/outputs/workspace-123",
+  env: {
+    TF_VAR_region: "us-west-2",
+    TF_VAR_environment: "production",
+    AWS_PROFILE: "default"
+  },
+  init: {
+    filesFromPath: {
+      files: ["/host/configs/main.tf", "/host/configs/modules"],
+      destination: "/workspace"
+    },
+    fileFromUrl: {
+      files: [
+        "https://s3.amazonaws.com/bucket/tfstate.tar.gz?X-Amz-Signature=...",
+        "https://s3.amazonaws.com/bucket/providers.zip?X-Amz-Signature=..."
+      ],
+      destination: "/workspace/downloads"
+    },
+    commands: [
+      "mkdir -p /workspace/state",
+      "tar -xzf /workspace/downloads/tfstate.tar.gz -C /workspace/state",
+      "unzip -q /workspace/downloads/providers.zip -d /workspace/.terraform"
+    ]
+  }
+});
+
+// 3. Run commands
+const cmdId1 = await spawner.runCommand("env-workspace-123", ["tofu", "init"]);
+const cmdId2 = await spawner.runCommand("env-workspace-123", ["tofu", "plan", "-out=plan.tfplan"]);
+
+// 4. Get output
+const output1 = await spawner.getOutput(cmdId1);
+console.log(output1.stdout);
+console.log(output1.exitCode);
+
+// 5. Cleanup
+await spawner.destroyEnvironment("env-workspace-123");
+await spawner.dispose();
+```
+
+### Direct Effect API (Advanced)
+
+For advanced use cases where you need full Effect control:
 
 ```typescript
 import { EnvironmentManager } from "@open-bento/spawner-v3";
 import { Effect } from "effect";
 import { NodeContext } from "@effect/platform-node/NodeContext";
 
-// Define the program using the EnvironmentManager service
 const program = Effect.gen(function* () {
   const manager = yield* EnvironmentManager;
 
-  // 1. Create environment with init, env vars, and custom output path
   yield* manager.createEnvironment({
     id: "env-workspace-123",
-    image: "tofu:1.8.0",
-    outputPath: "/mnt/outputs/workspace-123",
-    env: {
-      TF_VAR_region: "us-west-2",
-      TF_VAR_environment: "production",
-      AWS_PROFILE: "default"
-    },
-    init: {
-      // Mount host files/folders into container
-      filesFromPath: {
-        files: ["/host/configs/main.tf", "/host/configs/modules"],
-        destination: "/workspace"
-      },
-      // Download files from presigned URLs
-      fileFromUrl: {
-        files: [
-          "https://s3.amazonaws.com/bucket/tfstate.tar.gz?X-Amz-Signature=...",
-          "https://s3.amazonaws.com/bucket/providers.zip?X-Amz-Signature=..."
-        ],
-        destination: "/workspace/downloads"
-      },
-      // Run init commands
-      commands: [
-        "mkdir -p /workspace/state",
-        "tar -xzf /workspace/downloads/tfstate.tar.gz -C /workspace/state",
-        "unzip -q /workspace/downloads/providers.zip -d /workspace/.terraform"
-      ]
-    }
-  });
-
-  // Or minimal config with defaults (auto-cleanup after 5min)
-  yield* manager.createEnvironment({
-    id: "env-simple",
     image: "tofu:1.8.0"
   });
 
-  // Custom timeout (auto-cleanup after 1 hour)
-  yield* manager.createEnvironment({
-    id: "env-long-running",
-    image: "tofu:1.8.0",
-    timeoutMs: 3600000 // 1 hour
-  });
+  const cmdId = yield* manager.runCommand("env-workspace-123", ["tofu", "init"]);
+  const output = yield* manager.getOutput(cmdId);
 
-  // 2. Run commands (all execute in /workspace with env vars)
-  const cmdId1 = yield* manager.runCommand("env-workspace-123", ["tofu", "init"]);
-  const cmdId2 = yield* manager.runCommand("env-workspace-123", ["tofu", "plan", "-out=plan.tfplan"]);
-
-  // 3. Get output
-  const output1 = yield* manager.getOutput(cmdId1);
-  console.log(output1.stdout);
-  console.log(output1.exitCode);
-
-  const output2 = yield* manager.getOutput(cmdId2);
-
-  // 4. Cleanup
   yield* manager.destroyEnvironment("env-workspace-123");
+
+  return output;
 });
 
-// Provide all required layers and run
-// EnvironmentManager.Default automatically includes Docker.Default and OutputStorage.Default
-const runnable = program.pipe(
+// Run with layers
+const result = await program.pipe(
   Effect.provide(EnvironmentManager.Default),
-  Effect.provide(NodeContext.layer)
+  Effect.provide(NodeContext.layer),
+  Effect.runPromise
 );
-
-Effect.runPromise(runnable);
 ```
 
 ## Benefits
 
+### Architecture Benefits
 1. **Persistent State** - Filesystem persists between commands
 2. **Resource Efficiency** - Reuse containers instead of creating/destroying
 3. **Simple Output** - All output in files, easy to retrieve anytime
 4. **Sequential Commands** - Run multiple commands in same context
-5. **Effect Commands Integration** - Composable, type-safe process execution
-6. **Streaming Output** - Real-time output capture using Effect Streams
-7. **Error Handling** - Built-in error handling through Effect's type system
-8. **Platform Abstraction** - Effect Platform provides cross-platform compatibility
+
+### Effect Integration Benefits
+5. **Effect.Service Pattern** - Clean service definitions with automatic dependency injection
+6. **ManagedRuntime** - Automatic resource lifecycle management and cleanup
+7. **Effect Commands** - Composable, type-safe process execution
+8. **Streaming Output** - Real-time output capture using Effect Streams
+9. **Error Handling** - Built-in error handling through Effect's type system
+10. **Platform Abstraction** - Effect Platform provides cross-platform compatibility
+
+### Developer Experience Benefits
+11. **Simple Async API** - Use familiar async/await instead of Effect.gen
+12. **Single Function Call** - Access spawner with `Spawner.make()`
+13. **Automatic Cleanup** - `dispose()` handles all resource cleanup
+14. **Type Safety** - Full TypeScript inference across all layers
 
 ## Docker Service (Effect Commands)
 
-### Docker.ts
+**File: `src/services/Docker.ts`**
+
 Wraps Docker CLI operations as Effect Commands for composability.
 
 ```typescript
@@ -619,7 +691,7 @@ import { Command } from "@effect/platform/Command";
 import { Effect, Stream } from "effect";
 
 // Docker service using Effect.Service pattern
-class Docker extends Effect.Service<Docker>()("spawner/Docker", {
+export class Docker extends Effect.Service<Docker>()("spawner/Docker", {
   sync: () => {
     // Start a container with volume mounts
     const runContainer = (
@@ -729,17 +801,35 @@ class Docker extends Effect.Service<Docker>()("spawner/Docker", {
     } as const;
   }
 }) {}
-
-export { Docker };
 ```
 
 ## Implementation Steps
 
-1. Implement `Docker` service (Effect Commands wrapper)
-2. Implement `OutputStorage` (file read/write using Effect filesystem operations)
-3. Implement `Environment` (uses Docker service for container lifecycle)
-4. Implement `EnvironmentManager` (main API)
-5. Test with basic tofu commands
+### File-by-File Implementation Order
+
+1. **`src/services/Docker.ts`** - Docker service (no dependencies, simplest)
+   - Implements Effect.Service with sync() for stateless Docker CLI wrappers
+   - Methods: runContainer, exec, execWithExitCode, downloadFile, stopContainer, isRunning
+
+2. **`src/services/OutputStorage.ts`** - File I/O service (depends on FileSystem)
+   - Implements Effect.Service with effect() to access FileSystem and Path
+   - Methods: initCommand, writeStdout, writeStderr, readOutput, cleanup
+   - Dependencies: [NodeFileSystem.layer]
+
+3. **`src/services/EnvironmentManager.ts`** - Main orchestrator (depends on Docker + OutputStorage)
+   - Implements Environment class (internal, not exported)
+   - Implements Effect.Service with effect() to access Docker and OutputStorage
+   - Methods: createEnvironment, runCommand, getOutput, destroyEnvironment, getEnvironmentInfo
+   - Dependencies: [Docker.Default, OutputStorage.Default]
+   - Exports: EnvironmentManager, EnvironmentConfig, CommandOutput, EnvironmentInfo types
+
+4. **`src/index.ts`** - Spawner wrapper (wraps EnvironmentManager in ManagedRuntime)
+   - Creates ManagedRuntime with all layers
+   - Exposes simple async API via Spawner.make()
+   - Methods: all EnvironmentManager methods as async functions + dispose()
+   - Re-exports types from EnvironmentManager
+
+5. **Test end-to-end** - Create environment, run commands, get output, cleanup
 
 ## Init Configuration
 
