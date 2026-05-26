@@ -42,16 +42,20 @@ Single service that manages everything.
 
 ```typescript
 class EnvironmentManager {
+  private environments: Map<string, Environment>;
+  private commandToEnv: Map<string, string>; // cmdId -> envId mapping
+  private maxConcurrentEnvironments: number;
+
   // Create environment (starts container)
   createEnvironment(config: EnvironmentConfig): Effect<void>;
 
-  // Run command in environment
-  runCommand(envId: string, command: string[]): Effect<string>; // returns commandId
+  // Run command in environment (returns commandId immediately)
+  runCommand(envId: string, command: string[]): Effect<string>;
 
   // Get command output (read from file)
   getOutput(cmdId: string): Effect<CommandOutput>;
 
-  // Destroy environment (stops container)
+  // Destroy environment (stops container, preserves output files)
   destroyEnvironment(envId: string): Effect<void>;
 
   // Get environment info (status, last activity, etc.)
@@ -70,6 +74,7 @@ interface EnvironmentConfig {
   image: string; // Docker image to use (e.g., "tofu:1.8.0")
   env?: Record<string, string>; // Environment variables for all commands
   outputPath?: string; // Where to store command outputs (default: /tmp/spawner-outputs/{envId})
+  workingDir?: string; // Working directory for commands (default: /workspace)
   timeoutMs?: number; // Auto-destroy after this many ms of inactivity (default: 300000 = 5min)
   init?: {
     filesFromPath?: { files: string[]; destination: string }; // Mount host files/folders (read-only)
@@ -95,9 +100,10 @@ class Environment {
   private containerId: string;
   private config: EnvironmentConfig;
   private outputPath: string; // Resolved output path for this environment
+  private workingDir: string; // Resolved working directory
   private lastActivityAt: Date;
   private commandQueue: Queue<CommandTask>; // Commands run sequentially
-  private timeoutTimer?: NodeJS.Timeout;
+  private cleanupSchedule: Effect.Schedule; // Effect-based timeout scheduling
 
   // Start container with volume mounts
   start(): Effect<void>;
@@ -108,14 +114,14 @@ class Environment {
   // Run initialization commands (fail environment if any command fails)
   private runInitCommands(): Effect<void>;
 
-  // Execute command (returns commandId, queues for sequential execution)
+  // Execute command (returns commandId immediately, queues for execution)
   exec(command: string[]): Effect<string>;
 
   // Process command queue sequentially
   private processQueue(): Effect<void>;
 
-  // Reset auto-cleanup timer
-  private resetTimeout(): void;
+  // Reset auto-cleanup schedule
+  private resetTimeout(): Effect<void>;
 
   // Stop container
   stop(): Effect<void>;
@@ -175,7 +181,7 @@ Docker run -d --name env-1 \
   -e TF_VAR_region=us-west-2 \
   -v /host/path/config.tf:/workspace/config.tf:ro \
   -v /host/path/vars:/workspace/vars:ro \
-  tofu:1.8.0 sleep infinity
+  tofu:1.8.0 sh -c "mkdir -p /workspace && exec sleep infinity"
            ↓
 [If init.fileFromUrl provided]
   Download files into container:
@@ -200,9 +206,11 @@ Client: runCommand("env-1", ["tofu", "init"])
            ↓
 Generate commandId: "cmd-abc123"
            ↓
+Return commandId immediately: "cmd-abc123"
+           ↓
 Add to environment's command queue (sequential execution)
            ↓
-[When queue processes this command]
+[Asynchronously, when queue processes this command]
 Create output files in environment's outputPath:
   - /var/outputs/workspace-123/cmd-abc123.stdout
   - /var/outputs/workspace-123/cmd-abc123.stderr
@@ -215,7 +223,7 @@ Command completes → Record exit code
            ↓
 Reset auto-cleanup timer (environment stays alive)
            ↓
-Return commandId: "cmd-abc123"
+Process next command in queue
 ```
 
 ### 3. Get Output
@@ -223,10 +231,13 @@ Return commandId: "cmd-abc123"
 ```
 Client: getOutput("cmd-abc123")
            ↓
-Lookup commandId to find its environment's outputPath
+Lookup commandId in commandToEnv map to find environment
+           ↓
+Get environment's outputPath
            ↓
 Read /var/outputs/workspace-123/cmd-abc123.stdout
 Read /var/outputs/workspace-123/cmd-abc123.stderr
+Read /var/outputs/workspace-123/cmd-abc123.exitcode
            ↓
 Return { stdout, stderr, exitCode }
 ```
@@ -236,9 +247,15 @@ Return { stdout, stderr, exitCode }
 ```
 Client: destroyEnvironment("env-1")
            ↓
+Cancel auto-cleanup schedule
+           ↓
 Docker stop env-1 && docker rm env-1
            ↓
 Remove from environments map
+           ↓
+Remove commandId mappings for this environment
+           ↓
+Output files preserved on host (not deleted)
 ```
 
 ## File Structure
@@ -258,11 +275,20 @@ packages/spawner-v3/
 // Default output path if not specified in EnvironmentConfig
 const DEFAULT_OUTPUT_BASE_PATH = "/tmp/spawner-outputs";
 
+// Default working directory if not specified in EnvironmentConfig
+const DEFAULT_WORKING_DIR = "/workspace";
+
 // Default auto-cleanup timeout (5 minutes of inactivity)
 const DEFAULT_TIMEOUT_MS = 300000;
 
+// Maximum concurrent environments
+const MAX_CONCURRENT_ENVIRONMENTS = 50;
+
 // When outputPath is not provided in config:
 // outputPath = `${DEFAULT_OUTPUT_BASE_PATH}/${envId}`
+
+// When workingDir is not provided in config:
+// workingDir = DEFAULT_WORKING_DIR
 
 // When timeoutMs is not provided in config:
 // timeoutMs = DEFAULT_TIMEOUT_MS
@@ -390,6 +416,12 @@ filesFromPath: {
 - Directories are mounted recursively
 - Alternative: Copy files instead of mounting (allows container modifications without affecting host)
 
+**File vs Directory Handling:**
+- Implementation must detect if path is file or directory
+- File: `/host/config.tf` + destination `/workspace` → mount to `/workspace/config.tf`
+- Directory: `/host/modules` + destination `/workspace` → mount to `/workspace/modules`
+- Use `fs.stat()` to check if path is file or directory before mounting
+
 ### fileFromUrl
 Download files from presigned URLs into the container.
 
@@ -405,8 +437,20 @@ fileFromUrl: {
 
 **Implementation:**
 - Creates destination directory if needed
-- Downloads each URL: `docker exec env-1 curl -L '<url>' -o <destination>/<filename>`
+- Downloads each URL: `docker exec env-1 curl -L '<url>' -o <destination>`
+- **Filename from destination**: The `files` array should include full destination paths with filenames
 - Presigned URLs (S3, GCS, Azure) work directly
+
+**Example:**
+```typescript
+fileFromUrl: {
+  files: [
+    "https://s3.../file.tar.gz?sig=..."  // URL
+  ],
+  destination: "/workspace/downloads/file.tar.gz"  // Full path with filename
+}
+// Downloads to: /workspace/downloads/file.tar.gz
+```
 
 ### commands
 Run initialization commands after mounting/downloading files.
@@ -432,8 +476,10 @@ Each environment's command outputs are stored in its dedicated directory:
 {outputPath}/
   cmd-abc123.stdout
   cmd-abc123.stderr
+  cmd-abc123.exitcode
   cmd-xyz789.stdout
   cmd-xyz789.stderr
+  cmd-xyz789.exitcode
   ...
 ```
 
@@ -442,8 +488,10 @@ Example with custom path:
 /mnt/outputs/workspace-123/
   cmd-001.stdout
   cmd-001.stderr
+  cmd-001.exitcode
   cmd-002.stdout
   cmd-002.stderr
+  cmd-002.exitcode
 ```
 
 Example with default path:
@@ -451,7 +499,10 @@ Example with default path:
 /tmp/spawner-outputs/env-workspace-123/
   cmd-001.stdout
   cmd-001.stderr
+  cmd-001.exitcode
 ```
+
+**Note:** Output files are preserved when environment is destroyed. This allows retrieving command results even after container cleanup.
 
 ## Init Examples
 
@@ -505,9 +556,16 @@ Commands within an environment run **sequentially** (one at a time). This ensure
 
 ### Auto-Cleanup
 Environments auto-destroy after `timeoutMs` milliseconds of inactivity (default: 5 minutes).
-- Timer resets on every command execution
+- Uses Effect's scheduling primitives for timeout management
+- Schedule resets on every command execution
 - Manual cleanup via `destroyEnvironment()` still available
 - Prevents orphaned containers from consuming resources
+
+### Environment Concurrency Limit
+Maximum of `MAX_CONCURRENT_ENVIRONMENTS` (default: 50) can exist simultaneously.
+- `createEnvironment()` fails if limit reached
+- Auto-cleanup helps free slots
+- Prevents resource exhaustion
 
 ### Docker Image Handling
 Docker images are **pulled automatically** if not present locally.
@@ -519,6 +577,12 @@ Docker images are **pulled automatically** if not present locally.
 Parent directories for `outputPath` are **created automatically**.
 - No need to pre-create directories
 - Uses `mkdir -p` behavior
+
+### Working Directory
+Commands execute in `workingDir` (default: `/workspace`).
+- Directory created automatically during container start
+- Configurable per environment via `workingDir` in config
+- Init commands also run in this directory
 
 ### File Mounting
 Files from `filesFromPath` are mounted **read-only**.
