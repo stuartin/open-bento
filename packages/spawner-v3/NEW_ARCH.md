@@ -1,5 +1,7 @@
 # New Architecture: Environment-Based Execution (Minimal)
 
+> **Note:** This package will be renamed from `@open-bento/spawner-v3` to `@open-bento/runner`. All references to "spawner" in service names, imports, and examples should be updated to "runner".
+
 ## Overview
 
 Move from a run-based model to an environment-based model where each environment is a long-lived isolated context that can execute multiple commands.
@@ -59,7 +61,8 @@ class Environment {
 }
 
 // EnvironmentManager service using Effect.Service pattern
-export class EnvironmentManager extends Effect.Service<EnvironmentManager>()("spawner/EnvironmentManager", {
+// TODO: Rename service namespace from "spawner" to "runner"
+export class EnvironmentManager extends Effect.Service<EnvironmentManager>()("runner/EnvironmentManager", {
   effect: Effect.gen(function* () {
     const docker = yield* Docker;
     const storage = yield* OutputStorage;
@@ -76,7 +79,8 @@ export class EnvironmentManager extends Effect.Service<EnvironmentManager>()("sp
         }
 
         // Create output directory
-        const outputPath = config.outputPath ?? `/tmp/spawner-outputs/${config.id}`;
+        // TODO: Rename from "spawner-outputs" to "runner-outputs"
+        const outputPath = config.outputPath ?? `/tmp/runner-outputs/${config.id}`;
         yield* storage.initCommand(config.id, outputPath);
 
         // Start container using Docker service
@@ -234,7 +238,8 @@ import { Path } from "@effect/platform/Path";
 import { Effect } from "effect";
 
 // OutputStorage service using Effect.Service pattern
-export class OutputStorage extends Effect.Service<OutputStorage>()("spawner/OutputStorage", {
+// TODO: Rename service namespace from "spawner" to "runner"
+export class OutputStorage extends Effect.Service<OutputStorage>()("runner/OutputStorage", {
   effect: Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
@@ -434,7 +439,7 @@ Output files preserved on host (not deleted)
 ## File Structure
 
 ```
-packages/spawner-v3/
+packages/runner/
 ├── src/
 │   ├── index.ts                       # Spawner wrapper (ManagedRuntime + async API)
 │   └── services/
@@ -448,7 +453,8 @@ packages/spawner-v3/
 
 ```typescript
 // Default output path if not specified in EnvironmentConfig
-const DEFAULT_OUTPUT_BASE_PATH = "/tmp/spawner-outputs";
+// TODO: Rename from "spawner-outputs" to "runner-outputs"
+const DEFAULT_OUTPUT_BASE_PATH = "/tmp/runner-outputs";
 
 // Default working directory if not specified in EnvironmentConfig
 const DEFAULT_WORKING_DIR = "/workspace";
@@ -486,9 +492,11 @@ const MAX_CONCURRENT_ENVIRONMENTS = 50;
 - **Docker** - Must be installed and accessible via CLI
 - **Node.js** - v18+ for Effect-TS compatibility
 
-## index.ts - Spawner Wrapper
+## index.ts - Runner Wrapper
 
-The main export provides a simple async API using ManagedRuntime:
+The main export provides a simple async API using ManagedRuntime.
+
+> **Note:** The class is currently named `Spawner` but should be renamed to `Runner` when the package is renamed.
 
 ```typescript
 // src/index.ts
@@ -576,13 +584,14 @@ export type { EnvironmentConfig, CommandOutput, EnvironmentInfo } from "./servic
 ### Simple Async API (Recommended)
 
 ```typescript
-import { Spawner } from "@open-bento/spawner-v3";
+// TODO: Update package name to @open-bento/runner
+import { Spawner } from "@open-bento/runner";
 
-// 1. Create spawner instance
-const spawner = Spawner.make();
+// 1. Create runner instance
+const runner = Spawner.make();
 
 // 2. Create environment with init, env vars, and custom output path
-await spawner.createEnvironment({
+await runner.createEnvironment({
   id: "env-workspace-123",
   image: "tofu:1.8.0",
   outputPath: "/mnt/outputs/workspace-123",
@@ -612,17 +621,17 @@ await spawner.createEnvironment({
 });
 
 // 3. Run commands
-const cmdId1 = await spawner.runCommand("env-workspace-123", ["tofu", "init"]);
-const cmdId2 = await spawner.runCommand("env-workspace-123", ["tofu", "plan", "-out=plan.tfplan"]);
+const cmdId1 = await runner.runCommand("env-workspace-123", ["tofu", "init"]);
+const cmdId2 = await runner.runCommand("env-workspace-123", ["tofu", "plan", "-out=plan.tfplan"]);
 
 // 4. Get output
-const output1 = await spawner.getOutput(cmdId1);
+const output1 = await runner.getOutput(cmdId1);
 console.log(output1.stdout);
 console.log(output1.exitCode);
 
 // 5. Cleanup
-await spawner.destroyEnvironment("env-workspace-123");
-await spawner.dispose();
+await runner.destroyEnvironment("env-workspace-123");
+await runner.dispose();
 ```
 
 ### Direct Effect API (Advanced)
@@ -630,7 +639,8 @@ await spawner.dispose();
 For advanced use cases where you need full Effect control:
 
 ```typescript
-import { EnvironmentManager } from "@open-bento/spawner-v3";
+// TODO: Update package name to @open-bento/runner
+import { EnvironmentManager } from "@open-bento/runner";
 import { Effect } from "effect";
 import { NodeContext } from "@effect/platform-node/NodeContext";
 
@@ -691,7 +701,8 @@ import { Command } from "@effect/platform/Command";
 import { Effect, Stream } from "effect";
 
 // Docker service using Effect.Service pattern
-export class Docker extends Effect.Service<Docker>()("spawner/Docker", {
+// TODO: Rename service namespace from "spawner" to "runner"
+export class Docker extends Effect.Service<Docker>()("runner/Docker", {
   sync: () => {
     // Start a container with volume mounts
     const runContainer = (
