@@ -38,29 +38,146 @@ Each command execution within an environment:
 ## Minimal API
 
 ### EnvironmentManager
-Single service that manages everything.
+Single service that manages everything, defined using Effect service patterns.
 
 ```typescript
-class EnvironmentManager {
-  private environments: Map<string, Environment>;
-  private commandToEnv: Map<string, string>; // cmdId -> envId mapping
-  private maxConcurrentEnvironments: number;
+import { Effect } from "effect";
 
-  // Create environment (starts container)
-  createEnvironment(config: EnvironmentConfig): Effect<void>;
+// EnvironmentManager service using Effect.Service pattern
+class EnvironmentManager extends Effect.Service<EnvironmentManager>()("spawner/EnvironmentManager", {
+  effect: Effect.gen(function* () {
+    const docker = yield* Docker;
+    const storage = yield* OutputStorage;
 
-  // Run command in environment (returns commandId immediately)
-  runCommand(envId: string, command: string[]): Effect<string>;
+    const environments = new Map<string, Environment>();
+    const commandToEnv = new Map<string, string>();
+    const maxConcurrentEnvironments = 50;
 
-  // Get command output (read from file)
-  getOutput(cmdId: string): Effect<CommandOutput>;
+    const createEnvironment = (config: EnvironmentConfig) =>
+      Effect.gen(function* () {
+        // Check capacity
+        if (environments.size >= maxConcurrentEnvironments) {
+          yield* Effect.fail(new Error("Maximum concurrent environments reached"));
+        }
 
-  // Destroy environment (stops container, preserves output files)
-  destroyEnvironment(envId: string): Effect<void>;
+        // Create output directory
+        const outputPath = config.outputPath ?? `/tmp/spawner-outputs/${config.id}`;
+        yield* storage.initCommand(config.id, outputPath);
 
-  // Get environment info (status, last activity, etc.)
-  getEnvironmentInfo(envId: string): Effect<EnvironmentInfo | null>;
-}
+        // Start container using Docker service
+        const containerId = yield* docker.runContainer(
+          config.id,
+          config.image,
+          config.env ?? {},
+          [], // volumes from config.init.filesFromPath
+          config.workingDir ?? "/workspace"
+        );
+
+        // Download files if specified
+        if (config.init?.fileFromUrl) {
+          for (const url of config.init.fileFromUrl.files) {
+            yield* docker.downloadFile(containerId, url, config.init.fileFromUrl.destination);
+          }
+        }
+
+        // Run init commands
+        if (config.init?.commands) {
+          for (const cmd of config.init.commands) {
+            const exitCode = yield* docker.execWithExitCode(
+              containerId,
+              config.workingDir ?? "/workspace",
+              ["sh", "-c", cmd]
+            );
+            if (exitCode !== 0) {
+              yield* docker.stopContainer(containerId);
+              yield* Effect.fail(new Error(`Init command failed: ${cmd}`));
+            }
+          }
+        }
+
+        // Store environment
+        // Implementation details...
+      });
+
+    const runCommand = (envId: string, command: string[]) =>
+      Effect.gen(function* () {
+        const env = environments.get(envId);
+        if (!env) {
+          yield* Effect.fail(new Error(`Environment not found: ${envId}`));
+        }
+
+        const cmdId = `cmd-${Date.now()}`;
+        commandToEnv.set(cmdId, envId);
+
+        // Queue command for execution
+        // Implementation details...
+
+        return cmdId;
+      });
+
+    const getOutput = (cmdId: string) =>
+      Effect.gen(function* () {
+        const envId = commandToEnv.get(cmdId);
+        if (!envId) {
+          yield* Effect.fail(new Error(`Command not found: ${cmdId}`));
+        }
+
+        const env = environments.get(envId);
+        if (!env) {
+          yield* Effect.fail(new Error(`Environment not found: ${envId}`));
+        }
+
+        return yield* storage.readOutput(cmdId, env.outputPath);
+      });
+
+    const destroyEnvironment = (envId: string) =>
+      Effect.gen(function* () {
+        const env = environments.get(envId);
+        if (!env) {
+          yield* Effect.fail(new Error(`Environment not found: ${envId}`));
+        }
+
+        yield* docker.stopContainer(env.containerId);
+        environments.delete(envId);
+
+        // Remove command mappings
+        for (const [cmdId, id] of commandToEnv.entries()) {
+          if (id === envId) {
+            commandToEnv.delete(cmdId);
+          }
+        }
+      });
+
+    const getEnvironmentInfo = (envId: string) =>
+      Effect.gen(function* () {
+        const env = environments.get(envId);
+        if (!env) {
+          return null;
+        }
+
+        const isRunning = yield* docker.isRunning(env.containerId);
+
+        return {
+          id: envId,
+          status: isRunning ? "ready" : "failed",
+          lastActivityAt: env.lastActivityAt,
+          commandCount: env.commandCount
+        } as EnvironmentInfo;
+      });
+
+    return {
+      createEnvironment,
+      runCommand,
+      getOutput,
+      destroyEnvironment,
+      getEnvironmentInfo
+    } as const;
+  }),
+  dependencies: [Docker.Default, OutputStorage.Default]
+}) {}
+
+export { EnvironmentManager };
+
 
 interface EnvironmentInfo {
   id: string;
@@ -135,36 +252,86 @@ class Environment {
 }
 ```
 
-### 2. OutputStorage (Internal)
+### 2. OutputStorage (Service)
 Handles file I/O for command outputs using Effect FileSystem.
 
 ```typescript
 import { FileSystem } from "@effect/platform/FileSystem";
+import { NodeFileSystem } from "@effect/platform-node/NodeFileSystem";
 import { Path } from "@effect/platform/Path";
 import { Effect } from "effect";
 
-class OutputStorage {
-  // Create files for command in specific directory
-  initCommand(cmdId: string, outputPath: string): Effect<void>;
-  // Implementation: Uses FileSystem.writeFileString to create empty .stdout/.stderr files
-  //                 and "null" in .exitcode file
+// OutputStorage service using Effect.Service pattern
+class OutputStorage extends Effect.Service<OutputStorage>()("spawner/OutputStorage", {
+  effect: Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const path = yield* Path.Path;
 
-  // Write stdout/stderr as command executes
-  writeStdout(cmdId: string, outputPath: string, data: string): Effect<void>;
-  // Implementation: FileSystem.appendFileString for streaming writes
+    const initCommand = (cmdId: string, outputPath: string) =>
+      Effect.gen(function* () {
+        const stdoutPath = path.join(outputPath, `${cmdId}.stdout`);
+        const stderrPath = path.join(outputPath, `${cmdId}.stderr`);
+        const exitcodePath = path.join(outputPath, `${cmdId}.exitcode`);
 
-  writeStderr(cmdId: string, outputPath: string, data: string): Effect<void>;
-  // Implementation: FileSystem.appendFileString for streaming writes
+        yield* fs.writeFileString(stdoutPath, "");
+        yield* fs.writeFileString(stderrPath, "");
+        yield* fs.writeFileString(exitcodePath, "null");
+      });
 
-  // Read full output from specific directory
-  readOutput(cmdId: string, outputPath: string): Effect<CommandOutput>;
-  // Implementation: FileSystem.readFileString for all three files
-  //                 Effect.all([readStdout, readStderr, readExitCode])
+    const writeStdout = (cmdId: string, outputPath: string, data: string) =>
+      Effect.gen(function* () {
+        const stdoutPath = path.join(outputPath, `${cmdId}.stdout`);
+        yield* fs.appendFileString(stdoutPath, data);
+      });
 
-  // Delete command files
-  cleanup(cmdId: string, outputPath: string): Effect<void>;
-  // Implementation: FileSystem.remove for each file
-}
+    const writeStderr = (cmdId: string, outputPath: string, data: string) =>
+      Effect.gen(function* () {
+        const stderrPath = path.join(outputPath, `${cmdId}.stderr`);
+        yield* fs.appendFileString(stderrPath, data);
+      });
+
+    const readOutput = (cmdId: string, outputPath: string) =>
+      Effect.gen(function* () {
+        const stdoutPath = path.join(outputPath, `${cmdId}.stdout`);
+        const stderrPath = path.join(outputPath, `${cmdId}.stderr`);
+        const exitcodePath = path.join(outputPath, `${cmdId}.exitcode`);
+
+        const [stdout, stderr, exitCodeStr] = yield* Effect.all([
+          fs.readFileString(stdoutPath),
+          fs.readFileString(stderrPath),
+          fs.readFileString(exitcodePath)
+        ]);
+
+        const exitCode = exitCodeStr === "null" ? null : Number.parseInt(exitCodeStr);
+
+        return { stdout, stderr, exitCode };
+      });
+
+    const cleanup = (cmdId: string, outputPath: string) =>
+      Effect.gen(function* () {
+        const stdoutPath = path.join(outputPath, `${cmdId}.stdout`);
+        const stderrPath = path.join(outputPath, `${cmdId}.stderr`);
+        const exitcodePath = path.join(outputPath, `${cmdId}.exitcode`);
+
+        yield* Effect.all([
+          fs.remove(stdoutPath),
+          fs.remove(stderrPath),
+          fs.remove(exitcodePath)
+        ], { concurrency: "unbounded" });
+      });
+
+    return {
+      initCommand,
+      writeStdout,
+      writeStderr,
+      readOutput,
+      cleanup
+    } as const;
+  }),
+  dependencies: [NodeFileSystem.layer]
+}) {}
+
+export { OutputStorage };
 ```
 
 ## Data Flow
@@ -354,13 +521,12 @@ const MAX_CONCURRENT_ENVIRONMENTS = 50;
 ```typescript
 import { EnvironmentManager } from "@open-bento/spawner-v3";
 import { Effect } from "effect";
-import { NodeContext } from "@effect/platform-node";
+import { NodeContext } from "@effect/platform-node/NodeContext";
 
-// Create manager with Effect runtime
-const manager = EnvironmentManager.make();
-
-// Provide the Node.js platform layer for Command execution
+// Define the program using the EnvironmentManager service
 const program = Effect.gen(function* () {
+  const manager = yield* EnvironmentManager;
+
   // 1. Create environment with init, env vars, and custom output path
   yield* manager.createEnvironment({
     id: "env-workspace-123",
@@ -422,8 +588,14 @@ const program = Effect.gen(function* () {
   yield* manager.destroyEnvironment("env-workspace-123");
 });
 
-// Run with Node.js platform layer for Command execution
-Effect.runPromise(program.pipe(Effect.provide(NodeContext.layer)));
+// Provide all required layers and run
+// EnvironmentManager.Default automatically includes Docker.Default and OutputStorage.Default
+const runnable = program.pipe(
+  Effect.provide(EnvironmentManager.Default),
+  Effect.provide(NodeContext.layer)
+);
+
+Effect.runPromise(runnable);
 ```
 
 ## Benefits
@@ -446,105 +618,119 @@ Wraps Docker CLI operations as Effect Commands for composability.
 import { Command } from "@effect/platform/Command";
 import { Effect, Stream } from "effect";
 
-export class Docker {
-  // Start a container with volume mounts
-  static runContainer(
-    name: string,
-    image: string,
-    envVars: Record<string, string>,
-    volumes: Array<{ host: string; container: string; readonly?: boolean }>,
-    workingDir: string
-  ): Effect<string> {
-    const envFlags = Object.entries(envVars).flatMap(([k, v]) => ["-e", `${k}=${v}`]);
-    const volumeFlags = volumes.flatMap(v =>
-      ["-v", `${v.host}:${v.container}${v.readonly ? ":ro" : ""}`]
-    );
+// Docker service using Effect.Service pattern
+class Docker extends Effect.Service<Docker>()("spawner/Docker", {
+  sync: () => {
+    // Start a container with volume mounts
+    const runContainer = (
+      name: string,
+      image: string,
+      envVars: Record<string, string>,
+      volumes: Array<{ host: string; container: string; readonly?: boolean }>,
+      workingDir: string
+    ): Effect.Effect<string> => {
+      const envFlags = Object.entries(envVars).flatMap(([k, v]) => ["-e", `${k}=${v}`]);
+      const volumeFlags = volumes.flatMap(v =>
+        ["-v", `${v.host}:${v.container}${v.readonly ? ":ro" : ""}`]
+      );
 
-    return Command.make(
-      "docker", "run", "-d",
-      "--name", name,
-      ...envFlags,
-      ...volumeFlags,
-      "-w", workingDir,
-      image,
-      "sh", "-c", "exec sleep infinity"
-    ).pipe(
-      Command.string,
-      Effect.map(output => output.trim()) // Returns container ID
-    );
-  }
+      return Command.make(
+        "docker", "run", "-d",
+        "--name", name,
+        ...envFlags,
+        ...volumeFlags,
+        "-w", workingDir,
+        image,
+        "sh", "-c", "exec sleep infinity"
+      ).pipe(
+        Command.string,
+        Effect.map(output => output.trim()) // Returns container ID
+      );
+    };
 
-  // Execute command inside container and stream output
-  static exec(
-    containerId: string,
-    workingDir: string,
-    command: string[]
-  ): Stream.Stream<Uint8Array, Error> {
-    return Command.make(
-      "docker", "exec",
-      "-w", workingDir,
-      containerId,
-      ...command
-    ).pipe(Command.stream);
-  }
+    // Execute command inside container and stream output
+    const exec = (
+      containerId: string,
+      workingDir: string,
+      command: string[]
+    ): Stream.Stream<Uint8Array> => {
+      return Command.make(
+        "docker", "exec",
+        "-w", workingDir,
+        containerId,
+        ...command
+      ).pipe(Command.stream);
+    };
 
-  // Execute command and get exit code
-  static execWithExitCode(
-    containerId: string,
-    workingDir: string,
-    command: string[]
-  ): Effect<number> {
-    return Command.make(
-      "docker", "exec",
-      "-w", workingDir,
-      containerId,
-      ...command
-    ).pipe(Command.exitCode);
-  }
+    // Execute command and get exit code
+    const execWithExitCode = (
+      containerId: string,
+      workingDir: string,
+      command: string[]
+    ): Effect.Effect<number> => {
+      return Command.make(
+        "docker", "exec",
+        "-w", workingDir,
+        containerId,
+        ...command
+      ).pipe(Command.exitCode);
+    };
 
-  // Download file inside container
-  static downloadFile(
-    containerId: string,
-    url: string,
-    destination: string
-  ): Effect<void> {
-    return Command.make(
-      "docker", "exec",
-      containerId,
-      "curl", "-L", url, "-o", destination
-    ).pipe(
-      Command.exitCode,
-      Effect.flatMap(exitCode =>
-        exitCode === 0
-          ? Effect.void
-          : Effect.fail(new Error(`Failed to download ${url}`))
-      )
-    );
-  }
+    // Download file inside container
+    const downloadFile = (
+      containerId: string,
+      url: string,
+      destination: string
+    ): Effect.Effect<void> => {
+      return Command.make(
+        "docker", "exec",
+        containerId,
+        "curl", "-L", url, "-o", destination
+      ).pipe(
+        Command.exitCode,
+        Effect.flatMap(exitCode =>
+          exitCode === 0
+            ? Effect.void
+            : Effect.fail(new Error(`Failed to download ${url}`))
+        )
+      );
+    };
 
-  // Stop and remove container
-  static stopContainer(containerId: string): Effect<void> {
-    return Command.make("docker", "stop", containerId).pipe(
-      Command.exitCode,
-      Effect.flatMap(() => Command.make("docker", "rm", containerId)),
-      Effect.flatMap(cmd => cmd.pipe(Command.exitCode)),
-      Effect.asVoid
-    );
-  }
+    // Stop and remove container
+    const stopContainer = (containerId: string): Effect.Effect<void> => {
+      return Command.make("docker", "stop", containerId).pipe(
+        Command.exitCode,
+        Effect.flatMap(() => Command.make("docker", "rm", containerId)),
+        Effect.flatMap(cmd => cmd.pipe(Command.exitCode)),
+        Effect.asVoid
+      );
+    };
 
-  // Check if container is running
-  static isRunning(containerId: string): Effect<boolean> {
-    return Command.make(
-      "docker", "inspect",
-      "--format", "{{.State.Running}}",
-      containerId
-    ).pipe(
-      Command.string,
-      Effect.map(output => output.trim() === "true"),
-      Effect.catchAll(() => Effect.succeed(false))
-    );
+    // Check if container is running
+    const isRunning = (containerId: string): Effect.Effect<boolean> => {
+      return Command.make(
+        "docker", "inspect",
+        "--format", "{{.State.Running}}",
+        containerId
+      ).pipe(
+        Command.string,
+        Effect.map(output => output.trim() === "true"),
+        Effect.catchAll(() => Effect.succeed(false))
+      );
+    };
+
+    return {
+      runContainer,
+      exec,
+      execWithExitCode,
+      downloadFile,
+      stopContainer,
+      isRunning
+    } as const;
   }
-}
+}) {}
+
+export { Docker };
 ```
 
 ## Implementation Steps
