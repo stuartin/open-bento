@@ -1,5 +1,5 @@
 {
-  "name": "@open-bento/spawner-v3",
+  "name": "@open-bento/runner",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",

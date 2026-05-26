@@ -72,9 +72,9 @@ importers:
       '@open-bento/config':
         specifier: 'workspace:'
         version: link:../../packages/config
-      '@open-bento/spawner-v3':
+      '@open-bento/runner':
         specifier: 'workspace:'
-        version: link:../../packages/spawner-v3
+        version: link:../../packages/runner
       '@open-bento/tfe':
         specifier: 'workspace:'
         version: link:../../packages/tfe
@@ -156,7 +156,7 @@ importers:
 
   packages/config: {}
 
-  packages/spawner-v3:
+  packages/runner:
     dependencies:
       '@effect/platform':
         specifier: ^0.96.1

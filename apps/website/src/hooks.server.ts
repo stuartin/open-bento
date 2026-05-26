@@ -4,7 +4,6 @@ import { auth } from '$features/auth/auth';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { initDB } from '$features/db';
-import { Spawner } from '@open-bento/spawner-v3';
 import { initTerraformClient } from '$features/auth/init/init-terraform-client';
 import { initOrganizationWithAdmin } from '$features/auth/init/init-organization';
 import { initTFE } from '$features/auth/init/init-tfe';
@@ -27,11 +26,4 @@ export const init: ServerInit = async () => {
 	await initTerraformClient()
 	await initOrganizationWithAdmin()
 	await initTFE()
-
-	const spawner = await Spawner.get()
-	spawner.config = {
-		onLogs: () => new Promise(() => console.log("onLogs")),
-		onStatusUpdate: () => new Promise(() => console.log("onStatusUpdate")),
-	}
-	spawner.start()
 };

@@ -28,7 +28,7 @@
 		"@better-auth/utils": "^0.4.0",
 		"@biomejs/biome": "catalog:",
 		"@open-bento/config": "workspace:",
-		"@open-bento/spawner-v3": "workspace:",
+		"@open-bento/runner": "workspace:",
 		"@open-bento/types": "workspace:",
 		"@open-bento/tfe": "workspace:",
 		"@orpc/client": "catalog:",

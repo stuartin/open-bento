@@ -3,7 +3,9 @@ import { Effect, Layer, ManagedRuntime } from "effect";
 import { NodeContext } from "@effect/platform-node";
 import { EnvironmentManager, type EnvironmentConfig, type CommandOutput, type EnvironmentInfo } from "./services/EnvironmentManager";
 
-export function makeRunner() {
+export type Runner = typeof runner
+export const runner = makeRunner()
+function makeRunner() {
   // Merge EnvironmentManager with NodeContext to provide both
   const RuntimeLayer = Layer.merge(
     Layer.provide(EnvironmentManager.Default, NodeContext.layer),
