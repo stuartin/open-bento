@@ -51,7 +51,6 @@ export const GET: RequestHandler = async () => {
     const logs = await runner.init(
         run.data,
         {
-            workingDir: env.RUNNER_ENV === "local",
             runInShell: "pwsh",
             onUp: (id) => console.log(`onUp ${id}`),
             onStdOut: (stdout) => stdOut.push(stdout.data),
@@ -70,5 +69,4 @@ export const GET: RequestHandler = async () => {
     )
 
     return json(logs.map(ev => ev.data))
-    return lastExitCode === 0 ? json(result) : error(500, JSON.stringify(result))
 }
