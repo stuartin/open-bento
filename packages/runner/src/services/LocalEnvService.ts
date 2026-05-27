@@ -19,7 +19,7 @@ export const LocalEnvService = {
             const runnerProps = yield* Ref.get(runnerPropsRef)
             const runnerEnv = runnerProps.env as LocalEnvProps
 
-            const rootPath = path.resolve(runnerEnv.path, "tmp");
+            const rootPath = path.resolve(runnerEnv.path, "runs");
             const getEnvPath = (id: string) => path.resolve(rootPath, id)
 
             return EnvService.of({
