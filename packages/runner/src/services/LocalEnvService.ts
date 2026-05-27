@@ -1,5 +1,5 @@
 import { Layer, Effect } from "effect"
-import { ExecService } from "../ExecService"
+import { ExecService } from "./ExecService"
 import { EnvService } from "./EnvService"
 import type { Command } from "@effect/platform"
 

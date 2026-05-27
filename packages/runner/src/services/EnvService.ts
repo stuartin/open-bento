@@ -1,5 +1,5 @@
 import { Context, Effect } from "effect";
-import { ExecService, type ExecResult, type ExecStartProps } from "../ExecService";
+import { ExecService, type ExecResult, type ExecStartProps } from "./ExecService";
 import type { Command, CommandExecutor } from "@effect/platform";
 import type { PlatformError } from "@effect/platform/Error";
 

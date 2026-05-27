@@ -4,8 +4,8 @@ import { NodeContext } from "@effect/platform-node";
 import { PropsRef, type RunnerProps } from "./PropsRef";
 import { ExecService, type ExecStartProps } from "./services/ExecService";
 import { Command } from "@effect/platform";
-import { EnvService } from "./services/environments/EnvService";
-import { LocalEnvService } from "./services/environments/LocalEnvService";
+import { EnvService } from "./services/EnvService";
+import { LocalEnvService } from "./services/LocalEnvService";
 import type { Run } from "@open-bento/tfe";
 
 export type { StdOut, StdErr, ExitCode } from "./services/ExecService"
