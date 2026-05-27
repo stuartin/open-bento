@@ -4,12 +4,7 @@ import { error, json, type RequestHandler } from "@sveltejs/kit";
 export const GET: RequestHandler = async () => {
 
 
-    const result = await runner.testCommand({
-        id: "some-id",
-        opts: {
-            workingDir: "./"
-        }
-    })
-    return json({ ok: true, result: result.map(r => r.data) })
+    const result = await runner.init({ id: "" })
+    return json(result.map(r => r.data))
 
 }

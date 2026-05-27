@@ -1,12 +1,15 @@
-import { Chunk, Context, Data, Effect, Layer, Match, Stream } from "effect";
+import { Chunk, Context, Data, Effect, Layer, Match, Stream, String } from "effect";
 import { Command } from "@effect/platform";
 import { NodeContext } from "@effect/platform-node";
+import { EnvironmentService } from "./environments/EnvironmentService";
 
 export type StartProps = {
     id: string;
     opts?: {
         workingDir?: string;
         env?: Record<string, string>;
+        runInShell?: string | boolean
+        removeNewLineCharacters?: boolean
         onStdErr?: (v: StdErr) => void
         onStdOut?: (v: StdOut) => void
         onExitCode?: (v: ExitCode) => void
@@ -30,7 +33,7 @@ export class ExitCode extends Data.TaggedClass("ExitCode")<{
 
 export type ExecResult = StdOut | StdErr | ExitCode
 
-export class ExecService extends Effect.Service<ExecService>()("app/ExecService", {
+export class ExecService extends Effect.Service<ExecService>()("runner/ExecService", {
     effect: Effect.gen(function* () {
 
         const start = (p: StartProps) => {
@@ -39,6 +42,8 @@ export class ExecService extends Effect.Service<ExecService>()("app/ExecService"
                 opts: {
                     workingDir: "./",
                     env: {},
+                    runInShell: false,
+                    removeNewLineCharacters: true,
                     onStdOut: (v) => Effect.logInfo(`[stdout] (${v.id}): ${v.data}`),
                     onStdErr: (v) => Effect.logError(`[stderr] (${v.id}): ${v.data}`),
                     onExitCode: (v) => Effect.logInfo(`[exitcode] (${v.id}): ${v.data}`),
@@ -53,6 +58,7 @@ export class ExecService extends Effect.Service<ExecService>()("app/ExecService"
                         (cmd) => {
                             // Apply working directory and optional environment variables
                             let configuredCmd = cmd.pipe(
+                                Command.runInShell(props.opts.runInShell),
                                 Command.workingDirectory(props.opts.workingDir),
                                 Command.env(props.opts.env ?? {})
                             );
@@ -66,13 +72,13 @@ export class ExecService extends Effect.Service<ExecService>()("app/ExecService"
                                     // 1. Stream stdout lines tagged as 'Stdout'
                                     const stdoutStream = process.stdout.pipe(
                                         Stream.decodeText(),
-                                        Stream.map(line => new StdOut({ id: props.id, data: line }))
+                                        Stream.map(line => new StdOut({ id: props.id, data: props.opts.removeNewLineCharacters ? String.trim(line) : line }))
                                     )
 
                                     // 2. Stream stderr lines tagged as 'Stderr'
                                     const stderrStream = process.stderr.pipe(
                                         Stream.decodeText(),
-                                        Stream.map(line => new StdErr({ id: props.id, data: line }))
+                                        Stream.map(line => new StdErr({ id: props.id, data: props.opts.removeNewLineCharacters ? String.trim(line) : line }))
                                     )
 
                                     // 3. A single-item stream that waits for the exit code
@@ -95,19 +101,15 @@ export class ExecService extends Effect.Service<ExecService>()("app/ExecService"
                 )
 
                 return Effect.gen(function* () {
-                    yield* Effect.logInfo(`[STARTED] ExecService started`)
-
-                    // Add a finalizer unique to this specific run's execution lifecycle
-                    yield* Effect.addFinalizer((exit) =>
-                        Effect.logInfo(`[STOPPED] ExecService finished`)
-                    );
+                    yield* Effect.logInfo(`[EXEC] Started`)
+                    yield* Effect.addFinalizer((exit) => Effect.logInfo(`[EXEC] Stopped`));
 
                     // Execute the stream and compile down to the results array
                     return yield* streamPipeline.pipe(
                         Stream.tap((event) => Match.value(event).pipe(
                             Match.tag("ExitCode", (exitCode) => {
                                 props.opts.onExitCode(exitCode);
-                                Effect.runSync(Effect.logInfo(`[EXITCODE] ${exitCode.data}`))
+                                Effect.runSync(Effect.logInfo(`[EXEC] ExitCode: ${exitCode.data}`))
                                 return Effect.void
                             }),
                             Match.tag("StdOut", (stdOut) => {
@@ -125,9 +127,7 @@ export class ExecService extends Effect.Service<ExecService>()("app/ExecService"
                         Effect.map(Chunk.toReadonlyArray)
                     );
 
-                }).pipe(
-                    Effect.scoped
-                );
+                })
             }
 
             return { runCommands };
