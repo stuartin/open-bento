@@ -88,7 +88,7 @@ export const tfeWorkspacesRouter = os
                 }
             }
         }),
-        list: os.list.handler(async ({ errors, input }) => {
+        list: os.list.handler(async ({ input }) => {
 
             const workspaces = await db.query.workspaces.findMany({
                 where: {

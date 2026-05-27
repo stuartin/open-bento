@@ -48,7 +48,7 @@ export const CreateConfigurationVersionOutput = ORPCOutput({
 
 export const GetConfigurationVersionInput = ORPCInput({
   params: z.object({
-    version: z.string().describe("Configuration Version ID"),
+    "version-id": z.string().describe("Configuration Version ID"),
   }),
   headers: AuthHeadersSchema,
 });
@@ -60,3 +60,23 @@ export const GetConfigurationVersionOutput = ORPCOutput({
     ConfigurationVersionAttributesSchema
   ),
 });
+
+// --- Download Configuration Version ---
+
+export const DownloadConfigurationVersionInput = ORPCInput({
+  params: z.object({
+    "version-id": z.string().describe("Configuration Version ID"),
+  }),
+  headers: AuthHeadersSchema,
+});
+
+export const DownloadConfigurationVersionOutput = ORPCOutput({
+  status: z.literal(302),
+  body: z.undefined(),
+});
+
+// ============================================================
+// Type
+// ============================================================
+
+export type ConfigurationVersion = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.CONFIGURATION_VERSIONS, typeof ConfigurationVersionAttributesSchema>>>

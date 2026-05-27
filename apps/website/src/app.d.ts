@@ -1,4 +1,3 @@
-import type { APIClient } from '$lib/api-client';
 import type { Session, User } from '$features/auth/types'
 
 // See https://svelte.dev/docs/kit/types#app.d.ts

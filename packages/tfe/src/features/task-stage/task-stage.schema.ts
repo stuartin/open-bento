@@ -59,3 +59,9 @@ export const ListTaskStagesOutput = ORPCOutput({
     TaskStageAttributesSchema
   ),
 });
+
+// ============================================================
+// Type
+// ============================================================
+
+export type TaskStage = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.TASK_STAGES, typeof TaskStageAttributesSchema>>>

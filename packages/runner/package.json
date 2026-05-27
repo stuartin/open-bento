@@ -1,5 +1,5 @@
 {
-  "name": "@open-bento/spawner-v3",
+  "name": "@open-bento/runner",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
@@ -14,7 +14,8 @@
     "effect": "^3.21.2",
     "@effect/platform": "^0.96.1",
     "@effect/platform-node": "^0.106.0",
-    "@open-bento/types": "workspace:*",
+    "@open-bento/tfe": "workspace:*",
+    "@paralleldrive/cuid2": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

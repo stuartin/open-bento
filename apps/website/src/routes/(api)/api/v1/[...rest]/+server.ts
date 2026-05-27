@@ -5,17 +5,14 @@ import type { RequestHandler } from '@sveltejs/kit'
 import { auth } from '$features/auth/auth'
 import { OpenAPIReferencePlugin } from '@orpc/openapi/plugins'
 import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4'
-import { openAPISchemaGeneratorOptions } from '@open-bento/types'
-import { Spawner } from '@open-bento/spawner-v3'
-import { API_PREFIX } from '$lib/constants'
 import { ResponseHeadersPlugin } from '@orpc/server/plugins'
-import { tfeRouter } from '$features/tfe/index.router.server'
 import { TFE_ROOT_INTERCEPTOR_CONTEXT_KEY, tfeRootInterceptor } from '$features/tfe/lib/tfe-interceptor'
+import { runner } from '$features/runner/runner.server'
+import { env } from '$features/env/env.public'
+import { router } from '$features/orpc/router'
 
 const handler = new OpenAPIHandler(
-    {
-        tfe: tfeRouter
-    },
+    router,
     {
         plugins: [
             new ResponseHeadersPlugin(),
@@ -26,7 +23,27 @@ const handler = new OpenAPIHandler(
                 schemaConverters: [
                     new ZodToJsonSchemaConverter()
                 ],
-                specGenerateOptions: openAPISchemaGeneratorOptions
+                specGenerateOptions: {
+                    info: {
+                        title: 'Open Bento',
+                        version: '0.0.1',
+                    },
+                    // Hopefully not needed in v2: https://github.com/middleapi/orpc/issues/1423
+                    // commonSchemas: {
+                    //     Organization: {
+                    //         schema: OrganizationSchema,
+                    //     },
+                    //     Project: {
+                    //         schema: ProjectSchema,
+                    //     },
+                    //     Run: {
+                    //         schema: RunSchema,
+                    //     },
+                    //     Workspace: {
+                    //         schema: WorkspaceSchema,
+                    //     },
+                    // }
+                }
             })
         ],
         adapterInterceptors: [
@@ -35,6 +52,7 @@ const handler = new OpenAPIHandler(
                     ...options,
                     context: {
                         ...options.context,
+                        // biome-ignore lint/suspicious/noExplicitAny: required
                         [TFE_ROOT_INTERCEPTOR_CONTEXT_KEY as any]: {
                             fetchRequest: options.request,
                         },
@@ -44,6 +62,7 @@ const handler = new OpenAPIHandler(
         ],
         rootInterceptors: [
             // https://orpc.dev/docs/advanced/extend-body-parser
+            // biome-ignore lint/suspicious/noExplicitAny: required
             (options) => tfeRootInterceptor(options as any)
         ],
         interceptors: [
@@ -63,7 +82,7 @@ const handle: RequestHandler = async ({ request }) => {
     console.log({ method: request.method, url: request.url, headers: request.headers })
 
     // better-auth
-    if (request.url.startsWith(`${API_PREFIX}/auth`)) auth.handler(request);
+    if (request.url.startsWith(`${env.API_PREFIX}/auth`)) auth.handler(request);
 
 
     // debug
@@ -74,11 +93,11 @@ const handle: RequestHandler = async ({ request }) => {
 
     // oRPC
     const { response } = await handler.handle(request, {
-        prefix: API_PREFIX,
+        prefix: env.API_PREFIX as `/${string}`,
         context: {
             request,
             auth,
-            spawner: await Spawner.get()
+            runner
         }
     })
 

@@ -1,12 +1,10 @@
 import { betterAuth } from 'better-auth/minimal';
 import { drizzleAdapter } from '@better-auth/drizzle-adapter/relations-v2';
 import { sveltekitCookies } from 'better-auth/svelte-kit';
-import { env } from '$env/dynamic/private';
 import { getRequestEvent } from '$app/server';
 import { db } from '$features/db';
 import { createId } from "@paralleldrive/cuid2";
-import { building } from '$app/environment';
-import { API_PREFIX, ORIGIN, TERRAFORM_CLI_CLIENT_ID } from '$lib/constants';
+import { TERRAFORM_CLI_CLIENT_ID } from '$lib/constants';
 import { oauthProvider } from "@better-auth/oauth-provider";
 import { jwt, organization } from "better-auth/plugins"
 import { sessions } from '$features/db/schema';
@@ -14,11 +12,11 @@ import { eq } from 'drizzle-orm';
 import { bearer } from "better-auth/plugins";
 import { signedUrl } from './plugins/signed-url';
 import { oauthSession } from './plugins/oauth-session';
+import { env } from '$features/env/env.public';
 
 export const auth = betterAuth({
-	baseURL: ORIGIN,
-	basePath: `${API_PREFIX}/auth`,
-	secret: building ? 'is-dev' : env.BETTER_AUTH_SECRET, // https://github.com/better-auth/better-auth/issues/8125
+	baseURL: env.ORIGIN,
+	basePath: `${env.API_PREFIX}/auth`,
 	experimental: {
 		joins: true
 	},
@@ -99,7 +97,7 @@ export const auth = betterAuth({
 			])
 		}),
 		oauthSession(),
-		signedUrl({ path: `${ORIGIN}${API_PREFIX}/tfe/uploads` }),
+		signedUrl(),
 		sveltekitCookies(getRequestEvent) // make sure this is the last plugin in the array
 	],
 	advanced: {

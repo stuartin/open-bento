@@ -16,6 +16,21 @@ export const RESOURCE = {
   WORKSPACES: "workspaces"
 } as const
 
+export const TAG = {
+  APPLY: "apply",
+  PLAN: "plan",
+  COST_ESTIMATE: "cost-estimate",
+  CONFIGURATION_VERSION: "configuration-version",
+  ORGANIZATION: "organization",
+  POLICY_EVALUATION: "policy-evaluation",
+  STATE_VERSION: "state-version",
+  STATE_VERSION_OUTPUT: "state-version-output",
+  TASK_RESULT: "task-result",
+  TASK_STAGE: "task-stage",
+  RUN: "run",
+  WORKSPACE: "workspace"
+} as const
+
 
 // --- Auth Headers ---
 
@@ -53,6 +68,7 @@ const JsonApiResource = <
     id: z.string(),
     attributes,
     ...(relationships && { relationships }),
+    // biome-ignore lint/suspicious/noExplicitAny: required
   }) as any;
 
 // --- JSON:API Document Wrappers ---

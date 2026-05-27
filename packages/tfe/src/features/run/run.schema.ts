@@ -265,3 +265,10 @@ export const ForceCancelRunOutput = ORPCOutput({
   status: z.literal(202),
   body: z.undefined(),
 });
+
+
+// ============================================================
+// Type
+// ============================================================
+
+export type Run = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.RUNS, typeof RunAttributesSchema>>>

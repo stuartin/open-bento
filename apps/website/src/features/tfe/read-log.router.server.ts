@@ -4,7 +4,7 @@ import { tfeContract } from "@open-bento/tfe";
 const os = createRouter(tfeContract.readLogs)
 export const tfeReadLogsRouter = os
     .router({
-        get: os.get.handler(async ({ context }) => {
+        get: os.get.handler(async () => {
 
             await new Promise(resolve => setTimeout(resolve, 3000));
 
@@ -19,7 +19,7 @@ export const tfeReadLogsRouter = os
                 const line = Array.from({ length: wordCount }, () =>
                     words[Math.floor(Math.random() * words.length)]
                 ).join(" ");
-                return line.charAt(0).toUpperCase() + line.slice(1) + ".";
+                return `${line.charAt(0).toUpperCase()}${line.slice(1)}.`;
             };
 
             const lineCount = Math.floor(Math.random() * 10) + 5;

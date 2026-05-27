@@ -7,10 +7,9 @@ import {
   index,
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
-import { organizations, relations as authRelations, members, invitations } from "./auth.db";
+import { organizations, members, invitations } from "./auth.db";
 import type z from "zod";
 import type { RunAttributesSchema, WorkspaceAttributesSchema } from "@open-bento/tfe";
-import { organization } from "better-auth/plugins";
 
 export const entitlementSets = sqliteTable(
   "entitlement_sets",

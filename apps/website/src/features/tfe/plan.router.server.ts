@@ -1,7 +1,7 @@
-import { API_PREFIX, ORIGIN } from "$lib/constants";
 import { createRouter } from "$features/orpc/factories";
 import { useAuth } from "$features/auth/middleware/use-auth";
 import { GetPlanJsonOutputOutput, GetPlanOutput, tfeContract } from "@open-bento/tfe";
+import { env } from "$features/env/env.public";
 
 const os = createRouter(tfeContract.plans).use(useAuth);
 export const tfePlansRouter = os
@@ -19,7 +19,7 @@ export const tfePlansRouter = os
                         "resource-additions": 2,
                         "resource-changes": 1,
                         "resource-destructions": 0,
-                        "log-read-url": `${ORIGIN}${API_PREFIX}/tfe/read-logs/${input.params.plan}`,
+                        "log-read-url": `${env.ORIGIN}${env.API_PREFIX}/tfe/read-logs/${input.params.plan}`,
                     },
                 }
             })
@@ -32,7 +32,7 @@ export const tfePlansRouter = os
             }
         }),
 
-        jsonOutput: os.jsonOutput.handler(async ({ input, errors }) => {
+        jsonOutput: os.jsonOutput.handler(async ({ errors }) => {
 
             const jsonOutput = GetPlanJsonOutputOutput.shape.body.safeParse({
                 format_version: "1.2",

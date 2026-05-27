@@ -7,12 +7,16 @@ import {
   GetPlanJsonOutputRedirectOutput,
 } from "./plan.schema";
 import { createContract } from "../../lib/contract";
+import { TAG } from "../../lib/common.schema";
 
 // --- Contracts ---
+
+const tags = [TAG.PLAN]
 
 export const getPlan = createContract()
   .auth
   .route({
+    tags,
     path: "/plans/{plan}",
     method: "GET",
     inputStructure: "detailed",
@@ -24,6 +28,7 @@ export const getPlan = createContract()
 export const getPlanJsonOutput = createContract()
   .auth
   .route({
+    tags,
     path: "/plans/{plan}/json-output-redacted",
     method: "GET",
     inputStructure: "detailed",

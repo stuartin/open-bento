@@ -48,3 +48,9 @@ export const GetPolicyEvaluationOutput = ORPCOutput({
     PolicyEvaluationAttributesSchema
   ),
 });
+
+// ============================================================
+// Type
+// ============================================================
+
+export type PolicyEvaluation = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.POLICY_EVALUATIONS, typeof PolicyEvaluationAttributesSchema>>>

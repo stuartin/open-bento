@@ -4,10 +4,10 @@ import { auth } from '$features/auth/auth';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { initDB } from '$features/db';
-import { Spawner } from '@open-bento/spawner-v3';
 import { initTerraformClient } from '$features/auth/init/init-terraform-client';
 import { initOrganizationWithAdmin } from '$features/auth/init/init-organization';
 import { initTFE } from '$features/auth/init/init-tfe';
+import { initEnv } from '$features/env/env.private.server';
 
 const handleBetterAuth: Handle = async ({ event, resolve }) => {
 	const session = await auth.api.getSession({ headers: event.request.headers });
@@ -23,15 +23,11 @@ const handleBetterAuth: Handle = async ({ event, resolve }) => {
 export const handle: Handle = sequence(handleBetterAuth);
 
 export const init: ServerInit = async () => {
+	await initEnv()
 	await initDB()
 	await initTerraformClient()
-	await initOrganizationWithAdmin()
-	await initTFE()
-
-	const spawner = await Spawner.get()
-	spawner.config = {
-		onLogs: () => new Promise(() => console.log("onLogs")),
-		onStatusUpdate: () => new Promise(() => console.log("onStatusUpdate")),
+	if (dev) {
+		await initOrganizationWithAdmin()
+		await initTFE()
 	}
-	spawner.start()
 };

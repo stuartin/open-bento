@@ -1,9 +1,10 @@
 import { createRouter } from "$features/orpc/factories";
 import { useAuth } from "$features/auth/middleware/use-auth";
-import { GetConfigurationVersionOutput, RESOURCE, tfeContract, toCamel, toKebab } from "@open-bento/tfe";
+import { RESOURCE, tfeContract, toCamel, toKebab } from "@open-bento/tfe";
 import { db } from "$features/db";
 import { configurationVersions } from "$features/db/schema";
 import { eq } from "drizzle-orm";
+import { env } from "$features/env/env.public";
 
 const os = createRouter(tfeContract.configurationVersions).use(useAuth);
 export const tfeConfigurationVersionsRouter = os
@@ -31,7 +32,7 @@ export const tfeConfigurationVersionsRouter = os
 
             const { url } = await context.auth.api.generateSignedUrl({
                 headers: context.request.headers,
-                body: { identifier: initialConfigurationVersion.id }
+                body: { url: `${env.ORIGIN}${env.API_PREFIX}/tfe/uploads`, identifier: initialConfigurationVersion.id }
             })
 
             const configurationVersion = await db
@@ -54,25 +55,45 @@ export const tfeConfigurationVersionsRouter = os
         }),
         get: os.get.handler(async ({ errors, input }) => {
 
-            const configurationVersion = GetConfigurationVersionOutput.shape.body.safeParse({
-                data: {
-                    type: "configuration-versions",
-                    id: input.params.version,
-                    attributes: {
-                        "auto-queue-runs": false,
-                        speculative: true,
-                        provisional: false,
-                        status: "uploaded",
-                        "upload-url": "",
-                    }
+            const configurationVersion = await db.query.configurationVersions.findFirst({
+                where: {
+                    id: input.params["version-id"]
                 }
             })
 
-            if (!configurationVersion.success) throw errors.BAD_REQUEST(configurationVersion.error)
+            if (!configurationVersion) throw errors.NOT_FOUND()
 
             return {
                 status: 200,
-                body: configurationVersion.data
+                body: {
+                    data: {
+                        type: RESOURCE.CONFIGURATION_VERSIONS,
+                        id: configurationVersion.id,
+                        attributes: toKebab(configurationVersion)
+                    }
+                }
+            }
+        }),
+        download: os.download.handler(async ({ errors, input, context }) => {
+
+            const configurationVersion = await db.query.configurationVersions.findFirst({
+                where: {
+                    id: input.params["version-id"]
+                }
+            })
+
+            if (!configurationVersion) throw errors.NOT_FOUND()
+            if (configurationVersion.status !== "uploaded") throw errors.NOT_FOUND()
+
+            const { url } = await context.auth.api.generateSignedUrl({
+                headers: context.request.headers,
+                body: { url: `${env.ORIGIN}${env.API_PREFIX}/tfe/downloads`, identifier: configurationVersion.id }
+            })
+
+            context.resHeaders?.set("location", url)
+            return {
+                status: 302,
+                body: undefined
             }
         }),
     })

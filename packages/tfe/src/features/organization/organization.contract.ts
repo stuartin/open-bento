@@ -6,12 +6,16 @@ import {
   ListOrganizationRunQueueInput,
   ListOrganizationRunQueueOutput,
 } from "./organization.schema";
+import { TAG } from "../../lib/common.schema";
 
 // --- Contracts ---
+
+const tags = [TAG.ORGANIZATION]
 
 export const getOrganizationEntitlements = createContract()
   .auth
   .route({
+    tags,
     path: "/organizations/{organization}/entitlement-set",
     method: "GET",
     inputStructure: "detailed",
@@ -24,6 +28,7 @@ export const getOrganizationEntitlements = createContract()
 export const listOrganizationRunQueue = createContract()
   .auth
   .route({
+    tags,
     path: "/organizations/{organization}/runs/queue",
     method: "GET",
     inputStructure: "detailed",

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { AuthHeadersSchema, ORPCInput } from "../../lib/common.schema";
-import { ReadableStream } from "stream/web";
+import { ReadableStream } from "node:stream/web";
 
 // ============================================================
 // ENTITY DEFINITION - State Version

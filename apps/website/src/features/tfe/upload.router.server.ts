@@ -4,6 +4,7 @@ import { tfeContract } from "@open-bento/tfe";
 import { db } from "$features/db";
 import { configurationVersions } from "$features/db/schema";
 import { eq } from "drizzle-orm";
+import { env } from "$features/env/env.private.server";
 
 const os = createRouter(tfeContract.uploads);
 export const tfeUploadsRouter = os.router({
@@ -26,7 +27,7 @@ export const tfeUploadsRouter = os.router({
         const { ok } = await saveStreamWithType(
             body,
             `${configurationVersion.id}`,
-            `./uploads/${configurationVersion.organizationId}/${configurationVersion.workspaceId}`
+            `${env.STORAGE_PATH}/uploads/${configurationVersion.organizationId}/${configurationVersion.workspaceId}`
         );
 
         await db

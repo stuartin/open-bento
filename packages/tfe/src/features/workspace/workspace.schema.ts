@@ -108,3 +108,9 @@ export const ListWorkspacesOutput = ORPCOutput({
     WorkspaceAttributesSchema
   ),
 });
+
+// ============================================================
+// Type
+// ============================================================
+
+export type Workspace = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.WORKSPACES, typeof WorkspaceAttributesSchema>>>

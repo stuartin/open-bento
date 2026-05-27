@@ -43,3 +43,9 @@ export const GetApplyOutput = ORPCOutput({
     ApplyAttributesSchema
   ),
 });
+
+// ============================================================
+// Type
+// ============================================================
+
+export type Apply = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.APPLIES, typeof ApplyAttributesSchema>>>
