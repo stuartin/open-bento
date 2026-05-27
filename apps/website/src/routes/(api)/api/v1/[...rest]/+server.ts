@@ -6,11 +6,11 @@ import { auth } from '$features/auth/auth'
 import { OpenAPIReferencePlugin } from '@orpc/openapi/plugins'
 import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4'
 import { openAPISchemaGeneratorOptions } from '@open-bento/types'
-import { API_PREFIX } from '$lib/constants'
 import { ResponseHeadersPlugin } from '@orpc/server/plugins'
 import { tfeRouter } from '$features/tfe/index.router.server'
 import { TFE_ROOT_INTERCEPTOR_CONTEXT_KEY, tfeRootInterceptor } from '$features/tfe/lib/tfe-interceptor'
-import { runner } from '@open-bento/runner'
+import { runner } from '$features/runner/runner'
+import { env } from '$features/env/env.public'
 
 const handler = new OpenAPIHandler(
     {
@@ -63,7 +63,7 @@ const handle: RequestHandler = async ({ request }) => {
     console.log({ method: request.method, url: request.url, headers: request.headers })
 
     // better-auth
-    if (request.url.startsWith(`${API_PREFIX}/auth`)) auth.handler(request);
+    if (request.url.startsWith(`${env.API_PREFIX}/auth`)) auth.handler(request);
 
 
     // debug
@@ -74,7 +74,7 @@ const handle: RequestHandler = async ({ request }) => {
 
     // oRPC
     const { response } = await handler.handle(request, {
-        prefix: API_PREFIX,
+        prefix: env.API_PREFIX as `/${string}`,
         context: {
             request,
             auth,

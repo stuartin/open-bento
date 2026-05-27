@@ -4,7 +4,7 @@ import { GetRunEventsOutput, ListRunsOutput, RESOURCE, tfeContract, toCamel, toK
 import { createId } from "@paralleldrive/cuid2";
 import { db } from "$features/db";
 import { plans, runs } from "$features/db/schema";
-import { API_PREFIX, ORIGIN } from "$lib/constants";
+import { env } from "$features/env/env.public";
 
 const os = createRouter(tfeContract.runs).use(useAuth);
 export const tfeRunsRouter = os
@@ -36,7 +36,7 @@ export const tfeRunsRouter = os
                         organizationId,
                         workspaceId,
                         runId: run.id,
-                        logReadUrl: `${ORIGIN}${API_PREFIX}/tfe/read-logs/${run.id}/plan`
+                        logReadUrl: `${env.ORIGIN}${env.API_PREFIX}/tfe/read-logs/${run.id}/plan`
                     })
                     .returning()
                     .get()

@@ -1,10 +1,11 @@
+import { env } from '$features/env/env.public';
 import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
 	schema: './src/features/db/schema/index.ts',
-	out: "src/features/db/migrations",
+	out: env.DATABASE_MIGRATIONS_PATH,
 	dialect: 'sqlite',
-	dbCredentials: { url: "file:local.db" },
+	dbCredentials: { url: env.DATABASE_PATH },
 	casing: "snake_case",
 	verbose: true,
 	strict: true

@@ -11,8 +11,10 @@ services:
       - "3000:3000"
     env_file:
       - /apps/website/.env
-    # environment:
-    #   - PUBLIC_ORIGIN="http://localhost:3000"
+    environment:
+      - ORIGIN="http://localhost:3000"
+      - DATABASE_PATH="file:/app/db/local.db"
+      - DATABASE_MIGRATIONS_PATH="/app/migrations"
     volumes:
       - db:/app/db
 

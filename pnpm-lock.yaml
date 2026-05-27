@@ -36,6 +36,9 @@ catalogs:
     '@tanstack/svelte-query':
       specifier: ^6.1.18
       version: 6.1.18
+    dotenv:
+      specifier: ^17.4.2
+      version: 17.4.2
     zod:
       specifier: ^4.3.6
       version: 4.3.6
@@ -126,6 +129,9 @@ importers:
       better-auth:
         specifier: ^1.6.9
         version: 1.6.9(@prisma/client@5.22.0)(@sveltejs/kit@2.57.1(@sveltejs/vite-plugin-svelte@7.0.0(svelte@5.55.4)(vite@8.0.9(@types/node@24.12.2)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)))(svelte@5.55.4)(typescript@6.0.3)(vite@8.0.9(@types/node@24.12.2)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.3)))(better-sqlite3@12.9.0)(drizzle-kit@1.0.0-beta.22)(drizzle-orm@1.0.0-beta.22(@libsql/client@0.17.3)(@types/pg@8.20.0)(better-sqlite3@12.9.0)(pg@8.20.0)(zod@4.3.6))(pg@8.20.0)(svelte@5.55.4)
+      dotenv:
+        specifier: 'catalog:'
+        version: 17.4.2
       drizzle-kit:
         specifier: beta
         version: 1.0.0-beta.22
@@ -1757,6 +1763,10 @@ packages:
 
   devalue@5.7.1:
     resolution: {integrity: sha512-MUbZ586EgQqdRnC4yDrlod3BEdyvE4TapGYHMW2CiaW+KkkFmWEFqBUaLltEZCGi0iFXCEjRF0OjF0DV2QHjOA==}
+
+  dotenv@17.4.2:
+    resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
+    engines: {node: '>=12'}
 
   drizzle-kit@1.0.0-beta.22:
     resolution: {integrity: sha512-9HTZuQRljQKTgCx4UhiGn8KYYfHGk4+B/bRR1714W67kz0qgJvdrG527i8rQD8uUyET9UTGR1u8syySJD4znGw==}
@@ -3821,6 +3831,8 @@ snapshots:
   detect-libc@2.1.2: {}
 
   devalue@5.7.1: {}
+
+  dotenv@17.4.2: {}
 
   drizzle-kit@1.0.0-beta.22:
     dependencies:

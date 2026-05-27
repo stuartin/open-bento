@@ -7,6 +7,7 @@ import { initDB } from '$features/db';
 import { initTerraformClient } from '$features/auth/init/init-terraform-client';
 import { initOrganizationWithAdmin } from '$features/auth/init/init-organization';
 import { initTFE } from '$features/auth/init/init-tfe';
+import { initEnv } from '$features/env/env.private.server';
 
 const handleBetterAuth: Handle = async ({ event, resolve }) => {
 	const session = await auth.api.getSession({ headers: event.request.headers });
@@ -22,8 +23,11 @@ const handleBetterAuth: Handle = async ({ event, resolve }) => {
 export const handle: Handle = sequence(handleBetterAuth);
 
 export const init: ServerInit = async () => {
+	await initEnv()
 	await initDB()
 	await initTerraformClient()
-	await initOrganizationWithAdmin()
-	await initTFE()
+	if (dev) {
+		await initOrganizationWithAdmin()
+		await initTFE()
+	}
 };

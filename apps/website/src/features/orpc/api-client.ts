@@ -6,10 +6,10 @@ import { createTanstackQueryUtils } from '@orpc/tanstack-query'
 import { QueryClient } from '@tanstack/svelte-query'
 import { browser } from '$app/environment'
 import { goto } from '$app/navigation'
-import { ORIGIN_API } from '$lib/constants'
+import { env } from '$features/env/env.public'
 
 const link = new OpenAPILink(contract, {
-    url: ORIGIN_API,
+    url: `${env.ORIGIN}${env.API_PREFIX}`,
     fetch: (request, init) => {
         return globalThis.fetch(request, {
             ...init,
