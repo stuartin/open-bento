@@ -9,6 +9,7 @@ export type ExecStartProps = {
         workingDir?: string;
         env?: Record<string, string>;
         runInShell?: string | boolean
+        noColor?: boolean
         onStdErr?: (v: StdErr) => void
         onStdOut?: (v: StdOut) => void
         onExitCode?: (v: ExitCode) => void
@@ -32,6 +33,8 @@ export class ExitCode extends Data.TaggedClass("ExitCode")<{
 
 export type ExecResult = StdOut | StdErr | ExitCode
 
+const NO_ANSI_COLOR = (line: string) => String.replace(new RegExp("(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]", "g"), '')(line)
+
 export class ExecService extends Effect.Service<ExecService>()("runner/ExecService", {
     effect: Effect.gen(function* () {
 
@@ -42,6 +45,7 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                     workingDir: "./",
                     env: {},
                     runInShell: false,
+                    noColor: true,
                     onStdOut: (v) => Effect.logInfo(`[stdout] (${v.id}): ${v.data}`),
                     onStdErr: (v) => Effect.logError(`[stderr] (${v.id}): ${v.data}`),
                     onExitCode: (v) => Effect.logInfo(`[exitcode] (${v.id}): ${v.data}`),
@@ -50,7 +54,6 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
             } satisfies ExecStartProps & { opts: Required<ExecStartProps['opts']> }
 
             const runCommands = (commands: Command.Command[]) => {
-                console.log({ props })
 
                 // 1. Create a stream from the array of commands
                 const streamPipeline = Stream.fromIterable(commands).pipe(
@@ -73,14 +76,14 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                                     const stdoutStream = process.stdout.pipe(
                                         Stream.decodeText(),
                                         Stream.splitLines,
-                                        Stream.map(line => new StdOut({ id: props.id, data: line }))
+                                        Stream.map(line => new StdOut({ id: props.id, data: props.opts.noColor ? NO_ANSI_COLOR(line) : line }))
                                     )
 
                                     // 2. Stream stderr lines tagged as 'Stderr'
                                     const stderrStream = process.stderr.pipe(
                                         Stream.decodeText(),
                                         Stream.splitLines,
-                                        Stream.map(line => new StdErr({ id: props.id, data: line }))
+                                        Stream.map(line => new StdErr({ id: props.id, data: props.opts.noColor ? NO_ANSI_COLOR(line) : line }))
                                     )
 
                                     // 3. A single-item stream that waits for the exit code
