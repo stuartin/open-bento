@@ -1,7 +1,6 @@
-import { Chunk, Context, Data, Effect, Layer, Match, Stream, String } from "effect";
+import { Chunk, Data, Effect, Match, Stream, String } from "effect";
 import { Command } from "@effect/platform";
 import { NodeContext } from "@effect/platform-node";
-import { EnvService } from "./environments/EnvService";
 
 export type ExecStartProps = {
     id: string;
@@ -10,9 +9,9 @@ export type ExecStartProps = {
         env?: Record<string, string>;
         runInShell?: string | boolean
         noColor?: boolean
-        onStdErr?: (v: StdErr) => void
-        onStdOut?: (v: StdOut) => void
-        onExitCode?: (v: ExitCode) => void
+        onStdOut?: (out: StdOut) => void
+        onStdErr?: (err: StdErr) => void
+        onExitCode?: (exit: ExitCode) => void
     }
 }
 
@@ -131,7 +130,9 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                         Effect.map(Chunk.toReadonlyArray)
                     );
 
-                })
+                }).pipe(
+                    Effect.scoped
+                )
             }
 
             return { runCommands };

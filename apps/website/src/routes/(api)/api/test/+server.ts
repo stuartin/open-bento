@@ -42,15 +42,29 @@ export const GET: RequestHandler = async () => {
 
     if (!run.success) return error(500, run.error)
 
+    let stdOut: string[] = []
+    let stdErr: string[] = []
+    let result: string[] = []
+    let lastExitCode: number = 0
 
-    const result = await runner.init(
+    await runner.init(
         run.data,
         {
             workingDir: "../../packages/terraform/src/cloud-init",
             runInShell: "pwsh",
-            env: { NO_COLOR: "1" }
+            onStdOut: (stdout) => stdOut.push(stdout.data),
+            onStdErr: (stderr) => stdErr.push(stderr.data),
+            onExitCode: (exitcode) => {
+                lastExitCode = exitcode.data
+                if (lastExitCode === 0) {
+                    result.push(...stdOut)
+                    stdOut = []
+                } else {
+                    result.push(...stdErr)
+                }
+            }
         }
     )
-    return json(result.map(r => r.data))
 
+    return lastExitCode === 0 ? json(result) : error(500, JSON.stringify(result))
 }

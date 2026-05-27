@@ -8,8 +8,10 @@ import { EnvService } from "./services/environments/EnvService";
 import { LocalEnvService } from "./services/environments/LocalEnvService";
 import type { Run } from "@open-bento/tfe";
 
+export type { StdOut, StdErr, ExitCode } from "./services/ExecService"
+
 export type Runner = ReturnType<typeof makeRunner>
-export function makeRunner(props?: RunnerProps) {
+export function makeRunner(props?: Partial<RunnerProps>) {
 
   // Update our propsRef
   const allProps = Effect.runSync(
