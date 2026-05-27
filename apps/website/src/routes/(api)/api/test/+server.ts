@@ -1,4 +1,4 @@
-import { runner } from "$features/runner/runner";
+import { runner } from "$features/runner/runner.server";
 import { CreateRunOutput } from "@open-bento/tfe";
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 

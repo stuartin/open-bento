@@ -1,12 +1,13 @@
 // src/index.ts
 import { Effect, Layer, ManagedRuntime, Ref } from "effect";
 import { NodeContext } from "@effect/platform-node";
-import { PropsRef, type RunnerProps } from "./PropsRef";
+import { RunnerPropsRef, type RunnerProps } from "./RunnerPropsRef";
 import { ExecService, type ExecStartProps } from "./services/ExecService";
 import { Command } from "@effect/platform";
 import { EnvService } from "./services/EnvService";
 import { LocalEnvService } from "./services/LocalEnvService";
 import type { Run } from "@open-bento/tfe";
+import { NewLocalEnvService } from "./services/NewLocalEnvService";
 
 export type { StdOut, StdErr, ExitCode } from "./services/ExecService"
 
@@ -16,7 +17,7 @@ export function makeRunner(props: RunnerProps) {
   // Update our propsRef
   const allProps = Effect.runSync(
     Effect.gen(function* () {
-      const propsRef = yield* PropsRef
+      const propsRef = yield* RunnerPropsRef
       return yield* Ref.setAndGet(propsRef, props)
     })
   )
@@ -25,18 +26,17 @@ export function makeRunner(props: RunnerProps) {
   const environmentService = () => {
     switch (allProps.mode) {
       case "local": {
-        return LocalEnvService.Default
+        return NewLocalEnvService.Default
       }
       default: {
-        return LocalEnvService.Default
+        return NewLocalEnvService.Default
       }
     }
   }
 
   // Create our runtime
   const RuntimeLayer = Layer.mergeAll(
-    ExecService.Default,
-    environmentService()
+    ExecService.Default.pipe(Layer.provide(environmentService()))
   ).pipe(
     Layer.provideMerge(NodeContext.layer),
   )
@@ -47,35 +47,46 @@ export function makeRunner(props: RunnerProps) {
 
   const init = (run: Run, opts: ExecStartProps['opts']) => runtime.runPromise(
     Effect.gen(function* () {
-      const envService = yield* EnvService
+      const execService = yield* ExecService
 
-      const result = yield* envService.execute({
-        id: run.data.id,
-        commands: [
-          TERRAFORM_VERSION,
-          Command.make("terraform", "init"),
-        ],
-        opts
-      })
+      const result = yield* execService
+        .start({
+          id: run.data.id,
+          opts
+        })
+        .runCommands([
+          Command.make("ls")
+        ])
 
       return result
+
+      // const result = yield* execService.execute({
+      //   id: run.data.id,
+      //   commands: [
+      //     TERRAFORM_VERSION,
+      //     Command.make("terraform", "init"),
+      //   ],
+      //   opts
+      // })
+
+      // return result
     }),
   )
 
   const plan = (run: Run) => runtime.runPromise(
     Effect.gen(function* () {
-      const envService = yield* EnvService
+      // const envService = yield* EnvService
 
-      const result = yield* envService.execute({
-        id: run.data.id,
-        commands: [
-          TERRAFORM_VERSION,
-          Command.make("terraform", "init"),
-          Command.make("terraform", "plan")
-        ]
-      })
+      // const result = yield* envService.execute({
+      //   id: run.data.id,
+      //   commands: [
+      //     TERRAFORM_VERSION,
+      //     Command.make("terraform", "init"),
+      //     Command.make("terraform", "plan")
+      //   ]
+      // })
 
-      return result
+      // return result
     }),
   )
 

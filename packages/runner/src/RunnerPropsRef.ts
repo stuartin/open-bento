@@ -21,6 +21,6 @@ const defaultRunnerProps: RunnerProps = {
     path: "./RUNNER"
 }
 
-export class PropsRef extends Context.Reference<RunnerProps>()("runner/PropsRef", {
+export class RunnerPropsRef extends Context.Reference<RunnerProps>()("runner/PropsRef", {
     defaultValue: () => Ref.unsafeMake(defaultRunnerProps) as Ref.Ref<RunnerProps>
 }) { }
