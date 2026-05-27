@@ -53,6 +53,7 @@ const JsonApiResource = <
     id: z.string(),
     attributes,
     ...(relationships && { relationships }),
+    // biome-ignore lint/suspicious/noExplicitAny: required
   }) as any;
 
 // --- JSON:API Document Wrappers ---

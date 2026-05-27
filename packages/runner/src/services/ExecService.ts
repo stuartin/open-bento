@@ -1,4 +1,4 @@
-import { Chunk, Data, Effect, Match, Stream, String } from "effect";
+import { Chunk, Data, Effect, Match, Stream, String as EffectString } from "effect";
 import { Command } from "@effect/platform";
 import { NodeContext } from "@effect/platform-node";
 import type { StandardCommand } from "@effect/platform/Command";
@@ -33,7 +33,8 @@ export class ExitCode extends Data.TaggedClass("ExitCode")<{
 
 export type ExecResult = StdOut | StdErr | ExitCode
 
-const NO_ANSI_COLOR = (line: string) => String.replace(new RegExp("(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]", "g"), '')(line)
+// biome-ignore lint/suspicious/noControlCharactersInRegex: Intentional control characters used to identify and strip ANSI escape sequences.
+const NO_ANSI_COLOR = (line: string) => EffectString.replace(/(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]/g, '')(line)
 
 export class ExecService extends Effect.Service<ExecService>()("runner/ExecService", {
     effect: Effect.gen(function* () {
@@ -60,7 +61,7 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                     Stream.flatMap(
                         (cmd) => {
                             // Apply working directory and optional environment variables
-                            let configuredCmd = cmd.pipe(
+                            const configuredCmd = cmd.pipe(
                                 Command.runInShell(props.opts.runInShell),
                                 Command.workingDirectory(props.opts.workingDir),
                                 Command.env(props.opts.env ?? {})

@@ -1,9 +1,6 @@
 import type { User } from "better-auth"
 import { auth } from "../auth"
 import type { Organization } from "better-auth/plugins"
-import { dev } from "$app/environment"
-import { db } from "$features/db"
-import { entitlementSets } from "$features/db/schema"
 
 export const initOrganizationWithAdmin = async () => {
     const organization = await initOrganization()
@@ -20,8 +17,9 @@ const initOrganization = async () => {
         model: "organization"
     })
 
-    if (organizations.length > 0) return organizations[0]!
+    if (organizations.length > 0 && organizations[0]) return organizations[0]
 
+    // biome-ignore lint/suspicious/noExplicitAny: required
     const organization = await adapter.create<any, Organization>({
         model: "organization",
         data: {

@@ -52,6 +52,7 @@ const handler = new OpenAPIHandler(
                     ...options,
                     context: {
                         ...options.context,
+                        // biome-ignore lint/suspicious/noExplicitAny: required
                         [TFE_ROOT_INTERCEPTOR_CONTEXT_KEY as any]: {
                             fetchRequest: options.request,
                         },
@@ -61,6 +62,7 @@ const handler = new OpenAPIHandler(
         ],
         rootInterceptors: [
             // https://orpc.dev/docs/advanced/extend-body-parser
+            // biome-ignore lint/suspicious/noExplicitAny: required
             (options) => tfeRootInterceptor(options as any)
         ],
         interceptors: [

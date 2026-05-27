@@ -43,8 +43,8 @@ export const GET: RequestHandler = async () => {
     if (!run.success) return error(500, run.error)
 
     let stdOut: string[] = []
-    let stdErr: string[] = []
-    let result: string[] = []
+    const stdErr: string[] = []
+    const result: string[] = []
     let lastExitCode: number = 0
 
     await runner.init(

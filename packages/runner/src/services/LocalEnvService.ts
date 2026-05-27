@@ -3,6 +3,7 @@ import { ExecService } from "./ExecService"
 import { EnvService } from "./EnvService"
 import type { Command } from "@effect/platform"
 
+// biome-ignore lint/complexity/noStaticOnlyClass: Follows effect pattern
 export class LocalEnvService {
     static WrapCommand = (command: Command.Command) => {
         return command

@@ -32,7 +32,7 @@ export const tfePlansRouter = os
             }
         }),
 
-        jsonOutput: os.jsonOutput.handler(async ({ input, errors }) => {
+        jsonOutput: os.jsonOutput.handler(async ({ errors }) => {
 
             const jsonOutput = GetPlanJsonOutputOutput.shape.body.safeParse({
                 format_version: "1.2",

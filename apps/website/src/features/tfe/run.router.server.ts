@@ -98,7 +98,7 @@ export const tfeRunsRouter = os
             };
         }),
 
-        list: os.list.handler(async ({ input, errors }) => {
+        list: os.list.handler(async ({ errors }) => {
             const runs = ListRunsOutput.shape.body.safeParse({
                 data: [
                     {
@@ -158,28 +158,28 @@ export const tfeRunsRouter = os
         }),
 
         actions: os.actions.router({
-            apply: os.actions.apply.handler(async ({ input }) => {
+            apply: os.actions.apply.handler(async () => {
                 return {
                     status: 202,
                     body: undefined,
                 };
             }),
 
-            discard: os.actions.discard.handler(async ({ input }) => {
+            discard: os.actions.discard.handler(async () => {
                 return {
                     status: 202,
                     body: undefined,
                 };
             }),
 
-            cancel: os.actions.cancel.handler(async ({ input }) => {
+            cancel: os.actions.cancel.handler(async () => {
                 return {
                     status: 202,
                     body: undefined,
                 };
             }),
 
-            forceCancel: os.actions.forceCancel.handler(async ({ input }) => {
+            forceCancel: os.actions.forceCancel.handler(async () => {
                 return {
                     status: 202,
                     body: undefined,

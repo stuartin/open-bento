@@ -24,7 +24,6 @@ export function makeRunner(props?: Partial<RunnerProps>) {
   // Environment Selector
   const environmentService = () => {
     switch (allProps.environment) {
-      default:
       case "local": {
         return LocalEnvService.Default
       }

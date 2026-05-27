@@ -1,10 +1,10 @@
-import { Readable } from "stream";
-import { rename, mkdir, rm } from "fs/promises";
-import { createWriteStream as createWS } from "fs";
-import { finished } from "stream/promises";
-import type { ReadableStream } from "stream/web";
+import { Readable } from "node:stream";
+import { rename, mkdir, rm } from "node:fs/promises";
+import { createWriteStream as createWS } from "node:fs";
+import { finished } from "node:stream/promises";
+import type { ReadableStream } from "node:stream/web";
 import { fileTypeFromStream } from "file-type";
-import path from "path";
+import path from "node:path";
 
 export async function saveStreamWithType(
     webStream: ReadableStream,
