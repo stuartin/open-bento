@@ -1,6 +1,7 @@
 import { Chunk, Data, Effect, Match, Stream, String } from "effect";
 import { Command } from "@effect/platform";
 import { NodeContext } from "@effect/platform-node";
+import type { StandardCommand } from "@effect/platform/Command";
 
 export type ExecStartProps = {
     id: string;
@@ -63,11 +64,16 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                                 Command.runInShell(props.opts.runInShell),
                                 Command.workingDirectory(props.opts.workingDir),
                                 Command.env(props.opts.env ?? {})
-                            );
+                            )
+
+                            Effect.runSync(
+                                Effect.logInfo(`[EXEC] ${(configuredCmd as StandardCommand).command} ${(configuredCmd as StandardCommand).args}`)
+                            )
 
                             // Convert each individual process execution into a structured event stream
                             return Stream.unwrap(
                                 Effect.gen(function* () {
+
                                     // Start the process (inherits system environment via NodeContext)
                                     const process = yield* Command.start(configuredCmd);
 
