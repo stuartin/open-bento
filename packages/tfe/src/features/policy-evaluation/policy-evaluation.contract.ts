@@ -3,12 +3,16 @@ import {
   GetPolicyEvaluationOutput,
 } from "./policy-evaluation.schema";
 import { createContract } from "../../lib/contract";
+import { TAG } from "../../lib/common.schema";
 
 // --- Contracts ---
+
+const tags = [TAG.POLICY_EVALUATION]
 
 export const getPolicyEvaluation = createContract()
   .auth
   .route({
+    tags,
     path: "/policy-evaluations/{policyEvaluationId}",
     method: "GET",
     inputStructure: "detailed",

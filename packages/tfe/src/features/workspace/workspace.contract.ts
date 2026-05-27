@@ -10,12 +10,16 @@ import {
 } from "./workspace.schema";
 import { createContract } from "../../lib/contract";
 import { NOT_FOUND } from "../../lib/errors";
+import { TAG } from "../../lib/common.schema";
 
 // --- Contracts ---
+
+const tags = [TAG.WORKSPACE]
 
 export const createWorkspace = createContract()
   .auth
   .route({
+    tags,
     path: "/organizations/{organization}/workspaces",
     method: "POST",
     inputStructure: "detailed",
@@ -28,6 +32,7 @@ export const createWorkspace = createContract()
 export const updateWorkspace = createContract()
   .auth
   .route({
+    tags,
     path: "/workspaces/{workspace-id}",
     method: "PATCH",
     inputStructure: "detailed",
@@ -40,6 +45,7 @@ export const updateWorkspace = createContract()
 export const getWorkspace = createContract()
   .auth
   .route({
+    tags,
     path: "/organizations/{organization}/workspaces/{workspace}",
     method: "GET",
     inputStructure: "detailed",
@@ -52,6 +58,7 @@ export const getWorkspace = createContract()
 export const listWorkspaces = createContract()
   .auth
   .route({
+    tags,
     path: "/organizations/{organization}/workspaces",
     method: "GET",
     inputStructure: "detailed",

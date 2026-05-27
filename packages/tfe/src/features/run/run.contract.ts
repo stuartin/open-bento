@@ -18,12 +18,16 @@ import {
 } from "./run.schema";
 import { createContract } from "../../lib/contract";
 import { NOT_FOUND } from "../../lib/errors";
+import { TAG } from "../../lib/common.schema";
 
 // --- Contracts ---
+
+const tags = [TAG.RUN]
 
 export const createRun = createContract()
   .auth
   .route({
+    tags,
     path: "/runs",
     method: "POST",
     inputStructure: "detailed",
@@ -35,6 +39,7 @@ export const createRun = createContract()
 export const getRun = createContract()
   .auth
   .route({
+    tags,
     path: "/runs/{run-id}",
     method: "GET",
     inputStructure: "detailed",
@@ -47,6 +52,7 @@ export const getRun = createContract()
 export const listRuns = createContract()
   .auth
   .route({
+    tags,
     path: "/workspaces/{workspace}/runs",
     method: "GET",
     inputStructure: "detailed",
@@ -58,6 +64,7 @@ export const listRuns = createContract()
 export const getRunEvents = createContract()
   .auth
   .route({
+    tags,
     path: "/runs/{run-id}/run-events",
     method: "GET",
     inputStructure: "detailed",
@@ -69,6 +76,7 @@ export const getRunEvents = createContract()
 export const applyRun = createContract()
   .auth
   .route({
+    tags,
     path: "/runs/{run-id}/actions/apply",
     method: "POST",
     inputStructure: "detailed",
@@ -80,6 +88,7 @@ export const applyRun = createContract()
 export const discardRun = createContract()
   .auth
   .route({
+    tags,
     path: "/runs/{run-id}/actions/discard",
     method: "POST",
     inputStructure: "detailed",
@@ -91,6 +100,7 @@ export const discardRun = createContract()
 export const cancelRun = createContract()
   .auth
   .route({
+    tags,
     path: "/runs/{run-id}/actions/cancel",
     method: "POST",
     inputStructure: "detailed",
@@ -102,6 +112,7 @@ export const cancelRun = createContract()
 export const forceCancelRun = createContract()
   .auth
   .route({
+    tags,
     path: "/runs/{run-id}/actions/force-cancel",
     method: "POST",
     inputStructure: "detailed",

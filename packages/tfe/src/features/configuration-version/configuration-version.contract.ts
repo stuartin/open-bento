@@ -6,12 +6,16 @@ import {
   GetConfigurationVersionInput,
   GetConfigurationVersionOutput,
 } from "./configuration-version.schema";
+import { TAG } from "../../lib/common.schema";
 
 // --- Contracts ---
+
+const tags = [TAG.CONFIGURATION_VERSION]
 
 export const createConfigurationVersion = createContract()
   .auth
   .route({
+    tags,
     path: "/workspaces/{workspace-id}/configuration-versions",
     method: "POST",
     inputStructure: "detailed",
@@ -24,6 +28,7 @@ export const createConfigurationVersion = createContract()
 export const getConfigurationVersion = createContract()
   .auth
   .route({
+    tags,
     path: "/configuration-versions/{version}",
     method: "GET",
     inputStructure: "detailed",
