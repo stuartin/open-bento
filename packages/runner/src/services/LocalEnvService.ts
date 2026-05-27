@@ -35,7 +35,7 @@ export const LocalEnvService = {
                     if (exists) {
                         yield* fs.remove(envPath, { recursive: true });
                     }
-                    yield* fs.makeDirectory(envPath);
+                    yield* fs.makeDirectory(envPath, { recursive: true });
                 }).pipe(
                     Effect.mapError((fsError) => new Error(`Failed to create env: ${fsError.message}`))
                 ),
@@ -45,7 +45,7 @@ export const LocalEnvService = {
                     yield* Effect.logInfo(`[ENV] (${props.id}): Delete env: ${envPath}`);
 
                     // delete
-                    yield* fs.remove(rootPath, { recursive: true });
+                    yield* fs.remove(envPath, { recursive: true });
                 }).pipe(
                     Effect.mapError((fsError) => new Error(`Failed to delete env: ${fsError.message}`))
                 )
