@@ -2,7 +2,6 @@
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
   import { authClient } from "$features/auth/auth-client";
-  import { zSchema } from "@open-bento/types";
   import { onMount } from "svelte";
 
   const { user, session } = $derived(page.data);

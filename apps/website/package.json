@@ -29,7 +29,6 @@
 		"@biomejs/biome": "catalog:",
 		"@open-bento/config": "workspace:",
 		"@open-bento/runner": "workspace:",
-		"@open-bento/types": "workspace:",
 		"@open-bento/tfe": "workspace:",
 		"@orpc/client": "catalog:",
 		"@orpc/openapi": "catalog:",
