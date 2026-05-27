@@ -2,10 +2,11 @@
 import { Effect, Layer, ManagedRuntime, Ref } from "effect";
 import { NodeContext } from "@effect/platform-node";
 import { PropsRef, type RunnerProps } from "./PropsRef";
-import { ExecService, type StartProps } from "./services/ExecService";
+import { ExecService, type ExecStartProps } from "./services/ExecService";
 import { Command } from "@effect/platform";
-import { EnvironmentService } from "./services/environments/EnvironmentService";
-import { LocalEnvironmentService } from "./services/environments/LocalEnvironment";
+import { EnvService } from "./services/environments/EnvService";
+import { LocalEnvService } from "./services/environments/LocalEnvService";
+import type { Run } from "@open-bento/tfe";
 
 export type Runner = ReturnType<typeof makeRunner>
 export function makeRunner(props?: RunnerProps) {
@@ -23,7 +24,7 @@ export function makeRunner(props?: RunnerProps) {
     switch (allProps.environment) {
       default:
       case "local": {
-        return LocalEnvironmentService.Default
+        return LocalEnvService.Default
       }
     }
   }
@@ -38,22 +39,44 @@ export function makeRunner(props?: RunnerProps) {
   const runtime = ManagedRuntime.make(RuntimeLayer);
 
   // API
-  const init = (props: StartProps) => runtime.runPromise(
-    Effect.gen(function* () {
-      const envService = yield* EnvironmentService
+  const TERRAFORM_VERSION = Command.make("terraform", "version")
 
-      const result = yield* envService.execute(
-        props,
-        [
-          Command.make("terraform", "version")
+  const init = (run: Run, opts: ExecStartProps['opts']) => runtime.runPromise(
+    Effect.gen(function* () {
+      const envService = yield* EnvService
+
+      const result = yield* envService.execute({
+        id: run.data.id,
+        commands: [
+          TERRAFORM_VERSION,
+          Command.make("terraform", "init"),
+        ],
+        opts
+      })
+
+      return result
+    }),
+  )
+
+  const plan = (run: Run) => runtime.runPromise(
+    Effect.gen(function* () {
+      const envService = yield* EnvService
+
+      const result = yield* envService.execute({
+        id: run.data.id,
+        commands: [
+          TERRAFORM_VERSION,
+          Command.make("terraform", "init"),
+          Command.make("terraform", "plan")
         ]
-      )
+      })
 
       return result
     }),
   )
 
   return {
-    init
+    init,
+    plan,
   };
 }

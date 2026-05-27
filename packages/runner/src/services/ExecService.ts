@@ -1,9 +1,9 @@
 import { Chunk, Context, Data, Effect, Layer, Match, Stream, String } from "effect";
 import { Command } from "@effect/platform";
 import { NodeContext } from "@effect/platform-node";
-import { EnvironmentService } from "./environments/EnvironmentService";
+import { EnvService } from "./environments/EnvService";
 
-export type StartProps = {
+export type ExecStartProps = {
     id: string;
     opts?: {
         workingDir?: string;
@@ -36,7 +36,7 @@ export type ExecResult = StdOut | StdErr | ExitCode
 export class ExecService extends Effect.Service<ExecService>()("runner/ExecService", {
     effect: Effect.gen(function* () {
 
-        const start = (p: StartProps) => {
+        const start = (p: ExecStartProps) => {
             const props = {
                 ...p,
                 opts: {
@@ -49,7 +49,7 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                     onExitCode: (v) => Effect.logInfo(`[exitcode] (${v.id}): ${v.data}`),
                     ...p.opts,
                 }
-            } satisfies StartProps & { opts: Required<StartProps['opts']> }
+            } satisfies ExecStartProps & { opts: Required<ExecStartProps['opts']> }
 
             const runCommands = (commands: Command.Command[]) => {
                 // 1. Create a stream from the array of commands

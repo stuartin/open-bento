@@ -15,6 +15,7 @@
     "@effect/platform": "^0.96.1",
     "@effect/platform-node": "^0.106.0",
     "@open-bento/types": "workspace:*",
+    "@open-bento/tfe": "workspace:*",
     "@paralleldrive/cuid2": "catalog:",
     "zod": "catalog:"
   },

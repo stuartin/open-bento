@@ -1,28 +1,28 @@
 import { Layer, Effect } from "effect"
 import { ExecService } from "../ExecService"
-import { EnvironmentService } from "./EnvironmentService"
+import { EnvService } from "./EnvService"
 import type { Command } from "@effect/platform"
 
-export class LocalEnvironmentService {
+export class LocalEnvService {
     static WrapCommand = (command: Command.Command) => {
         return command
     }
 
     static Default = Layer.succeed(
-        EnvironmentService,
+        EnvService,
         (() => {
-            const service = EnvironmentService.of({
+            const service = EnvService.of({
                 start: Effect.logInfo(`[LOCAL] Started`),
                 stop: Effect.logInfo(`[LOCAL] Stopped`),
 
-                execute: (props, commands) => Effect.gen(function* () {
+                execute: (props) => Effect.gen(function* () {
                     yield* service.start
                     yield* Effect.addFinalizer(() => service.stop)
 
                     const execService = yield* ExecService
                     return yield* execService
                         .start(props)
-                        .runCommands(commands.map(LocalEnvironmentService.WrapCommand))
+                        .runCommands(props.commands.map(LocalEnvService.WrapCommand))
                 }).pipe(
                     Effect.scoped
                 ),
