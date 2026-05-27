@@ -2,7 +2,7 @@ import { Chunk, Data, Effect, Match, Stream, String as EffectString, Schedule, R
 import { Command } from "@effect/platform";
 import { NodeContext } from "@effect/platform-node";
 import type { StandardCommand } from "@effect/platform/Command";
-import { NewEnvService } from "./NewEnvService";
+import { EnvService } from "./EnvService";
 import { RunnerPropsRef } from "../RunnerPropsRef";
 
 export type ExecStartProps = {
@@ -56,7 +56,7 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
     effect: Effect.gen(function* () {
         const runnerPropsRef = yield* RunnerPropsRef
         const runnerProps = yield* Ref.get(runnerPropsRef)
-        const envService = yield* NewEnvService;
+        const envService = yield* EnvService;
         const queueSemaphore = yield* Effect.makeSemaphore(runnerProps.maxConcurrent);
         const queueCountRef = yield* Ref.make(0);
 

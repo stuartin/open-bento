@@ -4,32 +4,30 @@ import { NodeContext } from "@effect/platform-node";
 import { RunnerPropsRef, type RunnerProps } from "./RunnerPropsRef";
 import { ExecService, type ExecStartProps } from "./services/ExecService";
 import { Command } from "@effect/platform";
-import { EnvService } from "./services/EnvService";
-import { LocalEnvService } from "./services/LocalEnvService";
 import type { Run } from "@open-bento/tfe";
-import { NewLocalEnvService } from "./services/NewLocalEnvService";
+import { LocalEnvService } from "./services/LocalEnvService";
 
 export type { StdOut, StdErr, ExitCode } from "./services/ExecService"
 
 export type Runner = ReturnType<typeof makeRunner>
 export function makeRunner(props: RunnerProps) {
 
-  // Update our propsRef
-  const allProps = Effect.runSync(
+  // Update our runnerPropsRef
+  const runnerProps = Effect.runSync(
     Effect.gen(function* () {
-      const propsRef = yield* RunnerPropsRef
-      return yield* Ref.setAndGet(propsRef, props)
+      const runnerPropsRef = yield* RunnerPropsRef
+      return yield* Ref.setAndGet(runnerPropsRef, props)
     })
   )
 
   // Environment Selector
   const environmentService = () => {
-    switch (allProps.mode) {
+    switch (runnerProps.mode) {
       case "local": {
-        return NewLocalEnvService.Default
+        return LocalEnvService.Default
       }
       default: {
-        return NewLocalEnvService.Default
+        return LocalEnvService.Default
       }
     }
   }
@@ -55,21 +53,11 @@ export function makeRunner(props: RunnerProps) {
           opts
         })
         .runCommands([
-          Command.make("ls")
+          TERRAFORM_VERSION,
+          Command.make("terraform", "init")
         ])
 
       return result
-
-      // const result = yield* execService.execute({
-      //   id: run.data.id,
-      //   commands: [
-      //     TERRAFORM_VERSION,
-      //     Command.make("terraform", "init"),
-      //   ],
-      //   opts
-      // })
-
-      // return result
     }),
   )
 

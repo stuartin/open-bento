@@ -1,16 +1,14 @@
-import { Context, type Effect } from "effect";
-import type { ExecService, ExecResult, ExecStartProps } from "./ExecService";
-import type { Command, CommandExecutor } from "@effect/platform";
-import type { PlatformError } from "@effect/platform/Error";
+import { Context, Effect } from "effect";
+import { Command } from "@effect/platform";
 
-export type EnvExecuteProps = ExecStartProps & {
-    commands: Command.Command[],
-}
 export class EnvService extends Context.Tag("runner/EnvService")<
     EnvService,
     {
-        readonly start: Effect.Effect<void>
-        readonly execute: (props: EnvExecuteProps) => Effect.Effect<readonly ExecResult[], PlatformError, ExecService | CommandExecutor.CommandExecutor>
-        readonly stop: Effect.Effect<void>
+        // Wraps generic commands with env-specific tags, environments, or prefixes
+        readonly runCommand: (cmd: Command.Command) => Command.Command;
+
+        // Lifecycle steps
+        readonly up: (id: string) => Effect.Effect<void, Error>;
+        readonly down: (id: string) => Effect.Effect<void, Error>;
     }
 >() { }
