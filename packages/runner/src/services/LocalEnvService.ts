@@ -1,8 +1,10 @@
 import { FileSystem, Path } from "@effect/platform";
 import { Layer, Effect } from "effect";
 import { EnvService } from "./EnvService";
+import { ENVIRONMENTS } from "..";
 
 export const LocalEnvService = {
+    Name: ENVIRONMENTS.LOCAL,
     Default: Layer.effect(
         EnvService,
         Effect.gen(function* () {
@@ -16,8 +18,8 @@ export const LocalEnvService = {
 
                 runCommand: (cmd) => cmd,
 
-                up: (id) => Effect.gen(function* () {
-                    yield* Effect.logInfo(`[ENV] (${id}): Creating sandbox workspace at: ${sandboxDir}`);
+                up: (props) => Effect.gen(function* () {
+                    yield* Effect.logInfo(`[ENV] (${props.id}): Creating sandbox workspace at: ${sandboxDir}`);
 
                     // Ensure a fresh, clean directory exists locally
                     const exists = yield* fs.exists(sandboxDir);
@@ -30,8 +32,8 @@ export const LocalEnvService = {
                     Effect.mapError((fsError) => new Error(`Failed to initialize local sandbox: ${fsError.message}`))
                 ),
 
-                down: (id) => Effect.gen(function* () {
-                    yield* Effect.logInfo(`[ENV] (${id}): Cleaning up sandbox directory...`);
+                down: (props) => Effect.gen(function* () {
+                    yield* Effect.logInfo(`[ENV] (${props.id}): Cleaning up sandbox directory...`);
                     yield* fs.remove(sandboxDir, { recursive: true });
                 }).pipe(
                     Effect.mapError((fsError) => new Error(`Failed to purge local sandbox: ${fsError.message}`))

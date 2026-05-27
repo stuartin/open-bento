@@ -142,7 +142,7 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                         Schedule.compose(Schedule.recurs(2)) // 2 retries = 3 total attempts
                     );
 
-                    yield* envService.up(props.id).pipe(
+                    yield* envService.up(props).pipe(
                         Effect.tapError((err) =>
                             Effect.logWarning(`[ENV] (${props.id}): Up failed: ${err.message}. Retrying...`)
                         ),
@@ -154,7 +154,7 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                     // Env Down finalizer
                     yield* Effect.addFinalizer(() =>
                         Effect.gen(function* () {
-                            yield* envService.down(props.id);
+                            yield* envService.down(props);
                             props.opts.onDown(props.id);
                             yield* Effect.logInfo(`[ENV] (${props.id}): Env Down`);
                         }).pipe(Effect.orDie)

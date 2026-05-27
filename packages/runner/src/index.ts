@@ -8,6 +8,10 @@ import type { Run } from "@open-bento/tfe";
 import { LocalEnvService } from "./services/LocalEnvService";
 
 export type { StdOut, StdErr, ExitCode } from "./services/ExecService"
+export const ENVIRONMENTS = {
+  LOCAL: "local",
+  DOCKER: "docker"
+} as const
 
 export type Runner = ReturnType<typeof makeRunner>
 export function makeRunner(props: RunnerProps) {
