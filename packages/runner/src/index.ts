@@ -6,12 +6,10 @@ import { ExecService, type ExecStartProps } from "./services/ExecService";
 import { Command } from "@effect/platform";
 import type { Run } from "@open-bento/tfe";
 import { LocalEnvService } from "./services/LocalEnvService";
+import { DockerEnvService } from "./services/DockerEnvService";
 
 export type { StdOut, StdErr, ExitCode } from "./services/ExecService"
-export const ENVIRONMENTS = {
-  LOCAL: "local",
-  DOCKER: "docker"
-} as const
+export { ENVIRONMENTS } from "./RunnerPropsRef"
 
 export type Runner = ReturnType<typeof makeRunner>
 export function makeRunner(props: RunnerProps) {
@@ -26,9 +24,12 @@ export function makeRunner(props: RunnerProps) {
 
   // Environment Selector
   const environmentService = () => {
-    switch (runnerProps.mode) {
+    switch (runnerProps.env.name) {
       case "local": {
         return LocalEnvService.Default
+      }
+      case "docker": {
+        return DockerEnvService.Default
       }
       default: {
         return LocalEnvService.Default

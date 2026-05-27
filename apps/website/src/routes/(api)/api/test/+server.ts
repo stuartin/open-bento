@@ -1,3 +1,4 @@
+import { env } from "$features/env/env.private.server";
 import { runner } from "$features/runner/runner.server";
 import { CreateRunOutput } from "@open-bento/tfe";
 import { error, json, type RequestHandler } from "@sveltejs/kit";
@@ -47,11 +48,12 @@ export const GET: RequestHandler = async () => {
     const result: string[] = []
     let lastExitCode: number = 0
 
-    await runner.init(
+    const logs = await runner.init(
         run.data,
         {
-            workingDir: "../../packages/tests/src/terraform",
+            workingDir: env.RUNNER_ENV === "local",
             runInShell: "pwsh",
+            onUp: (id) => console.log(`onUp ${id}`),
             onStdOut: (stdout) => stdOut.push(stdout.data),
             onStdErr: (stderr) => stdErr.push(stderr.data),
             onExitCode: (exitcode) => {
@@ -62,9 +64,11 @@ export const GET: RequestHandler = async () => {
                 } else {
                     result.push(...stdErr)
                 }
-            }
+            },
+            onDown: (id) => console.log(`onDown ${id}`),
         }
     )
 
+    return json(logs.map(ev => ev.data))
     return lastExitCode === 0 ? json(result) : error(500, JSON.stringify(result))
 }
