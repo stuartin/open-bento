@@ -5,27 +5,44 @@ import "dotenv/config"
 
 const EnvBaseSchema = z.object({
   AUTH_SECRET: z.string().min(36),
+  DATABASE_PATH: z.string().default("file:local.db"),
+  DATABASE_MIGRATIONS_PATH: z.string().default("src/features/db/migrations"),
 })
 
-export const EnvSchema = z.discriminatedUnion("EXEC_ENVIRONMENT", [
-  // Local mode requirements
-  EnvBaseSchema.extend({
-    EXEC_ENVIRONMENT: z.literal("local"),
-    EXEC_LOCAL_STORAGE_PATH: z.string().min(1),
+const EnvExecSchema = z.discriminatedUnion("EXEC_MODE", [
+  // local
+  z.object({
+    EXEC_MODE: z.literal("local"),
   }),
 
-  // Production mode requirements
-  EnvBaseSchema.extend({
-    EXEC_ENVIRONMENT: z.literal("docker"),
+  // docker
+  z.object({
+    EXEC_MODE: z.literal("docker"),
   }),
 ])
+
+export const EnvStorageSchema = z.discriminatedUnion("STORAGE_MODE", [
+  // local
+  z.object({
+    STORAGE_MODE: z.literal("local"),
+    STORAGE_PATH: z.string().min(1),
+  }),
+
+  // s3
+  z.object({
+    STORAGE_MODE: z.literal("s3"),
+    STORAGE_PATH: z.string().min(1),
+  }),
+])
+
+const EnvSchema = EnvBaseSchema.and(EnvExecSchema).and(EnvStorageSchema)
 
 export const env = EnvSchema.parse(process.env);
 
 export const initEnv = async () => {
-  if (env.EXEC_ENVIRONMENT === "local" && env.EXEC_LOCAL_STORAGE_PATH) {
+  if (env.STORAGE_MODE === "local") {
     try {
-      const targetDir = path.resolve(env.EXEC_LOCAL_STORAGE_PATH);
+      const targetDir = path.resolve(env.STORAGE_PATH);
       if (!fs.existsSync(targetDir)) {
         fs.mkdirSync(targetDir, { recursive: true });
       }
