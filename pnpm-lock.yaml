@@ -84,9 +84,6 @@ importers:
       '@open-bento/tfe':
         specifier: 'workspace:'
         version: link:../../packages/tfe
-      '@open-bento/types':
-        specifier: 'workspace:'
-        version: link:../../packages/types
       '@orpc/client':
         specifier: 'catalog:'
         version: 1.14.0
@@ -176,9 +173,6 @@ importers:
       '@open-bento/tfe':
         specifier: workspace:*
         version: link:../tfe
-      '@open-bento/types':
-        specifier: workspace:*
-        version: link:../types
       '@paralleldrive/cuid2':
         specifier: 'catalog:'
         version: 3.3.0
@@ -199,7 +193,7 @@ importers:
         specifier: ^5.8.3
         version: 5.9.3
 
-  packages/terraform:
+  packages/tests:
     devDependencies:
       '@biomejs/biome':
         specifier: 'catalog:'
@@ -222,28 +216,6 @@ importers:
       decamelize-keys:
         specifier: ^2.0.1
         version: 2.0.1
-      zod:
-        specifier: 'catalog:'
-        version: 4.3.6
-    devDependencies:
-      '@biomejs/biome':
-        specifier: 'catalog:'
-        version: 2.4.12
-      '@open-bento/config':
-        specifier: workspace:*
-        version: link:../config
-
-  packages/types:
-    dependencies:
-      '@orpc/contract':
-        specifier: 'catalog:'
-        version: 1.13.14
-      '@orpc/openapi':
-        specifier: 'catalog:'
-        version: 1.13.14(ws@8.20.0)
-      '@orpc/zod':
-        specifier: 'catalog:'
-        version: 1.13.14(@orpc/contract@1.13.14)(@orpc/server@1.13.14(ws@8.20.0))(ws@8.20.0)(zod@4.3.6)
       zod:
         specifier: 'catalog:'
         version: 4.3.6
@@ -3249,22 +3221,6 @@ snapshots:
       '@tanstack/query-core': 5.99.2
     transitivePeerDependencies:
       - '@opentelemetry/api'
-
-  '@orpc/zod@1.13.14(@orpc/contract@1.13.14)(@orpc/server@1.13.14(ws@8.20.0))(ws@8.20.0)(zod@4.3.6)':
-    dependencies:
-      '@orpc/contract': 1.13.14
-      '@orpc/json-schema': 1.13.14(ws@8.20.0)
-      '@orpc/openapi': 1.13.14(ws@8.20.0)
-      '@orpc/server': 1.13.14(ws@8.20.0)
-      '@orpc/shared': 1.13.14
-      escape-string-regexp: 5.0.0
-      wildcard-match: 5.1.4
-      zod: 4.3.6
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
-      - crossws
-      - fastify
-      - ws
 
   '@orpc/zod@1.13.14(@orpc/contract@1.14.0)(@orpc/server@1.13.14(ws@8.20.0))(ws@8.20.0)(zod@4.3.6)':
     dependencies:

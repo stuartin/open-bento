@@ -50,7 +50,7 @@ export const GET: RequestHandler = async () => {
     await runner.init(
         run.data,
         {
-            workingDir: "../../packages/terraform/src/cloud-init",
+            workingDir: "../../packages/tests/src/terraform",
             runInShell: "pwsh",
             onStdOut: (stdout) => stdOut.push(stdout.data),
             onStdErr: (stderr) => stdErr.push(stderr.data),

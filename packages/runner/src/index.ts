@@ -11,20 +11,23 @@ import type { Run } from "@open-bento/tfe";
 export type { StdOut, StdErr, ExitCode } from "./services/ExecService"
 
 export type Runner = ReturnType<typeof makeRunner>
-export function makeRunner(props?: Partial<RunnerProps>) {
+export function makeRunner(props: RunnerProps) {
 
   // Update our propsRef
   const allProps = Effect.runSync(
     Effect.gen(function* () {
       const propsRef = yield* PropsRef
-      return yield* Ref.getAndUpdate(propsRef, (p) => ({ ...p, ...props }))
+      return yield* Ref.setAndGet(propsRef, props)
     })
   )
 
   // Environment Selector
   const environmentService = () => {
-    switch (allProps.environment) {
+    switch (allProps.mode) {
       case "local": {
+        return LocalEnvService.Default
+      }
+      default: {
         return LocalEnvService.Default
       }
     }

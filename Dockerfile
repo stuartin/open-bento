@@ -21,9 +21,9 @@ RUN pnpm --dir /build/website run build
 # ---------- Runtime stage ----------
 FROM base as app
 
-ENV ORIGIN="http://localhost:3000"
-ENV DATABASE_PATH="file:/app/db/local.db"
-ENV DATABASE_MIGRATIONS_PATH="/app/migrations"
+# ENV ORIGIN="http://localhost:3000"
+# ENV DATABASE_PATH="file:/app/db/local.db"
+# ENV DATABASE_MIGRATIONS_PATH="/app/migrations"
 
 WORKDIR /app
 RUN mkdir -p ./db

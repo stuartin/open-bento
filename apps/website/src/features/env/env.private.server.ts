@@ -9,15 +9,16 @@ const EnvBaseSchema = z.object({
   DATABASE_MIGRATIONS_PATH: z.string().default("src/features/db/migrations"),
 })
 
-const EnvExecSchema = z.discriminatedUnion("EXEC_MODE", [
+const EnvRunnerSchema = z.discriminatedUnion("RUNNER_MODE", [
   // local
   z.object({
-    EXEC_MODE: z.literal("local"),
+    RUNNER_MODE: z.literal("local"),
+    RUNNER_PATH: z.string().min(1)
   }),
 
   // docker
   z.object({
-    EXEC_MODE: z.literal("docker"),
+    RUNNER_MODE: z.literal("docker"),
   }),
 ])
 
@@ -35,7 +36,7 @@ export const EnvStorageSchema = z.discriminatedUnion("STORAGE_MODE", [
   }),
 ])
 
-const EnvSchema = EnvBaseSchema.and(EnvExecSchema).and(EnvStorageSchema)
+const EnvSchema = EnvBaseSchema.and(EnvRunnerSchema).and(EnvStorageSchema)
 
 export const env = EnvSchema.parse(process.env);
 
