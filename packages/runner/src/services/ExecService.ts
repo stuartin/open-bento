@@ -9,7 +9,6 @@ export type ExecStartProps = {
         workingDir?: string;
         env?: Record<string, string>;
         runInShell?: string | boolean
-        removeNewLineCharacters?: boolean
         onStdErr?: (v: StdErr) => void
         onStdOut?: (v: StdOut) => void
         onExitCode?: (v: ExitCode) => void
@@ -43,7 +42,6 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                     workingDir: "./",
                     env: {},
                     runInShell: false,
-                    removeNewLineCharacters: true,
                     onStdOut: (v) => Effect.logInfo(`[stdout] (${v.id}): ${v.data}`),
                     onStdErr: (v) => Effect.logError(`[stderr] (${v.id}): ${v.data}`),
                     onExitCode: (v) => Effect.logInfo(`[exitcode] (${v.id}): ${v.data}`),
@@ -52,6 +50,8 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
             } satisfies ExecStartProps & { opts: Required<ExecStartProps['opts']> }
 
             const runCommands = (commands: Command.Command[]) => {
+                console.log({ props })
+
                 // 1. Create a stream from the array of commands
                 const streamPipeline = Stream.fromIterable(commands).pipe(
                     Stream.flatMap(
@@ -64,7 +64,7 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                             );
 
                             // Convert each individual process execution into a structured event stream
-                            return Stream.unwrapScoped(
+                            return Stream.unwrap(
                                 Effect.gen(function* () {
                                     // Start the process (inherits system environment via NodeContext)
                                     const process = yield* Command.start(configuredCmd);
@@ -72,26 +72,27 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                                     // 1. Stream stdout lines tagged as 'Stdout'
                                     const stdoutStream = process.stdout.pipe(
                                         Stream.decodeText(),
-                                        Stream.map(line => new StdOut({ id: props.id, data: props.opts.removeNewLineCharacters ? String.trim(line) : line }))
+                                        Stream.splitLines,
+                                        Stream.map(line => new StdOut({ id: props.id, data: line }))
                                     )
 
                                     // 2. Stream stderr lines tagged as 'Stderr'
                                     const stderrStream = process.stderr.pipe(
                                         Stream.decodeText(),
-                                        Stream.map(line => new StdErr({ id: props.id, data: props.opts.removeNewLineCharacters ? String.trim(line) : line }))
+                                        Stream.splitLines,
+                                        Stream.map(line => new StdErr({ id: props.id, data: line }))
                                     )
 
                                     // 3. A single-item stream that waits for the exit code
                                     const exitStream = Stream.fromEffect(
                                         process.exitCode.pipe(
-                                            Effect.map(code => new ExitCode({ id: props.id, data: code })
-                                            )
+                                            Effect.map(code => new ExitCode({ id: props.id, data: code }))
                                         )
                                     )
 
                                     // Merge stdout and stderr concurrently, then append the exit code at the very end
                                     return Stream.merge(stdoutStream, stderrStream).pipe(
-                                        Stream.concat(exitStream)
+                                        Stream.merge(exitStream)
                                     );
                                 })
                             );
@@ -102,7 +103,7 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
 
                 return Effect.gen(function* () {
                     yield* Effect.logInfo(`[EXEC] Started`)
-                    yield* Effect.addFinalizer((exit) => Effect.logInfo(`[EXEC] Stopped`));
+                    yield* Effect.addFinalizer(() => Effect.logInfo(`[EXEC] Stopped`));
 
                     // Execute the stream and compile down to the results array
                     return yield* streamPipeline.pipe(
