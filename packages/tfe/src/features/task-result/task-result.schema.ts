@@ -42,3 +42,9 @@ export const GetTaskResultOutput = ORPCOutput({
     TaskResultAttributesSchema
   ),
 });
+
+// ============================================================
+// Type
+// ============================================================
+
+export type TaskResult = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.TASK_RESULTS, typeof TaskResultAttributesSchema>>>

@@ -60,3 +60,9 @@ export const GetConfigurationVersionOutput = ORPCOutput({
     ConfigurationVersionAttributesSchema
   ),
 });
+
+// ============================================================
+// Type
+// ============================================================
+
+export type ConfigurationVersion = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.CONFIGURATION_VERSIONS, typeof ConfigurationVersionAttributesSchema>>>

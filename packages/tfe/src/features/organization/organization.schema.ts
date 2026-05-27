@@ -75,3 +75,10 @@ export const ListOrganizationRunQueueOutput = ORPCOutput({
     RunQueueItemAttributesSchema
   ),
 });
+
+// ============================================================
+// Type
+// ============================================================
+
+export type EntitlementSet = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.ENTITLEMENT_SETS, typeof EntitlementSetAttributesSchema>>>
+export type RunQueueItem = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.RUNS, typeof RunQueueItemAttributesSchema>>>

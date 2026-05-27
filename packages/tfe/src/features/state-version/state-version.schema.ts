@@ -72,3 +72,9 @@ export const ListStateVersionsOutput = ORPCOutput({
     StateVersionAttributesSchema
   ),
 });
+
+// ============================================================
+// Type
+// ============================================================
+
+export type StateVersion = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.STATE_VERSIONS, typeof StateVersionAttributesSchema>>>

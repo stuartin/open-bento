@@ -74,3 +74,9 @@ export const GetPlanJsonOutputRedirectOutput = ORPCOutput({
   }),
   body: z.undefined(),
 });
+
+// ============================================================
+// Type
+// ============================================================
+
+export type Plan = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.PLANS, typeof PlanAttributesSchema>>>

@@ -42,3 +42,9 @@ export const GetCostEstimateOutput = ORPCOutput({
     CostEstimateAttributesSchema
   ),
 });
+
+// ============================================================
+// Type
+// ============================================================
+
+export type CostEstimate = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.COST_ESTIMATES, typeof CostEstimateAttributesSchema>>>
