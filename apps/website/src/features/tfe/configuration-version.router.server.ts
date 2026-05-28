@@ -85,15 +85,16 @@ export const tfeConfigurationVersionsRouter = os
             if (!configurationVersion) throw errors.NOT_FOUND()
             if (configurationVersion.status !== "uploaded") throw errors.NOT_FOUND()
 
+            const dlUrl = `${env.ORIGIN}${env.API_PREFIX}/tfe/downloads`
             const { url } = await context.auth.api.generateSignedUrl({
                 headers: context.request.headers,
-                body: { url: `${env.ORIGIN}${env.API_PREFIX}/tfe/downloads`, identifier: configurationVersion.id }
+                body: { url: dlUrl, identifier: configurationVersion.id }
             })
 
             context.resHeaders?.set("location", url)
             return {
                 status: 302,
-                body: undefined
+                body: url
             }
         }),
     })

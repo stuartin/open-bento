@@ -71,7 +71,7 @@ export const DownloadConfigurationVersionInput = ORPCInput({
 
 export const DownloadConfigurationVersionOutput = ORPCOutput({
   status: z.literal(302),
-  body: z.undefined(),
+  body: z.string(),
 });
 
 // ============================================================
