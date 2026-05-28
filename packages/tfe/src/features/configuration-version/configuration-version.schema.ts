@@ -13,6 +13,11 @@ export const ConfigurationVersionAttributesSchema = z.object({
   "upload-url": z.string().nullable(),
 });
 
+export const ConfigurationVersionResourceSchema = JsonApiDocument(
+  RESOURCE.CONFIGURATION_VERSIONS,
+  ConfigurationVersionAttributesSchema
+)
+
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
@@ -38,10 +43,7 @@ export const CreateConfigurationVersionInput = ORPCInput({
 
 export const CreateConfigurationVersionOutput = ORPCOutput({
   status: z.literal(201),
-  body: JsonApiDocument(
-    RESOURCE.CONFIGURATION_VERSIONS,
-    ConfigurationVersionAttributesSchema
-  ),
+  body: ConfigurationVersionResourceSchema
 });
 
 // --- Get Configuration Version ---
@@ -55,10 +57,7 @@ export const GetConfigurationVersionInput = ORPCInput({
 
 export const GetConfigurationVersionOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiDocument(
-    RESOURCE.CONFIGURATION_VERSIONS,
-    ConfigurationVersionAttributesSchema
-  ),
+  body: ConfigurationVersionResourceSchema
 });
 
 // --- Download Configuration Version ---
@@ -79,4 +78,4 @@ export const DownloadConfigurationVersionOutput = ORPCOutput({
 // Type
 // ============================================================
 
-export type ConfigurationVersion = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.CONFIGURATION_VERSIONS, typeof ConfigurationVersionAttributesSchema>>>
+export type ConfigurationVersion = z.infer<typeof ConfigurationVersionResourceSchema>

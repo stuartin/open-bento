@@ -23,6 +23,11 @@ export const ApplyAttributesSchema = z.object({
   "resource-destructions": z.number().optional(),
 });
 
+export const ApplyResourceSchema = JsonApiDocument(
+  RESOURCE.APPLIES,
+  ApplyAttributesSchema
+)
+
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
@@ -38,14 +43,11 @@ export const GetApplyInput = ORPCInput({
 
 export const GetApplyOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiDocument(
-    RESOURCE.APPLIES,
-    ApplyAttributesSchema
-  ),
+  body: ApplyResourceSchema
 });
 
 // ============================================================
 // Type
 // ============================================================
 
-export type Apply = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.APPLIES, typeof ApplyAttributesSchema>>>
+export type Apply = z.infer<typeof ApplyResourceSchema>

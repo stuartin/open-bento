@@ -22,6 +22,16 @@ export const TaskStageAttributesSchema = z.object({
   "updated-at": z.string().optional(),
 });
 
+export const TaskStageResourceSchema = JsonApiDocument(
+  RESOURCE.TASK_STAGES,
+  TaskStageAttributesSchema
+)
+
+export const TaskStageCollectionSchema = JsonApiCollection(
+  RESOURCE.TASK_STAGES,
+  TaskStageAttributesSchema
+)
+
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
@@ -37,10 +47,7 @@ export const GetTaskStageInput = ORPCInput({
 
 export const GetTaskStageOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiDocument(
-    RESOURCE.TASK_STAGES,
-    TaskStageAttributesSchema
-  ),
+  body: TaskStageResourceSchema
 });
 
 // --- List Task Stages ---
@@ -54,14 +61,11 @@ export const ListTaskStagesInput = ORPCInput({
 
 export const ListTaskStagesOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiCollection(
-    RESOURCE.TASK_STAGES,
-    TaskStageAttributesSchema
-  ),
+  body: TaskStageCollectionSchema
 });
 
 // ============================================================
 // Type
 // ============================================================
 
-export type TaskStage = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.TASK_STAGES, typeof TaskStageAttributesSchema>>>
+export type TaskStage = z.infer<typeof TaskStageResourceSchema>

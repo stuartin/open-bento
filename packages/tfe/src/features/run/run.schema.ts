@@ -61,11 +61,54 @@ export const RunAttributesSchema = z.object({
   "updated-at": z.coerce.date(),
 });
 
+export const RunResourceSchema = JsonApiDocument(
+  RESOURCE.RUNS,
+  RunAttributesSchema,
+  z.object({
+    plan: z.object({
+      data: z.object({
+        type: z.literal(RESOURCE.PLANS),
+        id: z.string(),
+      })
+    }),
+    workspace: z.object({
+      data: z.object({
+        type: z.literal(RESOURCE.WORKSPACES),
+        id: z.string(),
+      })
+    })
+  })
+)
+
+export const RunCollectionSchema = JsonApiCollection(
+  RESOURCE.RUNS,
+  RunAttributesSchema,
+  z.object({
+    plan: z.object({
+      data: z.object({
+        type: z.literal(RESOURCE.PLANS),
+        id: z.string(),
+      })
+    }),
+    workspace: z.object({
+      data: z.object({
+        type: z.literal(RESOURCE.WORKSPACES),
+        id: z.string(),
+      })
+    })
+  })
+)
+
 export const RunEventsSchema = z.object({
   action: z.string(),
   "created-at": z.iso.datetime(),
   description: z.string()
 })
+
+export const RunEventsCollectionSchema = JsonApiCollection(
+  RESOURCE.RUN_EVENTS,
+  RunEventsSchema
+)
 
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
@@ -113,10 +156,7 @@ export const CreateRunInput = ORPCInput({
 
 export const CreateRunOutput = ORPCOutput({
   status: z.literal(201),
-  body: JsonApiDocument(
-    RESOURCE.RUNS,
-    RunAttributesSchema
-  ),
+  body: RunResourceSchema
 });
 
 // --- Get Run ---
@@ -130,24 +170,7 @@ export const GetRunInput = ORPCInput({
 
 export const GetRunOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiDocument(
-    RESOURCE.RUNS,
-    RunAttributesSchema,
-    z.object({
-      plan: z.object({
-        data: z.object({
-          type: z.literal(RESOURCE.PLANS),
-          id: z.string(),
-        })
-      }),
-      workspace: z.object({
-        data: z.object({
-          type: z.literal(RESOURCE.WORKSPACES),
-          id: z.string(),
-        })
-      })
-    })
-  ),
+  body: RunResourceSchema
 });
 
 // --- List Runs ---
@@ -167,10 +190,7 @@ export const ListRunsInput = ORPCInput({
 
 export const ListRunsOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiCollection(
-    RESOURCE.RUNS,
-    RunAttributesSchema
-  ),
+  body: RunCollectionSchema
 });
 
 // --- Get Run Events ---
@@ -184,10 +204,7 @@ export const GetRunEventsInput = ORPCInput({
 
 export const GetRunEventsOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiCollection(
-    RESOURCE.RUN_EVENTS,
-    RunEventsSchema
-  ),
+  body: RunEventsCollectionSchema,
 });
 
 // --- Apply Run ---
@@ -266,9 +283,8 @@ export const ForceCancelRunOutput = ORPCOutput({
   body: z.undefined(),
 });
 
-
 // ============================================================
 // Type
 // ============================================================
 
-export type Run = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.RUNS, typeof RunAttributesSchema>>>
+export type Run = z.infer<typeof RunResourceSchema>

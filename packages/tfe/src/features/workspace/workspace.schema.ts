@@ -15,6 +15,16 @@ export const WorkspaceAttributesSchema = z.object({
   })
 });
 
+export const WorkspaceResourceSchema = JsonApiDocument(
+  RESOURCE.WORKSPACES,
+  WorkspaceAttributesSchema
+)
+
+export const WorkspaceCollectionSchema = JsonApiCollection(
+  RESOURCE.WORKSPACES,
+  WorkspaceAttributesSchema
+)
+
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
@@ -38,10 +48,7 @@ export const CreateWorkspaceInput = ORPCInput({
 
 export const CreateWorkspaceOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiDocument(
-    RESOURCE.WORKSPACES,
-    WorkspaceAttributesSchema
-  ),
+  body: WorkspaceResourceSchema
 });
 
 // --- Update Workspace ---
@@ -61,10 +68,7 @@ export const UpdateWorkspaceInput = ORPCInput({
 
 export const UpdateWorkspaceOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiDocument(
-    RESOURCE.WORKSPACES,
-    WorkspaceAttributesSchema
-  ),
+  body: WorkspaceResourceSchema
 });
 
 // --- Get Workspace ---
@@ -79,10 +83,7 @@ export const GetWorkspaceInput = ORPCInput({
 
 export const GetWorkspaceOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiDocument(
-    RESOURCE.WORKSPACES,
-    WorkspaceAttributesSchema
-  ),
+  body: WorkspaceResourceSchema
 });
 
 // --- List Workspaces ---
@@ -103,14 +104,11 @@ export const ListWorkspacesInput = ORPCInput({
 
 export const ListWorkspacesOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiCollection(
-    RESOURCE.WORKSPACES,
-    WorkspaceAttributesSchema
-  ),
+  body: WorkspaceCollectionSchema
 });
 
 // ============================================================
 // Type
 // ============================================================
 
-export type Workspace = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.WORKSPACES, typeof WorkspaceAttributesSchema>>>
+export type Workspace = z.infer<typeof WorkspaceResourceSchema>

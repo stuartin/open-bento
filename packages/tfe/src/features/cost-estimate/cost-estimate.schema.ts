@@ -22,6 +22,11 @@ export const CostEstimateAttributesSchema = z.object({
   "proposed-monthly-cost": z.string().optional(),
 });
 
+export const CostEstimateResourceSchema = JsonApiDocument(
+  RESOURCE.COST_ESTIMATES,
+  CostEstimateAttributesSchema
+)
+
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
@@ -37,14 +42,11 @@ export const GetCostEstimateInput = ORPCInput({
 
 export const GetCostEstimateOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiDocument(
-    RESOURCE.COST_ESTIMATES,
-    CostEstimateAttributesSchema
-  ),
+  body: CostEstimateResourceSchema
 });
 
 // ============================================================
 // Type
 // ============================================================
 
-export type CostEstimate = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.COST_ESTIMATES, typeof CostEstimateAttributesSchema>>>
+export type CostEstimate = z.infer<typeof CostEstimateResourceSchema>

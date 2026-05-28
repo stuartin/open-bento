@@ -9,6 +9,11 @@ export const EntitlementSetAttributesSchema = z.object({
   operations: z.boolean(),
 });
 
+export const EntitlementSetResourceSchema = JsonApiDocument(
+  RESOURCE.ENTITLEMENT_SETS,
+  EntitlementSetAttributesSchema
+)
+
 // ============================================================
 // ENTITY DEFINITION - Run Queue Item
 // ============================================================
@@ -38,6 +43,11 @@ export const RunQueueItemAttributesSchema = z.object({
   "position-in-queue": z.number().optional(),
 });
 
+export const RunQueueItemCollectionSchema = JsonApiCollection(
+  RESOURCE.RUNS,
+  RunQueueItemAttributesSchema
+)
+
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
@@ -53,10 +63,7 @@ export const GetOrganizationEntitlementsInput = ORPCInput({
 
 export const GetOrganizationEntitlementsOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiDocument(
-    RESOURCE.ENTITLEMENT_SETS,
-    EntitlementSetAttributesSchema
-  )
+  body: EntitlementSetResourceSchema
 });
 
 // --- List Organization Run Queue ---
@@ -70,15 +77,12 @@ export const ListOrganizationRunQueueInput = ORPCInput({
 
 export const ListOrganizationRunQueueOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiCollection(
-    RESOURCE.RUNS,
-    RunQueueItemAttributesSchema
-  ),
+  body: RunQueueItemCollectionSchema
 });
 
 // ============================================================
 // Type
 // ============================================================
 
-export type EntitlementSet = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.ENTITLEMENT_SETS, typeof EntitlementSetAttributesSchema>>>
-export type RunQueueItem = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.RUNS, typeof RunQueueItemAttributesSchema>>>
+export type EntitlementSet = z.infer<typeof EntitlementSetResourceSchema>
+export type RunQueueItem = z.infer<typeof RunQueueItemCollectionSchema>["data"][number]

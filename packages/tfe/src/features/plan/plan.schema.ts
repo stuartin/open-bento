@@ -24,6 +24,11 @@ export const PlanAttributesSchema = z.object({
   "resource-destructions": z.number().optional(),
 });
 
+export const PlanResourceSchema = JsonApiDocument(
+  RESOURCE.PLANS,
+  PlanAttributesSchema
+)
+
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
@@ -39,10 +44,7 @@ export const GetPlanInput = ORPCInput({
 
 export const GetPlanOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiDocument(
-    RESOURCE.PLANS,
-    PlanAttributesSchema
-  ),
+  body: PlanResourceSchema
 });
 
 // --- Get Plan JSON Output ---
@@ -79,4 +81,4 @@ export const GetPlanJsonOutputRedirectOutput = ORPCOutput({
 // Type
 // ============================================================
 
-export type Plan = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.PLANS, typeof PlanAttributesSchema>>>
+export type Plan = z.infer<typeof PlanResourceSchema>

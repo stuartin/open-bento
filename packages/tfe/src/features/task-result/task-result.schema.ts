@@ -22,6 +22,11 @@ export const TaskResultAttributesSchema = z.object({
   "updated-at": z.string().optional(),
 });
 
+export const TaskResultResourceSchema = JsonApiDocument(
+  RESOURCE.TASK_RESULTS,
+  TaskResultAttributesSchema
+)
+
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
@@ -37,14 +42,11 @@ export const GetTaskResultInput = ORPCInput({
 
 export const GetTaskResultOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiDocument(
-    RESOURCE.TASK_RESULTS,
-    TaskResultAttributesSchema
-  ),
+  body: TaskResultResourceSchema
 });
 
 // ============================================================
 // Type
 // ============================================================
 
-export type TaskResult = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.TASK_RESULTS, typeof TaskResultAttributesSchema>>>
+export type TaskResult = z.infer<typeof TaskResultResourceSchema>

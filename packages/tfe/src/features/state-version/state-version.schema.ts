@@ -12,6 +12,16 @@ export const StateVersionAttributesSchema = z.object({
   "hosted-state-download-url": z.string(),
 });
 
+export const StateVersionResourceSchema = JsonApiDocument(
+  RESOURCE.STATE_VERSIONS,
+  StateVersionAttributesSchema
+)
+
+export const StateVersionCollectionSchema = JsonApiCollection(
+  RESOURCE.STATE_VERSIONS,
+  StateVersionAttributesSchema
+)
+
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
@@ -27,10 +37,7 @@ export const GetCurrentStateVersionInput = ORPCInput({
 
 export const GetCurrentStateVersionOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiDocument(
-    RESOURCE.STATE_VERSIONS,
-    StateVersionAttributesSchema
-  ).nullable()
+  body: StateVersionResourceSchema.nullable()
 });
 
 // --- Get State Version ---
@@ -44,10 +51,7 @@ export const GetStateVersionInput = ORPCInput({
 
 export const GetStateVersionOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiDocument(
-    RESOURCE.STATE_VERSIONS,
-    StateVersionAttributesSchema
-  ),
+  body: StateVersionResourceSchema
 });
 
 // --- List State Versions ---
@@ -67,14 +71,11 @@ export const ListStateVersionsInput = ORPCInput({
 
 export const ListStateVersionsOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiCollection(
-    RESOURCE.STATE_VERSIONS,
-    StateVersionAttributesSchema
-  ),
+  body: StateVersionCollectionSchema
 });
 
 // ============================================================
 // Type
 // ============================================================
 
-export type StateVersion = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.STATE_VERSIONS, typeof StateVersionAttributesSchema>>>
+export type StateVersion = z.infer<typeof StateVersionResourceSchema>

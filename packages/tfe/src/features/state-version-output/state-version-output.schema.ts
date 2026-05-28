@@ -12,6 +12,11 @@ export const StateVersionOutputAttributesSchema = z.object({
   "detailed-type": z.string().nullable(),
 });
 
+export const StateVersionOutputResourceSchema = JsonApiDocument(
+  RESOURCE.STATE_VERSION_OUTPUTS,
+  StateVersionOutputAttributesSchema
+)
+
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
@@ -27,14 +32,11 @@ export const GetStateVersionOutputInput = ORPCInput({
 
 export const GetStateVersionOutputOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiDocument(
-    RESOURCE.STATE_VERSION_OUTPUTS,
-    StateVersionOutputAttributesSchema
-  ),
+  body: StateVersionOutputResourceSchema
 });
 
 // ============================================================
 // Type
 // ============================================================
 
-export type StateVersionOutput = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.STATE_VERSION_OUTPUTS, typeof StateVersionOutputAttributesSchema>>>
+export type StateVersionOutput = z.infer<typeof StateVersionOutputResourceSchema>

@@ -28,6 +28,11 @@ export const PolicyEvaluationAttributesSchema = z.object({
   "updated-at": z.string().optional(),
 });
 
+export const PolicyEvaluationResourceSchema = JsonApiDocument(
+  RESOURCE.POLICY_EVALUATIONS,
+  PolicyEvaluationAttributesSchema
+)
+
 // ============================================================
 // OPERATION-SPECIFIC SCHEMAS
 // ============================================================
@@ -43,14 +48,11 @@ export const GetPolicyEvaluationInput = ORPCInput({
 
 export const GetPolicyEvaluationOutput = ORPCOutput({
   status: z.literal(200),
-  body: JsonApiDocument(
-    RESOURCE.POLICY_EVALUATIONS,
-    PolicyEvaluationAttributesSchema
-  ),
+  body: PolicyEvaluationResourceSchema
 });
 
 // ============================================================
 // Type
 // ============================================================
 
-export type PolicyEvaluation = z.infer<ReturnType<typeof JsonApiDocument<typeof RESOURCE.POLICY_EVALUATIONS, typeof PolicyEvaluationAttributesSchema>>>
+export type PolicyEvaluation = z.infer<typeof PolicyEvaluationResourceSchema>
