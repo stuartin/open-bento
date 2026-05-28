@@ -6,7 +6,7 @@ export class EnvService extends Context.Tag("runner/EnvService")<
     EnvService,
     {
         // Wraps generic commands with env-specific tags, environments, or prefixes
-        readonly runCommand: (cmd: Command.Command) => Command.Command;
+        readonly runCommand: (run: Run, cmd: Command.Command) => Command.Command;
 
         // Lifecycle steps
         readonly up: (run: Run, url: string) => Effect.Effect<void, Error>;

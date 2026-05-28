@@ -36,8 +36,9 @@ export function makeRunner(props: RunnerProps) {
 
   // Create our runtime
   const RuntimeLayer = Layer.mergeAll(
-    ExecService.Default.pipe(Layer.provide(environmentService()))
+    ExecService.Default,
   ).pipe(
+    Layer.provide(environmentService()),
     Layer.provide(FetchHttpClient.layer),
     Layer.provideMerge(NodeContext.layer),
   )

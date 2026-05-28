@@ -50,8 +50,6 @@ export const tfeStorageRouter = os.router({
 
         if (!verified.ok) throw errors.BAD_REQUEST()
 
-        console.log({ verified })
-
         const configurationVersion = await db.query.configurationVersions.findFirst({
             where: {
                 id: verified.identifier

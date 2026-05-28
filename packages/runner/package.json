@@ -16,6 +16,7 @@
     "@effect/platform-node": "^0.106.0",
     "@open-bento/tfe": "workspace:*",
     "@paralleldrive/cuid2": "catalog:",
+    "tar": "^7.5.15",
     "zod": "catalog:"
   },
   "devDependencies": {

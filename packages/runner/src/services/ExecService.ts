@@ -39,26 +39,27 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                 const commandStreamPipeline = Stream.fromIterable(commands).pipe(
                     Stream.flatMap(
                         (cmd) => {
-                            // 3. Transform the generic command using your EnvService wrapper
-                            const wrappedCmd = envService.runCommand(cmd);
-
-                            // 4. Inject manual builder options on top of the environment wrapper
-                            const configuredCmd = wrappedCmd.pipe(
+                            // cmd defaults from props
+                            const configuredCmd = cmd.pipe(
                                 props.opts?.runInShell ? Command.runInShell(props.opts.runInShell) : identity,
                                 props.opts?.workingDir ? Command.workingDirectory(props.opts.workingDir) : identity,
                                 props.opts?.env ? Command.env(props.opts.env) : identity
                             )
 
+                            // env wraps the cmd as needed
+                            const wrappedCmd = envService.runCommand(props.run, configuredCmd);
+
+
                             Effect.runSync(
-                                Effect.logInfo(`[EXEC] (${runId}): Running Command: ${(configuredCmd as StandardCommand).command} ${(configuredCmd as StandardCommand).args}`)
+                                Effect.logInfo(`[EXEC] (${runId}): Running Command: ${(wrappedCmd as StandardCommand).command} ${(wrappedCmd as StandardCommand).args}`)
                             )
 
-                            // Convert each individual process execution into a structured event stream
+                            // Convert each individual cmd process execution into a structured event stream
                             return Stream.unwrap(
                                 Effect.gen(function* () {
 
                                     // Start the process (inherits system environment via NodeContext)
-                                    const process = yield* Command.start(configuredCmd);
+                                    const process = yield* Command.start(wrappedCmd);
 
                                     // 1. Stream stdout lines tagged as 'Stdout'
                                     const stdoutStream = process.stdout.pipe(
@@ -88,7 +89,7 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                                 })
                             );
                         },
-                        { concurrency: 1 } // Sequential processing
+                        { concurrency: 1 } // Sequential processing of cmd's
                     )
                 )
 
@@ -109,7 +110,7 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                         Effect.tapError((err) =>
                             Effect.logWarning(`[ENV] (${runId}): Up failed: ${err.message}. Retrying...`)
                         ),
-                        Effect.retry(retryPolicy) // Native Effect scheduling engine
+                        Effect.retry(retryPolicy)
                     );
                     props.opts?.onUp?.(runId);
                     yield* Effect.logInfo(`[ENV] (${runId}): Env Up`);

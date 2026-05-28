@@ -84,7 +84,7 @@ export async function retrieveFromDisk(
 }> {
     try {
         // 1. find file starting with the prefix
-        const files = await readdir(filePath);
+        const files = await readdir(path.resolve(filePath));
         const matchingFile = files.find(file => file.startsWith(fileNamePrefix));
 
         if (!matchingFile) {
@@ -92,8 +92,6 @@ export async function retrieveFromDisk(
         }
 
         const fullPath = path.resolve(filePath, matchingFile);
-
-        console.log({ fullPath })
 
         // 2. read the file from disk
         const buffer = await readFile(fullPath);
@@ -107,6 +105,7 @@ export async function retrieveFromDisk(
         // 5. create a Blob from the buffer
         const file = new File([buffer], matchingFile, { type: mime });
 
+        console.log(1)
         return {
             ok: true,
             file,
@@ -114,7 +113,7 @@ export async function retrieveFromDisk(
             fileName: matchingFile,
         };
     } catch (error) {
-        console.log({ error })
+        console.log(2)
         return {
             ok: false,
             error,

@@ -2,6 +2,7 @@ import { Command, FileSystem, HttpClient, Path } from "@effect/platform";
 import { Layer, Effect, Ref, Match, Stream } from "effect";
 import { EnvService } from "./EnvService";
 import { RunnerPropsRef } from "../RunnerPropsRef";
+import * as tar from "tar";
 
 export type LocalEnvProps = {
     readonly name: typeof LocalEnvService.Name
@@ -26,9 +27,9 @@ export const LocalEnvService = {
 
             return EnvService.of({
 
-                runCommand: (cmd) => Match.value(cmd).pipe(
+                runCommand: (run, cmd) => Match.value(cmd).pipe(
                     Match.tag("StandardCommand", (c) => Command.make(c.command, ...c.args).pipe(
-                        // Command.workingDirectory("")
+                        Command.workingDirectory(getEnvPath(run.data.id))
                     )),
                     Match.tag("PipedCommand", (c) => c),
                     Match.exhaustive
@@ -51,6 +52,13 @@ export const LocalEnvService = {
                     const response = yield* httpClient.get(url);
                     const fileStream = response.stream;
                     yield* Stream.run(fileStream, fs.sink(tarFile));
+
+                    // untar
+                    tar.x({
+                        file: tarFile,
+                        cwd: envPath,
+                        sync: true,
+                    });
 
                 }).pipe(
                     Effect.mapError((fsError) => new Error(`Failed to create env: ${fsError.message}`))
