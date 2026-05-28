@@ -1,47 +1,11 @@
-import { env } from "$features/env/env.private.server";
+import { orcpServerClient } from "$features/orpc/api-client.server";
 import { runner } from "$features/runner/runner.server";
-import { CreateRunOutput } from "@open-bento/tfe";
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 
 export const GET: RequestHandler = async () => {
 
-    const run = CreateRunOutput.shape.body.safeParse({
-        data: {
-            type: "runs",
-            id: "test",
-            attributes: {
-                status: "pending",
-                "has-changes": false,
-                "is-destroy": false,
-                "plan-only": true,
-                refresh: true,
-                "save-plan": false,
-                "auto-apply": false,
-                message: "",
-                "updated-at": new Date().toISOString(),
-                "created-at": new Date().toISOString(),
-                "position-in-queue": 0,
-                actions: {
-                    "is-cancelable": true,
-                    "is-confirmable": false,
-                    "is-discardable": false,
-                    "is-force-cancelable": false,
-                },
-                permissions: {
-                    "can-apply": false,
-                    "can-cancel": false,
-                    "can-comment": false,
-                    "can-discard": false,
-                    "can-force-execute": false,
-                    "can-force-cancel": false,
-                    "can-override-policy-check": false,
-                },
-                variables: []
-            },
-        },
-    });
-
-    if (!run.success) return error(500, run.error)
+    const run = await orcpServerClient.tfe.runs.get({ params: { "run-id": "rqazjdmooq9wmlwpl6wym07e" } })
+    console.log({ run })
 
     let stdOut: string[] = []
     const stdErr: string[] = []
@@ -49,7 +13,7 @@ export const GET: RequestHandler = async () => {
     let lastExitCode: number = 0
 
     const logs = await runner.init(
-        run.data,
+        run.body,
         {
             runInShell: "pwsh",
             onUp: (id) => console.log(`onUp ${id}`),

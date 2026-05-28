@@ -1,17 +1,19 @@
 import { APIError, createAuthEndpoint, createAuthMiddleware, getSessionFromCtx } from "better-auth/api";
 import { BetterAuthError, type BetterAuthPlugin, type GenericEndpointContext, type Session, type User } from "better-auth";
-import type { OAuthAccessToken } from "better-auth/plugins";
+import { type OAuthAccessToken, type Organization } from "better-auth/plugins";
 import { z } from "zod"
+import { env } from "$features/env/env.private.server";
 
 const getOauthSessionFromCtx = async (ctx: GenericEndpointContext) => {
+    if (ctx.context.session) return ctx.context.session;
+
+    const xServerKey = ctx.getHeader("x-server-key")
+    if (xServerKey) return await serverSession(ctx, xServerKey)
+
     let session: {
         session: Session
         user: User
     } | null = null
-
-    if (ctx.context.session) {
-        return ctx.context.session;
-    }
 
     try {
         const oauthPlugin = ctx.context?.getPlugin("oauth-provider")
@@ -89,3 +91,45 @@ export const oauthSession = () => {
         }
     } satisfies BetterAuthPlugin;
 };
+
+const serverSession = async (ctx: GenericEndpointContext, xServerKey: string) => {
+    let session: {
+        session: Session & { activeOrganizationId: string }
+        user: User & { organizationIds: string[] }
+    } | null = null
+
+    console.log(env.AUTH_SECRET !== xServerKey)
+
+    if (env.AUTH_SECRET !== xServerKey) return session
+
+    const organizations = await ctx.context.adapter.findMany<Organization>({
+        model: "organization"
+    })
+
+    console.log(organizations)
+
+    if (organizations.length === 0 || !organizations[0]) return session
+
+    session = {
+        session: {
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            expiresAt: new Date(Date.now() + 1000 * 60 * 60), // +1hr
+            id: "server-id",
+            token: "server-token",
+            userId: "server-user",
+            activeOrganizationId: organizations[0].id
+        },
+        user: {
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            email: "server@local.com",
+            emailVerified: true,
+            id: "server-id",
+            name: "server",
+            organizationIds: organizations.map(org => org.id),
+        }
+    }
+
+    return session
+}

@@ -35,9 +35,9 @@ export const TAG = {
 // --- Auth Headers ---
 
 export const AuthHeadersSchema = z.object({
-  // authorization: z.string().describe("Bearer token"),
-  // "content-type": z.literal("application/vnd.api+json").optional(),
-});
+  authorization: z.string().describe("Bearer token"),
+  "content-type": z.literal("application/vnd.api+json"),
+}).optional()
 
 // --- JSON:API Resource Schema ---
 
