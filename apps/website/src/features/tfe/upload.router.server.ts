@@ -4,7 +4,7 @@ import { tfeContract } from "@open-bento/tfe";
 import { db } from "$features/db";
 import { configurationVersions } from "$features/db/schema";
 import { eq } from "drizzle-orm";
-import { env } from "$features/env/env.private.server";
+import { env } from "$features/env/env.server";
 
 const os = createRouter(tfeContract.uploads);
 export const tfeUploadsRouter = os.router({

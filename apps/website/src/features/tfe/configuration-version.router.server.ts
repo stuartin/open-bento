@@ -4,7 +4,7 @@ import { RESOURCE, tfeContract, toCamel, toKebab } from "@open-bento/tfe";
 import { db } from "$features/db";
 import { configurationVersions } from "$features/db/schema";
 import { eq } from "drizzle-orm";
-import { env } from "$features/env/env.public";
+import { env } from "$features/env/env";
 
 const os = createRouter(tfeContract.configurationVersions).use(useAuth);
 export const tfeConfigurationVersionsRouter = os

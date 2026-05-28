@@ -4,7 +4,7 @@ import { GetRunEventsOutput, ListRunsOutput, RESOURCE, tfeContract, toCamel, toK
 import { createId } from "@paralleldrive/cuid2";
 import { db } from "$features/db";
 import { plans, runs } from "$features/db/schema";
-import { env } from "$features/env/env.public";
+import { env } from "$features/env/env";
 
 const os = createRouter(tfeContract.runs).use(useAuth);
 export const tfeRunsRouter = os

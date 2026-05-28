@@ -1,4 +1,4 @@
-import { env } from '$features/env/env.private.server';
+import { env } from '$features/env/env.server';
 import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({

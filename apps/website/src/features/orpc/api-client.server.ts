@@ -2,8 +2,8 @@ import { createRouterClient } from "@orpc/server";
 import { router } from "./router";
 import { auth } from "$features/auth/auth"
 import { runner } from "$features/runner/runner.server"
-import { env } from "$features/env/env.private.server";
-import { env as pubEnv } from "$features/env/env.public";
+import { env } from "$features/env/env.server";
+import { env as pubEnv } from "$features/env/env";
 
 export const orcpServerClient = createRouterClient(
     router,

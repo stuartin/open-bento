@@ -12,7 +12,7 @@ import { eq } from 'drizzle-orm';
 import { bearer } from "better-auth/plugins";
 import { signedUrl } from './plugins/signed-url';
 import { oauthSession } from './plugins/oauth-session';
-import { env } from '$features/env/env.public';
+import { env } from '$features/env/env';
 
 export const auth = betterAuth({
 	baseURL: env.ORIGIN,

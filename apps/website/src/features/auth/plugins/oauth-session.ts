@@ -2,7 +2,7 @@ import { APIError, createAuthEndpoint, createAuthMiddleware, getSessionFromCtx }
 import { BetterAuthError, type BetterAuthPlugin, type GenericEndpointContext, type Session, type User } from "better-auth";
 import { type OAuthAccessToken, type Organization } from "better-auth/plugins";
 import { z } from "zod"
-import { env } from "$features/env/env.private.server";
+import { env } from "$features/env/env.server";
 
 const getOauthSessionFromCtx = async (ctx: GenericEndpointContext) => {
     if (ctx.context.session) return ctx.context.session;

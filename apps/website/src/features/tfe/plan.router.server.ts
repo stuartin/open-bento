@@ -1,7 +1,7 @@
 import { createRouter } from "$features/orpc/factories";
 import { useAuth } from "$features/auth/middleware/use-auth";
 import { GetPlanJsonOutputOutput, GetPlanOutput, tfeContract } from "@open-bento/tfe";
-import { env } from "$features/env/env.public";
+import { env } from "$features/env/env";
 
 const os = createRouter(tfeContract.plans).use(useAuth);
 export const tfePlansRouter = os

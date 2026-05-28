@@ -5,7 +5,7 @@ import { createTanstackQueryUtils } from '@orpc/tanstack-query'
 import { QueryClient } from '@tanstack/svelte-query'
 import { browser } from '$app/environment'
 import { goto } from '$app/navigation'
-import { env } from '$features/env/env.public'
+import { env } from '$features/env/env'
 import { router } from './router'
 import type { RouterClient } from '@orpc/server'
 
