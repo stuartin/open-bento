@@ -58,7 +58,7 @@ const getOauthSessionFromCtx = async (ctx: GenericEndpointContext) => {
 }
 
 export const oauthSessionMiddleware = createAuthMiddleware(async (ctx) => {
-    const session = await getOauthSessionFromCtx(ctx);
+    const session = await getOauthSessionFromCtx(ctx) ?? await getSessionFromCtx(ctx)
     if (!session?.session) throw APIError.from("UNAUTHORIZED", {
         message: "Unauthorized",
         code: "UNAUTHORIZED"
@@ -79,13 +79,10 @@ export const oauthSession = () => {
                 "oauth/get-session",
                 {
                     method: "GET",
-                    query: z.object({
-                        fallbackToGetSession: z.boolean()
-                    }).default({ fallbackToGetSession: true })
                 },
                 async (ctx) => {
-                    const oauthSession = await getOauthSessionFromCtx(ctx)
-                    return !oauthSession && ctx.query.fallbackToGetSession ? await getSessionFromCtx(ctx) : oauthSession
+                    const session = await getOauthSessionFromCtx(ctx) ?? await getSessionFromCtx(ctx)
+                    return session
                 }
             )
         }
@@ -98,15 +95,11 @@ const serverSession = async (ctx: GenericEndpointContext, xServerKey: string) =>
         user: User & { organizationIds: string[] }
     } | null = null
 
-    console.log(env.AUTH_SECRET !== xServerKey)
-
     if (env.AUTH_SECRET !== xServerKey) return session
 
     const organizations = await ctx.context.adapter.findMany<Organization>({
         model: "organization"
     })
-
-    console.log(organizations)
 
     if (organizations.length === 0 || !organizations[0]) return session
 
