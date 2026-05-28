@@ -1,53 +1,21 @@
-import { Chunk, Data, Effect, Match, Stream, String as EffectString, Schedule, Ref } from "effect";
+import { Chunk, Effect, Match, Stream, String as EffectString, Schedule, Ref, identity } from "effect";
 import { Command } from "@effect/platform";
 import { NodeContext } from "@effect/platform-node";
 import type { StandardCommand } from "@effect/platform/Command";
 import { EnvService } from "./EnvService";
 import { RunnerPropsRef } from "../RunnerPropsRef";
+import { StdOut, StdErr, ExitCode, type RunnerCallbacks } from "../types";
+import type { Run } from "@open-bento/tfe";
 
-export type ExecStartProps = {
-    id: string;
+type ExecStartProps = {
+    run: Run
     opts?: {
         workingDir?: string;
         env?: Record<string, string>;
         runInShell?: string | boolean
         noColor?: boolean
-        onUp?: (id: string) => void
-        onStdOut?: (out: StdOut) => void
-        onStdErr?: (err: StdErr) => void
-        onExitCode?: (exit: ExitCode) => void
-        onDown?: (id: string) => void
-    }
+    } & RunnerCallbacks
 }
-
-export const defaultExecStartOpts: Required<ExecStartProps['opts']> = {
-    workingDir: "./",
-    env: {},
-    runInShell: false,
-    noColor: true,
-    onUp: () => undefined,
-    onStdOut: () => undefined,
-    onStdErr: () => undefined,
-    onExitCode: () => undefined,
-    onDown: () => undefined,
-}
-
-export class StdOut extends Data.TaggedClass("StdOut")<{
-    readonly id: string;
-    readonly data: string
-}> { }
-
-export class StdErr extends Data.TaggedClass("StdErr")<{
-    readonly id: string;
-    readonly data: string
-}> { }
-
-export class ExitCode extends Data.TaggedClass("ExitCode")<{
-    readonly id: string;
-    readonly data: number;
-}> { }
-
-export type ExecResult = StdOut | StdErr | ExitCode
 
 // biome-ignore lint/suspicious/noControlCharactersInRegex: Intentional control characters used to identify and strip ANSI escape sequences.
 const NO_ANSI_COLOR = (line: string) => EffectString.replace(/(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]/g, '')(line)
@@ -60,14 +28,8 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
         const queueSemaphore = yield* Effect.makeSemaphore(runnerProps.maxConcurrent);
         const queueCountRef = yield* Ref.make(0);
 
-        const start = (p: ExecStartProps) => {
-            const props = {
-                ...p,
-                opts: {
-                    ...defaultExecStartOpts,
-                    ...p.opts,
-                }
-            } satisfies ExecStartProps & { opts: Required<ExecStartProps['opts']> }
+        const start = (props: ExecStartProps) => {
+            const runId = props.run.data.id
 
             const runCommands = (commands: Command.Command[]) => {
 
@@ -81,13 +43,13 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
 
                             // 4. Inject manual builder options on top of the environment wrapper
                             const configuredCmd = wrappedCmd.pipe(
-                                Command.runInShell(props.opts.runInShell),
-                                Command.workingDirectory(props.opts.workingDir),
-                                Command.env(props.opts.env ?? {})
+                                props.opts?.runInShell ? Command.runInShell(props.opts.runInShell) : identity,
+                                props.opts?.workingDir ? Command.workingDirectory(props.opts.workingDir) : identity,
+                                props.opts?.env ? Command.env(props.opts.env) : identity
                             )
 
                             Effect.runSync(
-                                Effect.logInfo(`[EXEC] (${props.id}): Running Command: ${(configuredCmd as StandardCommand).command} ${(configuredCmd as StandardCommand).args}`)
+                                Effect.logInfo(`[EXEC] (${runId}): Running Command: ${(configuredCmd as StandardCommand).command} ${(configuredCmd as StandardCommand).args}`)
                             )
 
                             // Convert each individual process execution into a structured event stream
@@ -101,20 +63,20 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                                     const stdoutStream = process.stdout.pipe(
                                         Stream.decodeText(),
                                         Stream.splitLines,
-                                        Stream.map(line => new StdOut({ id: props.id, data: props.opts.noColor ? NO_ANSI_COLOR(line) : line }))
+                                        Stream.map(line => new StdOut({ id: runId, data: props.opts?.noColor ? NO_ANSI_COLOR(line) : line }))
                                     )
 
                                     // 2. Stream stderr lines tagged as 'Stderr'
                                     const stderrStream = process.stderr.pipe(
                                         Stream.decodeText(),
                                         Stream.splitLines,
-                                        Stream.map(line => new StdErr({ id: props.id, data: props.opts.noColor ? NO_ANSI_COLOR(line) : line }))
+                                        Stream.map(line => new StdErr({ id: runId, data: props.opts?.noColor ? NO_ANSI_COLOR(line) : line }))
                                     )
 
                                     // 3. A single-item stream that waits for the exit code
                                     const exitStream = Stream.fromEffect(
                                         process.exitCode.pipe(
-                                            Effect.map(code => new ExitCode({ id: props.id, data: code }))
+                                            Effect.map(code => new ExitCode({ id: runId, data: code }))
                                         )
                                     )
 
@@ -134,7 +96,7 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                 const executionStreamPipeline = Effect.gen(function* () {
                     // Track queue count
                     const queueCount = yield* Ref.updateAndGet(queueCountRef, (n) => n + 1);
-                    yield* Effect.logInfo(`[ENV] (${props.id}) Added to queue (${queueCount}/${runnerProps.maxConcurrent})`);
+                    yield* Effect.logInfo(`[ENV] (${runId}) Added to queue (${queueCount}/${runnerProps.maxConcurrent})`);
                     yield* Effect.addFinalizer(() => Ref.update(queueCountRef, (n) => n - 1));
 
                     // Bring Env up (with retry)
@@ -142,21 +104,21 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                         Schedule.compose(Schedule.recurs(2)) // 2 retries = 3 total attempts
                     );
 
-                    yield* envService.up(props).pipe(
+                    yield* envService.up(props.run).pipe(
                         Effect.tapError((err) =>
-                            Effect.logWarning(`[ENV] (${props.id}): Up failed: ${err.message}. Retrying...`)
+                            Effect.logWarning(`[ENV] (${runId}): Up failed: ${err.message}. Retrying...`)
                         ),
                         Effect.retry(retryPolicy) // Native Effect scheduling engine
                     );
-                    props.opts.onUp(props.id);
-                    yield* Effect.logInfo(`[ENV] (${props.id}): Env Up`);
+                    props.opts?.onUp?.(runId);
+                    yield* Effect.logInfo(`[ENV] (${runId}): Env Up`);
 
                     // Env Down finalizer
                     yield* Effect.addFinalizer(() =>
                         Effect.gen(function* () {
-                            yield* envService.down(props);
-                            props.opts.onDown(props.id);
-                            yield* Effect.logInfo(`[ENV] (${props.id}): Env Down`);
+                            yield* envService.down(props.run);
+                            props.opts?.onDown?.(runId);
+                            yield* Effect.logInfo(`[ENV] (${runId}): Env Down`);
                         }).pipe(Effect.orDie)
                     );
 
@@ -165,17 +127,17 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                         Stream.tap((event) => Match.value(event).pipe(
                             Match.tag("ExitCode", (exitCode) => {
                                 Effect.runSync(
-                                    Effect.logInfo(`[EXEC] (${props.id}): Command Finished. (exit code: ${exitCode.data})`)
+                                    Effect.logInfo(`[EXEC] (${runId}): Command Finished. (exit code: ${exitCode.data})`)
                                 )
-                                props.opts.onExitCode(exitCode);
+                                props.opts?.onExitCode?.(exitCode);
                                 return Effect.void
                             }),
                             Match.tag("StdOut", (stdOut) => {
-                                props.opts.onStdOut(stdOut);
+                                props.opts?.onStdOut?.(stdOut);
                                 return Effect.void;
                             }),
                             Match.tag("StdErr", (stdErr) => {
-                                props.opts.onStdErr(stdErr);
+                                props.opts?.onStdErr?.(stdErr);
                                 return Effect.void;
                             }),
                             Match.exhaustive
@@ -193,7 +155,7 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                     const queueCount = yield* Ref.get(queueCountRef);
 
                     if (queueCount >= runnerProps.maxConcurrent) {
-                        yield* Effect.logWarning(`[EXEC] (${props.id}) Queue full, waiting...`);
+                        yield* Effect.logWarning(`[EXEC] (${runId}) Queue full, waiting...`);
                     }
 
                     return yield* executionStreamPipeline.pipe(

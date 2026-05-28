@@ -1,5 +1,5 @@
-import { FileSystem, Path } from "@effect/platform";
-import { Layer, Effect, Ref } from "effect";
+import { Command, FileSystem, Path } from "@effect/platform";
+import { Layer, Effect, Ref, Match } from "effect";
 import { EnvService } from "./EnvService";
 import { RunnerPropsRef } from "../RunnerPropsRef";
 
@@ -17,18 +17,24 @@ export const LocalEnvService = {
             const path = yield* Path.Path;
             const runnerPropsRef = yield* RunnerPropsRef
             const runnerProps = yield* Ref.get(runnerPropsRef)
-            const runnerEnv = runnerProps.env as LocalEnvProps
+            const runnerEnv = runnerProps.environment as LocalEnvProps
 
             const rootPath = path.resolve(runnerEnv.path, "runs");
-            const getEnvPath = (id: string) => path.resolve(rootPath, id)
+            const getEnvPath = (run: string) => path.resolve(rootPath, run)
 
             return EnvService.of({
 
-                runCommand: (cmd) => cmd,
+                runCommand: (cmd) => Match.value(cmd).pipe(
+                    Match.tag("StandardCommand", (c) => Command.make(c.command, ...c.args).pipe(
+                        // Command.workingDirectory("")
+                    )),
+                    Match.tag("PipedCommand", (c) => c),
+                    Match.exhaustive
+                ),
 
-                up: (props) => Effect.gen(function* () {
-                    const envPath = getEnvPath(props.id)
-                    yield* Effect.logInfo(`[ENV] (${props.id}): Create env: ${envPath}`);
+                up: (run) => Effect.gen(function* () {
+                    const envPath = getEnvPath(run.data.id)
+                    yield* Effect.logInfo(`[ENV] (${run.data.id}): Create env: ${envPath}`);
 
                     // create
                     const exists = yield* fs.exists(envPath);
@@ -40,9 +46,9 @@ export const LocalEnvService = {
                     Effect.mapError((fsError) => new Error(`Failed to create env: ${fsError.message}`))
                 ),
 
-                down: (props) => Effect.gen(function* () {
-                    const envPath = getEnvPath(props.id)
-                    yield* Effect.logInfo(`[ENV] (${props.id}): Delete env: ${envPath}`);
+                down: (run) => Effect.gen(function* () {
+                    const envPath = getEnvPath(run.data.id)
+                    yield* Effect.logInfo(`[ENV] (${run.data.id}): Delete env: ${envPath}`);
 
                     // delete
                     yield* fs.remove(envPath, { recursive: true });

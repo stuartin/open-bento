@@ -15,7 +15,6 @@ export const GET: RequestHandler = async () => {
     const logs = await runner.init(
         run.body,
         {
-            runInShell: "pwsh",
             onUp: (id) => console.log(`onUp ${id}`),
             onStdOut: (stdout) => stdOut.push(stdout.data),
             onStdErr: (stderr) => stdErr.push(stderr.data),

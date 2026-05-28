@@ -3,7 +3,7 @@ import { makeRunner } from "@open-bento/runner";
 
 export const runner = makeRunner({
     maxConcurrent: 10,
-    env: {
+    environment: {
         ...(
             env.RUNNER_ENV === "local"
                 ? { name: env.RUNNER_ENV, path: env.RUNNER_LOCAL_PATH }

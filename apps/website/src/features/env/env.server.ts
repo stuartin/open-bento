@@ -2,7 +2,7 @@ import z from "zod";
 import fs from 'node:fs';
 import path from 'node:path';
 import "dotenv/config"
-import { ENVIRONMENTS } from "@open-bento/runner";
+import { ENVIRONMENTS } from "@open-bento/runner/types";
 
 const EnvBaseSchema = z.object({
   AUTH_SECRET: z.string().min(36),

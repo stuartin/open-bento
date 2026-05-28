@@ -10,12 +10,12 @@ export const ENVIRONMENTS = {
 
 export type RunnerProps = {
     readonly maxConcurrent: number
-    readonly env: LocalEnvProps | DockerEnvProps
+    readonly environment: LocalEnvProps | DockerEnvProps
 }
 
 const defaultRunnerProps: RunnerProps = {
     maxConcurrent: 10,
-    env: {
+    environment: {
         name: LocalEnvService.Name,
         path: "./RUNNER"
     }

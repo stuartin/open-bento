@@ -3,7 +3,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./tofu": "./tofu.Dockerfile"
+    "./types": "./src/types.ts"
   },
   "scripts": {
     "lint": "biome lint .",

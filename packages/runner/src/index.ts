@@ -2,16 +2,13 @@
 import { Effect, Layer, ManagedRuntime, Ref } from "effect";
 import { NodeContext } from "@effect/platform-node";
 import { RunnerPropsRef, type RunnerProps } from "./RunnerPropsRef";
-import { ExecService, type ExecStartProps } from "./services/ExecService";
+import { ExecService } from "./services/ExecService";
 import { Command } from "@effect/platform";
 import type { Run } from "@open-bento/tfe";
 import { LocalEnvService } from "./services/LocalEnvService";
 import { DockerEnvService } from "./services/DockerEnvService";
+import type { RunnerCallbacks } from "./types";
 
-export type { StdOut, StdErr, ExitCode } from "./services/ExecService"
-export { ENVIRONMENTS } from "./RunnerPropsRef"
-
-export type Runner = ReturnType<typeof makeRunner>
 export function makeRunner(props: RunnerProps) {
 
   // Update our runnerPropsRef
@@ -24,7 +21,7 @@ export function makeRunner(props: RunnerProps) {
 
   // Environment Selector
   const environmentService = () => {
-    switch (runnerProps.env.name) {
+    switch (runnerProps.environment.name) {
       case "local": {
         return LocalEnvService.Default
       }
@@ -48,14 +45,17 @@ export function makeRunner(props: RunnerProps) {
   // API
   const TERRAFORM_VERSION = Command.make("terraform", "version")
 
-  const init = (run: Run, opts: ExecStartProps['opts']) => runtime.runPromise(
+  const init = (run: Run, callbacks: RunnerCallbacks) => runtime.runPromise(
     Effect.gen(function* () {
       const execService = yield* ExecService
 
       const result = yield* execService
         .start({
-          id: run.data.id,
-          opts
+          run,
+          opts: {
+            noColor: true,
+            ...callbacks
+          }
         })
         .runCommands([
           TERRAFORM_VERSION,
