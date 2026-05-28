@@ -1,5 +1,4 @@
 import z from "zod";
-import "dotenv/config"
 
 const EnvSchema = z.object({
     NODE_ENV: z.enum(["development", "production"]).default("development"),
@@ -7,4 +6,4 @@ const EnvSchema = z.object({
     API_PREFIX: z.string().startsWith("/").default("/api/v1")
 })
 
-export const env = EnvSchema.parse(process.env);
+export const env = EnvSchema.parse(import.meta.env);

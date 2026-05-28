@@ -10,8 +10,8 @@ import { jwt, organization } from "better-auth/plugins"
 import { sessions } from '$features/db/schema';
 import { eq } from 'drizzle-orm';
 import { bearer } from "better-auth/plugins";
-import { signedUrl } from './plugins/signed-url';
-import { oauthSession } from './plugins/oauth-session';
+import { signedUrl } from './plugins/signed-url.server';
+import { oauthSession } from './plugins/oauth-session.server';
 import { env } from '$features/env/env';
 
 export const auth = betterAuth({

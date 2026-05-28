@@ -6,10 +6,10 @@ import { QueryClient } from '@tanstack/svelte-query'
 import { browser } from '$app/environment'
 import { goto } from '$app/navigation'
 import { env } from '$features/env/env'
-import { router } from './router'
-import type { RouterClient } from '@orpc/server'
+import type { ContractRouterClient } from '@open-bento/tfe'
+import { contract } from './contract'
 
-const link = new OpenAPILink(router, {
+const link = new OpenAPILink(contract, {
     url: `${env.ORIGIN}${env.API_PREFIX}`,
     fetch: (request, init) => {
         return globalThis.fetch(request, {
@@ -28,7 +28,7 @@ const link = new OpenAPILink(router, {
     ],
 })
 
-const orpcClient: JsonifiedClient<RouterClient<typeof router>> = createORPCClient(link)
+const orpcClient: JsonifiedClient<ContractRouterClient<typeof contract>> = createORPCClient(link)
 export const client = createTanstackQueryUtils(orpcClient)
 
 export const queryClient = new QueryClient({

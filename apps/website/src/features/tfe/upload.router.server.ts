@@ -5,6 +5,7 @@ import { db } from "$features/db";
 import { configurationVersions } from "$features/db/schema";
 import { eq } from "drizzle-orm";
 import { env } from "$features/env/env.server";
+import type { ReadableStream } from "node:stream/web";
 
 const os = createRouter(tfeContract.uploads);
 export const tfeUploadsRouter = os.router({
@@ -25,7 +26,7 @@ export const tfeUploadsRouter = os.router({
         if (!configurationVersion) throw errors.NOT_FOUND()
 
         const { ok } = await saveStreamWithType(
-            body,
+            body as ReadableStream,
             `${configurationVersion.id}`,
             `${env.STORAGE_PATH}/uploads/${configurationVersion.organizationId}/${configurationVersion.workspaceId}`
         );

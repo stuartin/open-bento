@@ -8,8 +8,8 @@ import { ZodToJsonSchemaConverter } from '@orpc/zod/zod4'
 import { ResponseHeadersPlugin } from '@orpc/server/plugins'
 import { TFE_ROOT_INTERCEPTOR_CONTEXT_KEY, tfeRootInterceptor } from '$features/tfe/lib/tfe-interceptor'
 import { runner } from '$features/runner/runner.server'
-import { env } from '$features/env/env.public'
-import { router } from '$features/orpc/router'
+import { env } from '$features/env/env'
+import { router } from '$features/orpc/router.server'
 
 const handler = new OpenAPIHandler(
     router,

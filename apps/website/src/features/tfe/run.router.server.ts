@@ -16,7 +16,7 @@ export const tfeRunsRouter = os
             const workspaceId = input.body.data.relationships.workspace.data.id
             const configurationVersionId = input.body.data.relationships["configuration-version"].data.id
 
-            const { run } = await db.transaction(async (tx) => {
+            const { run, plan } = await db.transaction(async (tx) => {
 
                 const run = await tx
                     .insert(runs)
@@ -52,7 +52,27 @@ export const tfeRunsRouter = os
                     data: {
                         type: RESOURCE.RUNS,
                         id: run.id,
-                        attributes: toKebab(run)
+                        attributes: toKebab(run),
+                        relationships: {
+                            plan: {
+                                data: {
+                                    type: RESOURCE.PLANS,
+                                    id: plan.id
+                                }
+                            },
+                            workspace: {
+                                data: {
+                                    type: RESOURCE.WORKSPACES,
+                                    id: workspaceId
+                                }
+                            },
+                            "configuration-version": {
+                                data: {
+                                    type: RESOURCE.CONFIGURATION_VERSIONS,
+                                    id: configurationVersionId
+                                }
+                            }
+                        }
                     }
                 },
             };
@@ -66,7 +86,8 @@ export const tfeRunsRouter = os
                 },
                 with: {
                     plan: { columns: { id: true } },
-                    workspace: { columns: { id: true } }
+                    workspace: { columns: { id: true } },
+                    configurationVersion: { columns: { id: true } }
                 }
             })
 
@@ -92,6 +113,12 @@ export const tfeRunsRouter = os
                                     id: run.workspace.id
                                 }
                             },
+                            "configuration-version": {
+                                data: {
+                                    type: RESOURCE.CONFIGURATION_VERSIONS,
+                                    id: run.configurationVersion.id
+                                }
+                            }
                         }
                     }
                 },

@@ -76,6 +76,12 @@ export const RunResourceSchema = JsonApiDocument(
         type: z.literal(RESOURCE.WORKSPACES),
         id: z.string(),
       })
+    }),
+    "configuration-version": z.object({
+      data: z.object({
+        type: z.literal(RESOURCE.CONFIGURATION_VERSIONS),
+        id: z.string(),
+      })
     })
   })
 )

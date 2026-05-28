@@ -1,8 +1,6 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
   import { page } from "$app/state";
   import { authClient } from "$features/auth/auth-client";
-  import { onMount } from "svelte";
 
   const { user, session } = $derived(page.data);
 </script>

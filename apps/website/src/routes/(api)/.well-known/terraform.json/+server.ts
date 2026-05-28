@@ -1,7 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit'
 import { json } from '@sveltejs/kit';
 import { TERRAFORM_CLI_CLIENT_ID } from "../../../../lib/constants"
-import { env } from "../../../../features/env/env.public"
+import { env } from "../../../../features/env/env"
 
 export const GET: RequestHandler = async () => {
     return json({

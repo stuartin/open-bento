@@ -1,5 +1,5 @@
 // Library
-export type { AnyContractRouter } from "@orpc/contract"
+export type { AnyContractRouter, ContractRouterClient } from "@orpc/contract"
 
 // Utility
 export * from "./lib/casing"
