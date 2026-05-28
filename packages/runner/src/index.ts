@@ -1,9 +1,9 @@
 // src/index.ts
 import { Effect, Layer, ManagedRuntime, Ref } from "effect";
-import { NodeContext } from "@effect/platform-node";
+import { NodeContext, NodeHttpClient } from "@effect/platform-node";
 import { RunnerPropsRef, type RunnerProps } from "./RunnerPropsRef";
 import { ExecService } from "./services/ExecService";
-import { Command } from "@effect/platform";
+import { Command, FetchHttpClient } from "@effect/platform";
 import type { Run } from "@open-bento/tfe";
 import { LocalEnvService } from "./services/LocalEnvService";
 import { DockerEnvService } from "./services/DockerEnvService";
@@ -38,6 +38,7 @@ export function makeRunner(props: RunnerProps) {
   const RuntimeLayer = Layer.mergeAll(
     ExecService.Default.pipe(Layer.provide(environmentService()))
   ).pipe(
+    Layer.provide(FetchHttpClient.layer),
     Layer.provideMerge(NodeContext.layer),
   )
   const runtime = ManagedRuntime.make(RuntimeLayer);
@@ -45,13 +46,14 @@ export function makeRunner(props: RunnerProps) {
   // API
   const TERRAFORM_VERSION = Command.make("terraform", "version")
 
-  const init = (run: Run, callbacks: RunnerCallbacks) => runtime.runPromise(
+  const init = (run: Run, url: string, callbacks: RunnerCallbacks) => runtime.runPromise(
     Effect.gen(function* () {
       const execService = yield* ExecService
 
       const result = yield* execService
         .start({
           run,
+          url,
           opts: {
             noColor: true,
             ...callbacks

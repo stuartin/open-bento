@@ -1,5 +1,5 @@
-import { Command, FileSystem, Path } from "@effect/platform";
-import { Layer, Effect, Ref, Match } from "effect";
+import { Command, FileSystem, HttpClient, Path } from "@effect/platform";
+import { Layer, Effect, Ref, Match, Stream } from "effect";
 import { EnvService } from "./EnvService";
 import { RunnerPropsRef } from "../RunnerPropsRef";
 
@@ -15,6 +15,8 @@ export const LocalEnvService = {
         Effect.gen(function* () {
             const fs = yield* FileSystem.FileSystem;
             const path = yield* Path.Path;
+            const httpClient = yield* HttpClient.HttpClient;
+
             const runnerPropsRef = yield* RunnerPropsRef
             const runnerProps = yield* Ref.get(runnerPropsRef)
             const runnerEnv = runnerProps.environment as LocalEnvProps
@@ -32,7 +34,7 @@ export const LocalEnvService = {
                     Match.exhaustive
                 ),
 
-                up: (run) => Effect.gen(function* () {
+                up: (run, url) => Effect.gen(function* () {
                     const envPath = getEnvPath(run.data.id)
                     yield* Effect.logInfo(`[ENV] (${run.data.id}): Create env: ${envPath}`);
 
@@ -42,6 +44,14 @@ export const LocalEnvService = {
                         yield* fs.remove(envPath, { recursive: true });
                     }
                     yield* fs.makeDirectory(envPath, { recursive: true });
+
+                    // download configuration
+                    const tarFile = path.resolve(envPath, "configuration.tar.gz")
+                    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+                    const response = yield* httpClient.get(url);
+                    const fileStream = response.stream;
+                    yield* Stream.run(fileStream, fs.sink(tarFile));
+
                 }).pipe(
                     Effect.mapError((fsError) => new Error(`Failed to create env: ${fsError.message}`))
                 ),

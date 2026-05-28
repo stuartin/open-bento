@@ -9,6 +9,7 @@ import type { Run } from "@open-bento/tfe";
 
 type ExecStartProps = {
     run: Run
+    url: string
     opts?: {
         workingDir?: string;
         env?: Record<string, string>;
@@ -104,7 +105,7 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
                         Schedule.compose(Schedule.recurs(2)) // 2 retries = 3 total attempts
                     );
 
-                    yield* envService.up(props.run).pipe(
+                    yield* envService.up(props.run, props.url).pipe(
                         Effect.tapError((err) =>
                             Effect.logWarning(`[ENV] (${runId}): Up failed: ${err.message}. Retrying...`)
                         ),

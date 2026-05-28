@@ -5,7 +5,10 @@ import { error, json, type RequestHandler } from "@sveltejs/kit";
 export const GET: RequestHandler = async () => {
 
     const run = await orcpServerClient.tfe.runs.get({ params: { "run-id": "rqazjdmooq9wmlwpl6wym07e" } })
-    console.log({ run })
+    const download = await orcpServerClient.tfe.configurationVersions.download(
+        { params: { "version-id": run.body.data.relationships["configuration-version"].data.id } }
+    )
+    console.log({ run, download })
 
     let stdOut: string[] = []
     const stdErr: string[] = []
@@ -14,6 +17,7 @@ export const GET: RequestHandler = async () => {
 
     const logs = await runner.init(
         run.body,
+        download.body,
         {
             onUp: (id) => console.log(`onUp ${id}`),
             onStdOut: (stdout) => stdOut.push(stdout.data),

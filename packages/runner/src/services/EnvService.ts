@@ -9,7 +9,7 @@ export class EnvService extends Context.Tag("runner/EnvService")<
         readonly runCommand: (cmd: Command.Command) => Command.Command;
 
         // Lifecycle steps
-        readonly up: (run: Run) => Effect.Effect<void, Error>;
+        readonly up: (run: Run, url: string) => Effect.Effect<void, Error>;
         readonly down: (run: Run) => Effect.Effect<void, Error>;
     }
 >() { }
