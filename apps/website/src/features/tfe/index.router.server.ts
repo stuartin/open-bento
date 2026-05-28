@@ -6,7 +6,7 @@ import { tfeWorkspacesRouter } from "./workspace.router.server";
 import { tfeStateVersionsRouter } from "./state-version.router.server";
 import { tfeResponse } from "./lib/tfe-response.middleware";
 import { tfeConfigurationVersionsRouter } from "./configuration-version.router.server";
-import { tfeUploadsRouter } from "./upload.router.server";
+import { tfeStorageRouter } from "./storage.router.server";
 import { tfeRunsRouter } from "./run.router.server";
 import { tfePlansRouter } from "./plan.router.server";
 import { tfeReadLogsRouter } from "./read-log.router.server";
@@ -20,7 +20,7 @@ export const tfeRouter = os
         workspaces: tfeWorkspacesRouter,
         stateVersions: tfeStateVersionsRouter,
         configurationVersions: tfeConfigurationVersionsRouter,
-        uploads: tfeUploadsRouter,
+        storage: tfeStorageRouter,
         runs: tfeRunsRouter,
         plans: tfePlansRouter,
         readLogs: tfeReadLogsRouter

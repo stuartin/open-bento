@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AuthHeadersSchema, ORPCInput } from "../../lib/common.schema";
+import { AuthHeadersSchema, ORPCInput, ORPCOutput } from "../../lib/common.schema";
 
 // ============================================================
 // ENTITY DEFINITION - State Version
@@ -20,3 +20,17 @@ export const CreateUploadInput = ORPCInput({
   }),
   headers: AuthHeadersSchema,
 });
+
+// --- Download File ---
+
+export const CreateDownloadInput = ORPCInput({
+  query: z.object({
+    token: z.string()
+  }),
+  headers: AuthHeadersSchema,
+});
+
+export const CreateDownloadOutput = ORPCOutput({
+  status: z.literal(200),
+  body: z.file(),
+})

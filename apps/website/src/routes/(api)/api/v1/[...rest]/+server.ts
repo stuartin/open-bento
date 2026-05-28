@@ -10,6 +10,8 @@ import { TFE_ROOT_INTERCEPTOR_CONTEXT_KEY, tfeRootInterceptor } from '$features/
 import { runner } from '$features/runner/runner.server'
 import { env } from '$features/env/env'
 import { router } from '$features/orpc/router.server'
+import { APIError } from 'better-auth'
+import { isAPIError } from 'better-auth/api'
 
 const handler = new OpenAPIHandler(
     router,
@@ -72,7 +74,13 @@ const handler = new OpenAPIHandler(
                     if (error.cause instanceof ValidationError) {
                         console.log(JSON.stringify(error, null, 2))
                     }
+                    return
                 }
+                if (isAPIError(error)) {
+                    console.error(error)
+                    return
+                }
+
                 console.error(error)
             }),
         ],

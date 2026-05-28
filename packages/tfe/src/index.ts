@@ -55,9 +55,9 @@ export * from "./features/task-result/task-result.contract";
 export * from "./features/policy-evaluation/policy-evaluation.schema";
 export * from "./features/policy-evaluation/policy-evaluation.contract";
 
-// Upload
-export * from "./features/upload/upload.schema";
-export * from "./features/upload/upload.contract";
+// Storage
+export * from "./features/storage/storage.schema";
+export * from "./features/storage/storage.contract";
 
 // Unified Contract Router
 import { workspaceContract } from "./features/workspace/workspace.contract";
@@ -68,7 +68,7 @@ import { stateVersionContract } from "./features/state-version/state-version.con
 import { organizationContract } from "./features/organization/organization.contract";
 import { pingContract } from "./features/ping/ping.contract";
 import { oc } from "@orpc/contract";
-import { uploadContract } from "./features/upload/upload.contract";
+import { storageContract } from "./features/storage/storage.contract";
 import { readLogContract } from "./features/read-log/read-log.contract";
 
 export const tfeContract = oc
@@ -79,7 +79,7 @@ export const tfeContract = oc
         workspaces: workspaceContract,
         stateVersions: stateVersionContract,
         configurationVersions: configurationVersionContract,
-        uploads: uploadContract,
+        storage: storageContract,
         runs: runContract,
         plans: planContract,
         readLogs: readLogContract
