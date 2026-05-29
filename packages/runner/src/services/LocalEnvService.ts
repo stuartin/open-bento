@@ -60,6 +60,16 @@ export const LocalEnvService = {
                         sync: true,
                     });
 
+                    const overrideTF = [
+                        `terraform {`,
+                        `  backend "local" {`,
+                        `    path = "./terraform.tfstate"`,
+                        `  }`,
+                        `}`,
+                    ].join("\n")
+                    const data = new TextEncoder().encode(overrideTF);
+                    yield* fs.writeFile(path.resolve(envPath, "override.tf"), data)
+
                 }).pipe(
                     Effect.mapError((fsError) => new Error(`Failed to create env: ${fsError.message}`))
                 ),

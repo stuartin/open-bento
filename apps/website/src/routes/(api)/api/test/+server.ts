@@ -15,7 +15,7 @@ export const GET: RequestHandler = async () => {
     const result: string[] = []
     let lastExitCode: number = 0
 
-    const logs = await runner.init(
+    const logs = await runner.plan(
         run.body,
         download.body,
         {
