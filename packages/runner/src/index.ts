@@ -2,7 +2,7 @@
 import { Effect, Layer, ManagedRuntime, Ref } from "effect";
 import { NodeContext, NodeHttpClient } from "@effect/platform-node";
 import { RunnerPropsRef, type RunnerProps } from "./RunnerPropsRef";
-import { ExecService } from "./services/ExecService";
+import { ExecService, type ExecRunCommand } from "./services/ExecService";
 import { Command, FetchHttpClient } from "@effect/platform";
 import type { Run } from "@open-bento/tfe";
 import { LocalEnvService } from "./services/LocalEnvService";
@@ -45,7 +45,13 @@ export function makeRunner(props: RunnerProps) {
   const runtime = ManagedRuntime.make(RuntimeLayer);
 
   // API
-  const TERRAFORM_VERSION = Command.make("terraform", "version")
+  const TERRAFORM_VERSION: ExecRunCommand = {
+    cmd: Command.make("terraform", "version")
+  }
+  const TERRAFORM_INIT: ExecRunCommand = {
+    cmd: Command.make("terraform", "init"),
+    opts: { isInternal: true }
+  }
 
   const init = (run: Run, url: string, callbacks: RunnerCallbacks) => runtime.runPromise(
     Effect.gen(function* () {
@@ -62,27 +68,35 @@ export function makeRunner(props: RunnerProps) {
         })
         .runCommands([
           TERRAFORM_VERSION,
-          Command.make("terraform", "init")
+          TERRAFORM_INIT
         ])
 
       return result
     }),
   )
 
-  const plan = (run: Run) => runtime.runPromise(
+  const plan = (run: Run, url: string, callbacks: RunnerCallbacks) => runtime.runPromise(
     Effect.gen(function* () {
-      // const envService = yield* EnvService
+      const execService = yield* ExecService
 
-      // const result = yield* envService.execute({
-      //   id: run.data.id,
-      //   commands: [
-      //     TERRAFORM_VERSION,
-      //     Command.make("terraform", "init"),
-      //     Command.make("terraform", "plan")
-      //   ]
-      // })
+      const result = yield* execService
+        .start({
+          run,
+          url,
+          opts: {
+            noColor: true,
+            ...callbacks
+          }
+        })
+        .runCommands([
+          TERRAFORM_VERSION,
+          TERRAFORM_INIT,
+          {
+            cmd: Command.make("terraform", "plan")
+          }
+        ])
 
-      // return result
+      return result
     }),
   )
 

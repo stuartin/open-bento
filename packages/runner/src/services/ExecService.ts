@@ -18,6 +18,13 @@ type ExecStartProps = {
     } & RunnerCallbacks
 }
 
+export type ExecRunCommand = {
+    cmd: Command.Command
+    opts?: {
+        isInternal?: boolean
+    }
+}
+
 // biome-ignore lint/suspicious/noControlCharactersInRegex: Intentional control characters used to identify and strip ANSI escape sequences.
 const NO_ANSI_COLOR = (line: string) => EffectString.replace(/(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]/g, '')(line)
 
@@ -32,15 +39,15 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
         const start = (props: ExecStartProps) => {
             const runId = props.run.data.id
 
-            const runCommands = (commands: Command.Command[]) => {
+            const runCommands = (runCommands: ExecRunCommand[]) => {
 
                 // Creates a stream to run the commands sequentially
                 // Union of StdOut, StdErr and ExitCode
-                const commandStreamPipeline = Stream.fromIterable(commands).pipe(
+                const commandStreamPipeline = Stream.fromIterable(runCommands).pipe(
                     Stream.flatMap(
-                        (cmd) => {
+                        (runCommand) => {
                             // cmd defaults from props
-                            const configuredCmd = cmd.pipe(
+                            const configuredCmd = runCommand.cmd.pipe(
                                 props.opts?.runInShell ? Command.runInShell(props.opts.runInShell) : identity,
                                 props.opts?.workingDir ? Command.workingDirectory(props.opts.workingDir) : identity,
                                 props.opts?.env ? Command.env(props.opts.env) : identity
@@ -48,7 +55,6 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
 
                             // env wraps the cmd as needed
                             const wrappedCmd = envService.runCommand(props.run, configuredCmd);
-
 
                             Effect.runSync(
                                 Effect.logInfo(`[EXEC] (${runId}): Running Command: ${(wrappedCmd as StandardCommand).command} ${(wrappedCmd as StandardCommand).args}`)
@@ -84,8 +90,9 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
 
                                     // Merge stdout and stderr concurrently, then append the exit code at the very end
                                     return Stream.merge(stdoutStream, stderrStream).pipe(
-                                        Stream.merge(exitStream)
-                                    );
+                                        Stream.merge(exitStream),
+                                        Stream.map((event) => ({ event, opts: runCommand.opts }))
+                                    )
                                 })
                             );
                         },
@@ -126,6 +133,8 @@ export class ExecService extends Effect.Service<ExecService>()("runner/ExecServi
 
                     // Exec Start
                     return yield* commandStreamPipeline.pipe(
+                        Stream.filter((result) => result.opts?.isInternal ? false : true),
+                        Stream.map((result) => result.event),
                         Stream.tap((event) => Match.value(event).pipe(
                             Match.tag("ExitCode", (exitCode) => {
                                 Effect.runSync(
